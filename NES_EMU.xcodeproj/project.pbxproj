@@ -1,0 +1,462 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
+		352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
+		352575F726BD4829005AB816 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E326BD4828005AB816 /* ContentView.swift */; };
+		352575F826BD4829005AB816 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E326BD4828005AB816 /* ContentView.swift */; };
+		352575F926BD4829005AB816 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 352575E426BD4829005AB816 /* Assets.xcassets */; };
+		352575FA26BD4829005AB816 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 352575E426BD4829005AB816 /* Assets.xcassets */; };
+		3525760626BD48DF005AB816 /* Cartridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760526BD48DF005AB816 /* Cartridge.swift */; };
+		3525760726BD48DF005AB816 /* Cartridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760526BD48DF005AB816 /* Cartridge.swift */; };
+		3525760B26BD4BA6005AB816 /* mario.nes in Resources */ = {isa = PBXBuildFile; fileRef = 3525760A26BD4BA6005AB816 /* mario.nes */; };
+		3525760C26BD4BA6005AB816 /* mario.nes in Resources */ = {isa = PBXBuildFile; fileRef = 3525760A26BD4BA6005AB816 /* mario.nes */; };
+		3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
+		3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		352575E226BD4828005AB816 /* NES_EMUApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NES_EMUApp.swift; sourceTree = "<group>"; };
+		352575E326BD4828005AB816 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		352575E426BD4829005AB816 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		352575E926BD4829005AB816 /* NES_EMU.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NES_EMU.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		352575EC26BD4829005AB816 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		352575F126BD4829005AB816 /* NES_EMU.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NES_EMU.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		352575F326BD4829005AB816 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		352575F426BD4829005AB816 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		3525760526BD48DF005AB816 /* Cartridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartridge.swift; sourceTree = "<group>"; };
+		3525760A26BD4BA6005AB816 /* mario.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = mario.nes; sourceTree = "<group>"; };
+		3525760F26BD5D5B005AB816 /* RomHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomHeader.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		352575E626BD4829005AB816 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		352575EE26BD4829005AB816 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		352575DC26BD4827005AB816 = {
+			isa = PBXGroup;
+			children = (
+				3525760A26BD4BA6005AB816 /* mario.nes */,
+				352575E126BD4828005AB816 /* Shared */,
+				352575EB26BD4829005AB816 /* iOS */,
+				352575F226BD4829005AB816 /* macOS */,
+				352575EA26BD4829005AB816 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		352575E126BD4828005AB816 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				352575E226BD4828005AB816 /* NES_EMUApp.swift */,
+				352575E326BD4828005AB816 /* ContentView.swift */,
+				352575E426BD4829005AB816 /* Assets.xcassets */,
+				3525760526BD48DF005AB816 /* Cartridge.swift */,
+				3525760F26BD5D5B005AB816 /* RomHeader.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		352575EA26BD4829005AB816 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				352575E926BD4829005AB816 /* NES_EMU.app */,
+				352575F126BD4829005AB816 /* NES_EMU.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		352575EB26BD4829005AB816 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				352575EC26BD4829005AB816 /* Info.plist */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		352575F226BD4829005AB816 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				352575F326BD4829005AB816 /* Info.plist */,
+				352575F426BD4829005AB816 /* macOS.entitlements */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		352575E826BD4829005AB816 /* NES_EMU (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 352575FD26BD4829005AB816 /* Build configuration list for PBXNativeTarget "NES_EMU (iOS)" */;
+			buildPhases = (
+				352575E526BD4829005AB816 /* Sources */,
+				352575E626BD4829005AB816 /* Frameworks */,
+				352575E726BD4829005AB816 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NES_EMU (iOS)";
+			productName = "NES_EMU (iOS)";
+			productReference = 352575E926BD4829005AB816 /* NES_EMU.app */;
+			productType = "com.apple.product-type.application";
+		};
+		352575F026BD4829005AB816 /* NES_EMU (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3525760026BD4829005AB816 /* Build configuration list for PBXNativeTarget "NES_EMU (macOS)" */;
+			buildPhases = (
+				352575ED26BD4829005AB816 /* Sources */,
+				352575EE26BD4829005AB816 /* Frameworks */,
+				352575EF26BD4829005AB816 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NES_EMU (macOS)";
+			productName = "NES_EMU (macOS)";
+			productReference = 352575F126BD4829005AB816 /* NES_EMU.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		352575DD26BD4827005AB816 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1230;
+				LastUpgradeCheck = 1230;
+				TargetAttributes = {
+					352575E826BD4829005AB816 = {
+						CreatedOnToolsVersion = 12.3;
+					};
+					352575F026BD4829005AB816 = {
+						CreatedOnToolsVersion = 12.3;
+					};
+				};
+			};
+			buildConfigurationList = 352575E026BD4827005AB816 /* Build configuration list for PBXProject "NES_EMU" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 352575DC26BD4827005AB816;
+			productRefGroup = 352575EA26BD4829005AB816 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				352575E826BD4829005AB816 /* NES_EMU (iOS) */,
+				352575F026BD4829005AB816 /* NES_EMU (macOS) */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		352575E726BD4829005AB816 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				352575F926BD4829005AB816 /* Assets.xcassets in Resources */,
+				3525760B26BD4BA6005AB816 /* mario.nes in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		352575EF26BD4829005AB816 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				352575FA26BD4829005AB816 /* Assets.xcassets in Resources */,
+				3525760C26BD4BA6005AB816 /* mario.nes in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		352575E526BD4829005AB816 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				352575F726BD4829005AB816 /* ContentView.swift in Sources */,
+				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
+				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
+				3525760626BD48DF005AB816 /* Cartridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		352575ED26BD4829005AB816 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				352575F826BD4829005AB816 /* ContentView.swift in Sources */,
+				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
+				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
+				3525760726BD48DF005AB816 /* Cartridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		352575FB26BD4829005AB816 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		352575FC26BD4829005AB816 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		352575FE26BD4829005AB816 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
+				PRODUCT_NAME = NES_EMU;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		352575FF26BD4829005AB816 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
+				PRODUCT_NAME = NES_EMU;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3525760126BD4829005AB816 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
+				PRODUCT_NAME = NES_EMU;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3525760226BD4829005AB816 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
+				PRODUCT_NAME = NES_EMU;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		352575E026BD4827005AB816 /* Build configuration list for PBXProject "NES_EMU" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				352575FB26BD4829005AB816 /* Debug */,
+				352575FC26BD4829005AB816 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		352575FD26BD4829005AB816 /* Build configuration list for PBXNativeTarget "NES_EMU (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				352575FE26BD4829005AB816 /* Debug */,
+				352575FF26BD4829005AB816 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3525760026BD4829005AB816 /* Build configuration list for PBXNativeTarget "NES_EMU (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3525760126BD4829005AB816 /* Debug */,
+				3525760226BD4829005AB816 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 352575DD26BD4827005AB816 /* Project object */;
+}
