@@ -8,6 +8,47 @@
 import Foundation
 class RomHeader{
     
+    func KB(_ n:UInt)->UInt
+    {
+        return n*1024
+    }
+    
+    func MB(_ n:UInt)->UInt
+    {
+        return n*1024*1024
+    }
+    
+    func GetNumPrgRomBanks()->UInt
+    {
+        return m_prgRomBanks
+    }
+    
+    func GetNumChrRomBanks()->UInt
+    {
+        return m_chrRomBanks
+    }
+    
+    func GetNumPrgRamBanks()->UInt
+    {
+        return m_prgRamBanks
+    }
+    
+    func GetPrgRomSizeBytes()->UInt
+    {
+        return m_prgRomBanks * KB(16)
+    }
+    
+    func GetChrRomSizeBytes()->UInt
+    {
+        return m_chrRomBanks * KB(8)
+    }
+    
+    func GetPrgRamSizeBytes()->UInt
+    {
+        return m_prgRamBanks * KB(8)
+    }
+    
+    
     func compareUintChar(uint:UInt8 ,char:Unicode.Scalar)->Bool
     {
         let n = UInt8.init(ascii: char)
@@ -21,9 +62,9 @@ class RomHeader{
         }
     }
     
-    var m_prgRomBanks:UInt8 = 0
-    var m_chrRomBanks:UInt8 = 0
-    var m_prgRamBanks:UInt8 = 0
+    var m_prgRomBanks:UInt = 0
+    var m_chrRomBanks:UInt = 0
+    var m_prgRamBanks:UInt = 0
 
     
     func Initialize(bytes: [UInt8])->RomHeader?
@@ -50,10 +91,9 @@ class RomHeader{
             NSLog("NES1")
         }
         
-        m_prgRomBanks = bytes[4]
-        m_chrRomBanks = bytes[5]
-        
-        m_prgRamBanks = bytes[8];
+        m_prgRomBanks = UInt.init(bytes[4])
+        m_chrRomBanks = UInt.init(bytes[5])
+        m_prgRamBanks = UInt.init(bytes[8])
         
         // Wiki: Value 0 infers 8 KB for compatibility
         if (m_prgRamBanks == 0)

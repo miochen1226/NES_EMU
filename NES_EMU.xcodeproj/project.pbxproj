@@ -19,6 +19,10 @@
 		3525760C26BD4BA6005AB816 /* mario.nes in Resources */ = {isa = PBXBuildFile; fileRef = 3525760A26BD4BA6005AB816 /* mario.nes */; };
 		3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
 		3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
+		3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
+		3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
+		3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
+		3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +37,8 @@
 		3525760526BD48DF005AB816 /* Cartridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartridge.swift; sourceTree = "<group>"; };
 		3525760A26BD4BA6005AB816 /* mario.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = mario.nes; sourceTree = "<group>"; };
 		3525760F26BD5D5B005AB816 /* RomHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomHeader.swift; sourceTree = "<group>"; };
+		3547C22726BEBDB0008DB9B9 /* BaseDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDef.swift; sourceTree = "<group>"; };
+		3547C22C26BECE62008DB9B9 /* Memory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +78,8 @@
 				352575E426BD4829005AB816 /* Assets.xcassets */,
 				3525760526BD48DF005AB816 /* Cartridge.swift */,
 				3525760F26BD5D5B005AB816 /* RomHeader.swift */,
+				3547C22726BEBDB0008DB9B9 /* BaseDef.swift */,
+				3547C22C26BECE62008DB9B9 /* Memory.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -201,7 +209,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */,
 				352575F726BD4829005AB816 /* ContentView.swift in Sources */,
+				3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3525760626BD48DF005AB816 /* Cartridge.swift in Sources */,
@@ -212,7 +222,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */,
 				352575F826BD4829005AB816 /* ContentView.swift in Sources */,
+				3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3525760726BD48DF005AB816 /* Cartridge.swift in Sources */,
