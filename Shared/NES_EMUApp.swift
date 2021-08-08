@@ -9,8 +9,11 @@ import SwiftUI
 
 @main
 struct NES_EMUApp: App {
+    
+    let nes = Nes.init()
     init() {
-        Cartridge.init().loadFile()
+        nes.loadRom()
+        //Cartridge.init().loadFile()
     }
     var body: some Scene {
         WindowGroup {

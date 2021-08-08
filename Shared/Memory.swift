@@ -26,4 +26,8 @@ class Memory
         rawMemory[address] = value
     }
     
+    func RawRef(address:Int)->UInt8
+    {
+        return rawMemory[address];
+    }
 }

@@ -27,5 +27,8 @@ struct globeDef
 
     static let kSavBankCount = 1;
     static let kSavBankSize = KB(8)
-    
+}
+
+protocol HandleCpuReadProtocol {
+    func HandleCpuRead(_ cpuAddress:uint16)->uint8
 }
