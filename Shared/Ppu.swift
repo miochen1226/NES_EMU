@@ -11,5 +11,9 @@ class Ppu:HandleCpuReadProtocol{
         return 0
     }
     
+    func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
+    {
+        //TODO
+    }
     
 }

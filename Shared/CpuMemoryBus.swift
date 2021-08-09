@@ -95,4 +95,26 @@ class CpuMemoryBus{
 
         return m_cpuInternalRam!.HandleCpuRead(cpuAddress)
     }
+    
+    func Write(cpuAddress:UInt16, value:UInt8)
+    {
+        if (cpuAddress >= CpuMemory.kExpansionRomBase)
+        {
+            m_cartridge!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            return
+        }
+        else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
+        {
+            m_cpu!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            return
+        }
+        else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
+        {
+            m_ppu!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            return
+        }
+
+        m_cpuInternalRam!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+    }
+    
 }

@@ -19,6 +19,8 @@
 		3525760C26BD4BA6005AB816 /* mario.nes in Resources */ = {isa = PBXBuildFile; fileRef = 3525760A26BD4BA6005AB816 /* mario.nes */; };
 		3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
 		3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
+		352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
+		352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		3530FA3326BF6C8B00CF18DD /* Nes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3226BF6C8B00CF18DD /* Nes.swift */; };
 		3530FA3426BF6C8B00CF18DD /* Nes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3226BF6C8B00CF18DD /* Nes.swift */; };
 		3530FA3826BF6DCF00CF18DD /* Cpu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3726BF6DCF00CF18DD /* Cpu.swift */; };
@@ -59,6 +61,7 @@
 		3525760526BD48DF005AB816 /* Cartridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartridge.swift; sourceTree = "<group>"; };
 		3525760A26BD4BA6005AB816 /* mario.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = mario.nes; sourceTree = "<group>"; };
 		3525760F26BD5D5B005AB816 /* RomHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomHeader.swift; sourceTree = "<group>"; };
+		352F931226C18E0A00323AC1 /* Bitfield8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bitfield8.swift; sourceTree = "<group>"; };
 		3530FA3226BF6C8B00CF18DD /* Nes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nes.swift; sourceTree = "<group>"; };
 		3530FA3726BF6DCF00CF18DD /* Cpu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cpu.swift; sourceTree = "<group>"; };
 		3530FA3C26BF6E7A00CF18DD /* CpuMemoryBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuMemoryBus.swift; sourceTree = "<group>"; };
@@ -124,6 +127,7 @@
 				3530FA6026C0590300CF18DD /* OpCodeTable.swift */,
 				35E7560D26C06A1C0077EE92 /* File.swift */,
 				35E7561226C072E20077EE92 /* OpCodeTables.swift */,
+				352F931226C18E0A00323AC1 /* Bitfield8.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -266,6 +270,7 @@
 				3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				3530FA4626BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3530FA3D26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
+				352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
@@ -290,6 +295,7 @@
 				3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				3530FA4726BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3530FA3E26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
+				352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */,

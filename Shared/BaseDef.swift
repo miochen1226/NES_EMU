@@ -31,4 +31,5 @@ struct globeDef
 
 protocol HandleCpuReadProtocol {
     func HandleCpuRead(_ cpuAddress:uint16)->uint8
+    func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
 }

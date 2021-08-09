@@ -50,6 +50,11 @@ class Cartridge:HandleCpuReadProtocol{
         return 0;
     }
     
+    func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
+    {
+        //TODO
+    }
+    
     func GetBankIndex(address:UInt16,baseAddress:UInt16,bankSize:UInt16)->Int
     {
         let firstBankIndex = baseAddress / bankSize

@@ -22,7 +22,11 @@ class Nes{
     {
         m_cartridge.loadFile()
         m_cpu.Reset()
-        ExecuteCpuAndPpuFrame()
+        
+        for _ in 0...99999
+        {
+            ExecuteCpuAndPpuFrame()
+        }
     }
     
     func ExecuteCpuAndPpuFrame()
