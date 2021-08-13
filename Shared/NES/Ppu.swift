@@ -178,19 +178,19 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
             m_ppuStatusReg.reload()
             m_ppuControlReg2.initialize(ppuRegisterMemory: m_ppuRegisters,regAddress: CpuMemory.kPpuControlReg2)
             
-            NSLog("write kPpuStatusReg")
+            //NSLog("write kPpuStatusReg")
             printPpuControl1Status()
         }
         
         if(cpuAddress == 8192)
         {
-            NSLog("write kPpuControlReg1")
+            //NSLog("write kPpuControlReg1")
             m_ppuControlReg1.reload()
             
         }
         if(cpuAddress == 8193)
         {
-            NSLog("write kPpuControlReg2")
+            //NSLog("write kPpuControlReg2")
             m_ppuControlReg2.reload()
         }
         
@@ -202,7 +202,7 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
 
         if(cpuAddress < CpuMemory.kPpuRegistersBase || cpuAddress >= CpuMemory.kPpuRegistersEnd)
         {
-            NSLog("error")
+            //NSLog("error")
         }
         // If debugger is reading, we don't want any register side-effects, so just return the value
         /*
@@ -286,59 +286,59 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
         let value = PpuControl1.BackgroundPatternTableAddress
         if(m_ppuControlReg1.Test(PpuControl1.NameTableAddressMask))
         {
-            NSLog("NameTableAddressMask")
+            //NSLog("NameTableAddressMask")
         }
         if(m_ppuControlReg1.Test(PpuControl1.PpuAddressIncrement))
         {
-            NSLog("PpuAddressIncrement")
+            //NSLog("PpuAddressIncrement")
         }
         if(m_ppuControlReg1.Test(PpuControl1.SpritePatternTableAddress8x8))
         {
-            NSLog("SpritePatternTableAddress8x8")
+            //NSLog("SpritePatternTableAddress8x8")
         }
         if(m_ppuControlReg1.Test(PpuControl1.BackgroundPatternTableAddress))
         {
-            NSLog("BackgroundPatternTableAddress")
+            //NSLog("BackgroundPatternTableAddress")
         }
         if(m_ppuControlReg1.Test(PpuControl1.SpriteSize8x16))
         {
-            NSLog("SpriteSize8x16")
+            //NSLog("SpriteSize8x16")
         }
         if(m_ppuControlReg1.Test(PpuControl1.PpuMasterSlaveSelect))
         {
-            NSLog("PpuMasterSlaveSelect")
+            //NSLog("PpuMasterSlaveSelect")
         }
         if(m_ppuControlReg1.Test(PpuControl1.PpuMasterSlaveSelect))
         {
-            NSLog("PpuMasterSlaveSelect")
+            //NSLog("PpuMasterSlaveSelect")
         }
         if(m_ppuControlReg1.Test(PpuControl1.NmiOnVBlank))
         {
-            NSLog("NmiOnVBlank")
+            //NSLog("NmiOnVBlank")
         }
     }
     
     func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
     {
-        NSLog("HandleCpuWrite")
+        //NSLog("HandleCpuWrite")
         
         if(cpuAddress == 8194)
         {
-            NSLog("kPpuStatusReg")
+            //NSLog("kPpuStatusReg")
         }
         
         if(cpuAddress == 8192)
         {
-            NSLog("kPpuControlReg1")
+            //NSLog("kPpuControlReg1")
         }
         if(cpuAddress == 8193)
         {
-            NSLog("kPpuControlReg2")
+            //NSLog("kPpuControlReg2")
         }
         
         if(value != 0)
         {
-            NSLog("not 0")
+            //NSLog("not 0")
         }
         
         let registerAddress = MapCpuToPpuRegister(cpuAddress)
@@ -367,7 +367,7 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
             
             if(test2 == true)
             {
-                NSLog("NmiOnVBlank is true")
+                //NSLog("NmiOnVBlank is true")
             }
             let enabledNmiOnVBlank = !oldPpuControlReg1.Test(PpuControl1.NmiOnVBlank) && m_ppuControlReg1.Test(PpuControl1.NmiOnVBlank)
             
@@ -386,7 +386,6 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
             
             if(spriteRamAddress == 255)
             {
-                NSLog("22222")
                 WritePpuRegister(CpuMemory.kPpuSprRamAddressReg, value: 0)
             }
             else
@@ -857,19 +856,6 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
     }
     var m_bgTileFetchDataPipeline:[BgTileFetchData] = [BgTileFetchData.init(),BgTileFetchData.init()]
     
-    func printPpuControlReg2()
-    {
-        let regValue = m_ppuControlReg2.Value()
-        let value1 = PpuControl2.DisplayType
-        let value2 = PpuControl2.BackgroundShowLeft8
-        let value3 = PpuControl2.SpritesShowLeft8
-        let value4 = PpuControl2.RenderBackground
-        let value5 = PpuControl2.RenderSprites
-        let value6 = PpuControl2.ColorIntensityMask
-        let value7 = PpuControl2.FullBackgroundColorMask
-        
-        NSLog("123")
-    }
     func RenderPixel(x:UInt32, y:UInt32)
     {
         //TODO
@@ -879,7 +865,6 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
         var bgRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground))
         var spriteRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderSprites))
         
-        //printPpuControlReg2()
         // Consider bg/sprites as disabled (for this pixel) if we're not supposed to render it in the left-most 8 pixels
         if ( !m_ppuControlReg2.Test(UInt8(PpuControl2.BackgroundShowLeft8)) && x < 8 )
         {

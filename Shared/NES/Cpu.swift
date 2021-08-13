@@ -46,16 +46,16 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
             break
 
         case CpuMemory.kControllerPort1: // $4016
-            NSLog("TODOOOO")
+            //NSLog("TODOOOO")
             break
         case CpuMemory.kControllerPort2: // $4017
-            NSLog("TODOOOO")
+            //NSLog("TODOOOO")
             //result = m_controllerPorts.HandleCpuRead(cpuAddress);
             break
 
         default:
             
-            NSLog("TODOOOO")
+            //NSLog("TODOOOO")
             //result = m_apu->HandleCpuRead(cpuAddress);
             break
         }
@@ -99,15 +99,15 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
             break;
 
         case CpuMemory.kControllerPort1: // $4016
-            NSLog("TODOOOO")
+            //NSLog("TODOOOO")
             //m_controllerPorts.HandleCpuWrite(cpuAddress, value);
             break;
 
         case CpuMemory.kControllerPort2: // $4017 For writes, this address is mapped to the APU!
-            NSLog("TODOOOO")
+            //NSLog("TODOOOO")
             break
         default:
-            NSLog("TODOOOO m_apu->HandleCpuWrite(cpuAddress, value);")
+            //NSLog("TODOOOO m_apu->HandleCpuWrite(cpuAddress, value);")
             //m_apu->HandleCpuWrite(cpuAddress, value);
             break;
         }
@@ -225,15 +225,20 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
             break
 
         case AddressMode.Relatv: // For conditional branch instructions
-            let offsetSigned = ToInt8(Read8(PC+1))
-            let offsetAbs = UInt16(abs(offsetSigned))
-            if(offsetSigned>=0)
+            let offsetSigned = ToInt(Read8(PC+1))
+            
+            //let k = abs(-128)
+            //let i = UInt16(k)
+            
+            if(offsetSigned<0)
             {
-                m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) + offsetAbs
+                let offsetAbs:UInt16 = UInt16(offsetSigned * -1)
+                m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) - offsetAbs
             }
             else
             {
-                m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) - offsetAbs
+                let offsetAbs:UInt16 = UInt16(offsetSigned)
+                m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) + offsetAbs
             }
             
             //Origin code
@@ -498,10 +503,21 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
 
         case OpCodeEntryTtype.CPX: // CPX Compare Memory and Index X
             
-            let memValue = GetMemValue();
-            let result = X - memValue;
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            let memValue = GetMemValue()
+            
+            if(memValue > X)
+            {
+                let result = UInt8(UInt16(X)+255 - UInt16(memValue))
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            }
+            else
+            {
+                let result = X - memValue;
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            }
+            
             let enabled = X >= memValue ? 1:0
             P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
             
@@ -510,9 +526,19 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
         case OpCodeEntryTtype.CPY: // CPY Compare memory and index Y
             
             let memValue = GetMemValue()
-            let result = Y - memValue
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            if(memValue>Y)
+            {
+                let result = TO8(UInt16(Y) + 255 - UInt16(memValue))
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+                
+            }
+            else
+            {
+                let result = Y - memValue
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            }
             let enabled = Y >= memValue ? 1:0
             P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
             
@@ -1157,8 +1183,8 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
         return m_operandAddress
     }
     
-    func ToInt8(_ x : UInt8) -> Int8 {
-          return Int8(bitPattern: x)
+    func ToInt(_ x : UInt8) -> Int16 {
+          return Int16(Int8(bitPattern: x))
     }
     
     func Nmi()

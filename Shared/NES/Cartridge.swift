@@ -161,7 +161,7 @@ class Cartridge:HandleCpuReadProtocol,HandlePpuReadProtocol{
     func loadMarioRom()
     {
         //Donkey Kong  mario Donkey Kong (Japan) Donkey Kong (World) (Rev A)
-        if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        if let filepath = Bundle.main.path(forResource: "mario", ofType: "nes")
         {
             if let data = NSData(contentsOfFile: filepath)
             {

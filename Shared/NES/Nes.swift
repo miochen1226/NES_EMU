@@ -16,6 +16,7 @@ class Nes{
     let m_cpuInternalRam = CpuInternalRam.init()
     let m_renderer = Renderer.init()
     init() {
+        m_renderer.Initialize()
         m_cpu.Initialize(cpuMemoryBus:m_cpuMemoryBus)
         m_ppu.Initialize(ppuMemoryBus: m_ppuMemoryBus, nes: self,renderer:m_renderer)
         m_cpuMemoryBus.Initialize(cpu:m_cpu, ppu:m_ppu, cartridge:m_cartridge,cpuInternalRam: m_cpuInternalRam)
@@ -28,10 +29,20 @@ class Nes{
         m_cpu.Reset()
         m_ppu.Reset()
         
-        for _ in 0...99999
+        /*
+        for _ in 0...60
         {
             ExecuteCpuAndPpuFrame()
         }
+        */
+    }
+    
+    func step()
+    {
+        //for _ in 0...
+        //{
+            ExecuteCpuAndPpuFrame()
+        //}
     }
     
     func GetNameTableMirroring()->RomHeader.NameTableMirroring

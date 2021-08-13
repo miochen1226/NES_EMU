@@ -10,9 +10,9 @@ import SwiftUI
 @main
 struct NES_EMUApp: App {
     
-    let nes = Nes.init()
+    //let nes = Nes.init()
     init() {
-        nes.loadRom()
+        //nes.loadRom()
         //Cartridge.init().loadFile()
     }
     var body: some Scene {
