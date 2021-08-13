@@ -16,6 +16,7 @@ class Mapper{
     {
         return n*1024*1024
     }
+    
     static var kPrgBankCount:UInt = 8
     static var kPrgBankSize:UInt = KB(4)
 
@@ -57,6 +58,33 @@ class Mapper{
     var m_canWritePrgMemory = false
     var m_canWriteChrMemory = false
     var m_canWriteSavMemory = false
+    
+    func OnCpuWrite(cpuAddress:UInt16, value:UInt8)
+    {
+        // Nothing to do
+    }
+    
+    func GetMappedSavBankIndex(cpuBankIndex:Int)->Int
+    {
+        return m_savBankIndices[cpuBankIndex]!
+    }
+    
+    func GetMappedChrBankIndex(ppuBankIndex:Int)->Int
+    {
+        return m_chrBankIndices[ppuBankIndex]!
+    }
+    
+    
+    func CanWritePrgMemory()->Bool
+    {
+        return m_canWritePrgMemory
+    }
+    
+    func CanWriteSavMemory()->Bool
+    {
+        return m_canWriteSavMemory
+    }
+    
     func Initialize(numPrgBanks:UInt,numChrBanks:UInt,numSavBanks:UInt)
     {
         m_numPrgBanks = numPrgBanks
@@ -77,6 +105,33 @@ class Mapper{
         SetPrgBankIndex32k(cpuBankIndexIn:0, cartBankIndexIn:0)
         SetChrBankIndex8k(ppuBankIndexIn:0, cartBankIndexIn:0)
         SetSavBankIndex8k(cpuBankIndexIn:0, cartBankIndexIn:0)
+        PostInitialize()
+    }
+    
+    func PostInitialize()
+    {
+        
+    }
+    
+    func NumChrBanks8k()->Int
+    {
+        return Int(m_numChrBanks / 8)
+    }
+    
+    func NumPrgBanks16k()->Int
+    {
+        return Int(m_numPrgBanks / 4)
+        
+    }
+    
+    func SetPrgBankIndex16k(cpuBankIndexIn:Int, cartBankIndexIn:Int)
+    {
+        let cpuBankIndex = cpuBankIndexIn * 4
+        let cartBankIndex = cartBankIndexIn * 4
+        m_prgBankIndices[cpuBankIndex] = cartBankIndex
+        m_prgBankIndices[cpuBankIndex + 1] = cartBankIndex + 1
+        m_prgBankIndices[cpuBankIndex + 2] = cartBankIndex + 2
+        m_prgBankIndices[cpuBankIndex + 3] = cartBankIndex + 3
     }
     
     func SetPrgBankIndex32k(cpuBankIndexIn:Int, cartBankIndexIn:Int)

@@ -7,5 +7,8 @@
 
 import Foundation
 class Mapper1: Mapper {
-    
+    override func PostInitialize()
+    {
+        
+    }
 }

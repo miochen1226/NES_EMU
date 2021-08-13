@@ -74,7 +74,7 @@ class OpCodeTable:OpCodeNameSpace
         [ 0xCE, OpCodeEntryTtype.DEC, 3, 6, 0, AddressMode.Absolu ],
         [ 0xDE, OpCodeEntryTtype.DEC, 3, 7, 0, AddressMode.AbIdxX ],
 
-        [ 0xCA, OpCodeEntryTtype.DEC, 1, 2, 0, AddressMode.Implid ],
+        [ 0xCA, OpCodeEntryTtype.DEX, 1, 2, 0, AddressMode.Implid ],
 
         [ 0x88, OpCodeEntryTtype.DEY, 1, 2, 0, AddressMode.Implid ],
 

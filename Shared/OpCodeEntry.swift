@@ -24,6 +24,8 @@ class OpCodeNameSpace
         case IdxInd = 0x0800 // Indexed with X Indirect : ($addr8 + X)
         case IndIdx = 0x1000 // Indirect Indexed with Y : ($addr8) + Y
         
+        
+        
         //case MemoryValueOperand = Immedt | ZeroPg | ZPIdxX|ZPIdxY|Absolu|AbIdxX|AbIdxY|IdxInd|IndIdx
         //case JmpOrBranchOperand = Relatv|Absolu|Indrct
     }

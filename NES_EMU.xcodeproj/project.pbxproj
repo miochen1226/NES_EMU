@@ -19,6 +19,12 @@
 		3525760C26BD4BA6005AB816 /* mario.nes in Resources */ = {isa = PBXBuildFile; fileRef = 3525760A26BD4BA6005AB816 /* mario.nes */; };
 		3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
 		3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
+		35265B3626C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */ = {isa = PBXBuildFile; fileRef = 35265B3526C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes */; };
+		35265B3726C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */ = {isa = PBXBuildFile; fileRef = 35265B3526C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes */; };
+		35265B3B26C5548F0031E1A6 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3A26C5548F0031E1A6 /* Renderer.swift */; };
+		35265B3C26C5548F0031E1A6 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3A26C5548F0031E1A6 /* Renderer.swift */; };
+		35265B4026C566540031E1A6 /* PpuStatusReg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3F26C566540031E1A6 /* PpuStatusReg.swift */; };
+		35265B4126C566540031E1A6 /* PpuStatusReg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3F26C566540031E1A6 /* PpuStatusReg.swift */; };
 		352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		3530FA3326BF6C8B00CF18DD /* Nes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3226BF6C8B00CF18DD /* Nes.swift */; };
@@ -43,6 +49,26 @@
 		3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
 		3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
 		3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
+		358D403026C64C79005AAAD8 /* UInt8Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D402F26C64C78005AAAD8 /* UInt8Ext.swift */; };
+		358D403126C64C79005AAAD8 /* UInt8Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D402F26C64C78005AAAD8 /* UInt8Ext.swift */; };
+		358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
+		358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
+		35B9C57426C289A600E13D57 /* PpuRegisterMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57326C289A600E13D57 /* PpuRegisterMemory.swift */; };
+		35B9C57526C289A600E13D57 /* PpuRegisterMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57326C289A600E13D57 /* PpuRegisterMemory.swift */; };
+		35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
+		35B9C57A26C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
+		35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57D26C291C700E13D57 /* PpuMemory.swift */; };
+		35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57D26C291C700E13D57 /* PpuMemory.swift */; };
+		35B9C58326C29A5400E13D57 /* PpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */; };
+		35B9C58426C29A5400E13D57 /* PpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */; };
+		35B9C59826C3144D00E13D57 /* Donkey Kong.nes in Resources */ = {isa = PBXBuildFile; fileRef = 35B9C59726C3144D00E13D57 /* Donkey Kong.nes */; };
+		35B9C59926C3144D00E13D57 /* Donkey Kong.nes in Resources */ = {isa = PBXBuildFile; fileRef = 35B9C59726C3144D00E13D57 /* Donkey Kong.nes */; };
+		35B9C59D26C3167400E13D57 /* Donkey Kong (Japan).nes in Resources */ = {isa = PBXBuildFile; fileRef = 35B9C59C26C3167400E13D57 /* Donkey Kong (Japan).nes */; };
+		35B9C59E26C3167400E13D57 /* Donkey Kong (Japan).nes in Resources */ = {isa = PBXBuildFile; fileRef = 35B9C59C26C3167400E13D57 /* Donkey Kong (Japan).nes */; };
+		35B9C5A226C3191600E13D57 /* Mapper0.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C5A126C3191600E13D57 /* Mapper0.swift */; };
+		35B9C5A326C3191600E13D57 /* Mapper0.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C5A126C3191600E13D57 /* Mapper0.swift */; };
+		35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
+		35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
 		35E7560E26C06A1C0077EE92 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E7560D26C06A1C0077EE92 /* File.swift */; };
 		35E7560F26C06A1C0077EE92 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E7560D26C06A1C0077EE92 /* File.swift */; };
 		35E7561326C072E20077EE92 /* OpCodeTables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E7561226C072E20077EE92 /* OpCodeTables.swift */; };
@@ -61,6 +87,9 @@
 		3525760526BD48DF005AB816 /* Cartridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cartridge.swift; sourceTree = "<group>"; };
 		3525760A26BD4BA6005AB816 /* mario.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = mario.nes; sourceTree = "<group>"; };
 		3525760F26BD5D5B005AB816 /* RomHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomHeader.swift; sourceTree = "<group>"; };
+		35265B3526C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong (World) (Rev A).nes"; sourceTree = "<group>"; };
+		35265B3A26C5548F0031E1A6 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		35265B3F26C566540031E1A6 /* PpuStatusReg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuStatusReg.swift; sourceTree = "<group>"; };
 		352F931226C18E0A00323AC1 /* Bitfield8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bitfield8.swift; sourceTree = "<group>"; };
 		3530FA3226BF6C8B00CF18DD /* Nes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nes.swift; sourceTree = "<group>"; };
 		3530FA3726BF6DCF00CF18DD /* Cpu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cpu.swift; sourceTree = "<group>"; };
@@ -73,6 +102,16 @@
 		3530FA6026C0590300CF18DD /* OpCodeTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeTable.swift; sourceTree = "<group>"; };
 		3547C22726BEBDB0008DB9B9 /* BaseDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDef.swift; sourceTree = "<group>"; };
 		3547C22C26BECE62008DB9B9 /* Memory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memory.swift; sourceTree = "<group>"; };
+		358D402F26C64C78005AAAD8 /* UInt8Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UInt8Ext.swift; sourceTree = "<group>"; };
+		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
+		35B9C57326C289A600E13D57 /* PpuRegisterMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuRegisterMemory.swift; sourceTree = "<group>"; };
+		35B9C57826C28F9A00E13D57 /* PpuControl1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl1.swift; sourceTree = "<group>"; };
+		35B9C57D26C291C700E13D57 /* PpuMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemory.swift; sourceTree = "<group>"; };
+		35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemoryBus.swift; sourceTree = "<group>"; };
+		35B9C59726C3144D00E13D57 /* Donkey Kong.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong.nes"; sourceTree = "<group>"; };
+		35B9C59C26C3167400E13D57 /* Donkey Kong (Japan).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong (Japan).nes"; sourceTree = "<group>"; };
+		35B9C5A126C3191600E13D57 /* Mapper0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper0.swift; sourceTree = "<group>"; };
+		35DA36F826C3C10F005B2BC1 /* Color4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color4.swift; sourceTree = "<group>"; };
 		35E7560D26C06A1C0077EE92 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		35E7561226C072E20077EE92 /* OpCodeTables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeTables.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -95,9 +134,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		35111F6D26C38E5A00E8D773 /* Mapper */ = {
+			isa = PBXGroup;
+			children = (
+				3530FA5626BF880E00CF18DD /* Mapper.swift */,
+				35B9C5A126C3191600E13D57 /* Mapper0.swift */,
+				3530FA5B26BFBCA800CF18DD /* Mapper1.swift */,
+			);
+			path = Mapper;
+			sourceTree = "<group>";
+		};
 		352575DC26BD4827005AB816 = {
 			isa = PBXGroup;
 			children = (
+				35265B3526C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes */,
+				35B9C59C26C3167400E13D57 /* Donkey Kong (Japan).nes */,
+				35B9C59726C3144D00E13D57 /* Donkey Kong.nes */,
 				3525760A26BD4BA6005AB816 /* mario.nes */,
 				352575E126BD4828005AB816 /* Shared */,
 				352575EB26BD4829005AB816 /* iOS */,
@@ -109,6 +161,7 @@
 		352575E126BD4828005AB816 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				35111F6D26C38E5A00E8D773 /* Mapper */,
 				352575E226BD4828005AB816 /* NES_EMUApp.swift */,
 				352575E326BD4828005AB816 /* ContentView.swift */,
 				352575E426BD4829005AB816 /* Assets.xcassets */,
@@ -122,12 +175,19 @@
 				3530FA4526BF70BB00CF18DD /* Ppu.swift */,
 				3530FA4A26BF771500CF18DD /* CpuInternalRam.swift */,
 				3530FA5126BF7A6B00CF18DD /* OpCodeEntry.swift */,
-				3530FA5626BF880E00CF18DD /* Mapper.swift */,
-				3530FA5B26BFBCA800CF18DD /* Mapper1.swift */,
 				3530FA6026C0590300CF18DD /* OpCodeTable.swift */,
 				35E7560D26C06A1C0077EE92 /* File.swift */,
 				35E7561226C072E20077EE92 /* OpCodeTables.swift */,
 				352F931226C18E0A00323AC1 /* Bitfield8.swift */,
+				35B9C57326C289A600E13D57 /* PpuRegisterMemory.swift */,
+				35B9C57826C28F9A00E13D57 /* PpuControl1.swift */,
+				35B9C57D26C291C700E13D57 /* PpuMemory.swift */,
+				35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */,
+				35DA36F826C3C10F005B2BC1 /* Color4.swift */,
+				35265B3A26C5548F0031E1A6 /* Renderer.swift */,
+				35265B3F26C566540031E1A6 /* PpuStatusReg.swift */,
+				358D402F26C64C78005AAAD8 /* UInt8Ext.swift */,
+				358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -236,8 +296,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35B9C59826C3144D00E13D57 /* Donkey Kong.nes in Resources */,
 				352575F926BD4829005AB816 /* Assets.xcassets in Resources */,
+				35265B3626C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */,
 				3525760B26BD4BA6005AB816 /* mario.nes in Resources */,
+				35B9C59D26C3167400E13D57 /* Donkey Kong (Japan).nes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,8 +308,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35B9C59926C3144D00E13D57 /* Donkey Kong.nes in Resources */,
 				352575FA26BD4829005AB816 /* Assets.xcassets in Resources */,
+				35265B3726C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */,
 				3525760C26BD4BA6005AB816 /* mario.nes in Resources */,
+				35B9C59E26C3167400E13D57 /* Donkey Kong (Japan).nes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,21 +326,31 @@
 				3530FA5226BF7A6B00CF18DD /* OpCodeEntry.swift in Sources */,
 				3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */,
 				3530FA3326BF6C8B00CF18DD /* Nes.swift in Sources */,
+				35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */,
 				352575F726BD4829005AB816 /* ContentView.swift in Sources */,
 				35E7561326C072E20077EE92 /* OpCodeTables.swift in Sources */,
 				3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
+				35265B4026C566540031E1A6 /* PpuStatusReg.swift in Sources */,
 				35E7560E26C06A1C0077EE92 /* File.swift in Sources */,
+				358D403026C64C79005AAAD8 /* UInt8Ext.swift in Sources */,
 				3530FA3826BF6DCF00CF18DD /* Cpu.swift in Sources */,
+				35B9C57426C289A600E13D57 /* PpuRegisterMemory.swift in Sources */,
+				35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */,
 				3530FA5C26BFBCA900CF18DD /* Mapper1.swift in Sources */,
+				358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
+				35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5726BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				3530FA4626BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3530FA3D26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
+				35265B3B26C5548F0031E1A6 /* Renderer.swift in Sources */,
 				352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
+				35B9C5A226C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760626BD48DF005AB816 /* Cartridge.swift in Sources */,
+				35B9C58326C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,21 +361,31 @@
 				3530FA5326BF7A6B00CF18DD /* OpCodeEntry.swift in Sources */,
 				3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */,
 				3530FA3426BF6C8B00CF18DD /* Nes.swift in Sources */,
+				35B9C57A26C28F9A00E13D57 /* PpuControl1.swift in Sources */,
 				352575F826BD4829005AB816 /* ContentView.swift in Sources */,
 				35E7561426C072E20077EE92 /* OpCodeTables.swift in Sources */,
 				3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
+				35265B4126C566540031E1A6 /* PpuStatusReg.swift in Sources */,
 				35E7560F26C06A1C0077EE92 /* File.swift in Sources */,
+				358D403126C64C79005AAAD8 /* UInt8Ext.swift in Sources */,
 				3530FA3926BF6DCF00CF18DD /* Cpu.swift in Sources */,
+				35B9C57526C289A600E13D57 /* PpuRegisterMemory.swift in Sources */,
+				35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */,
 				3530FA5D26BFBCA900CF18DD /* Mapper1.swift in Sources */,
+				358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
+				35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5826BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				3530FA4726BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3530FA3E26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
+				35265B3C26C5548F0031E1A6 /* Renderer.swift in Sources */,
 				352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
+				35B9C5A326C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760726BD48DF005AB816 /* Cartridge.swift in Sources */,
+				35B9C58426C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

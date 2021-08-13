@@ -9,7 +9,13 @@ import Foundation
 class Bitfield8 {
     var m_field:UInt8 = 0
     
-    init() { ClearAll(); }
+    /*
+    init()->Bitfield8
+    {
+        ClearAll()
+        return self
+    }
+    */
 
     func Value()->UInt8
     {
@@ -57,7 +63,17 @@ class Bitfield8 {
     
     func Test(_ bits:UInt8)->Bool
     {
-        return Read(bits) != 0
+        let ret = Read(bits)
+        
+        if(ret == 0)
+        {
+            return false
+        }
+        else
+        {
+            return true
+        }
+        //return Read(bits) != 0
     }
     
     func Test01(_ bits:UInt8)->UInt8

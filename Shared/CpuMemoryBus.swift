@@ -100,21 +100,21 @@ class CpuMemoryBus{
     {
         if (cpuAddress >= CpuMemory.kExpansionRomBase)
         {
-            m_cartridge!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            m_cartridge!.HandleCpuWrite(cpuAddress, value: value)
             return
         }
         else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
         {
-            m_cpu!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            m_cpu!.HandleCpuWrite(cpuAddress, value: value)
             return
         }
         else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
         {
-            m_ppu!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            m_ppu!.HandleCpuWrite(cpuAddress, value: value)
             return
         }
 
-        m_cpuInternalRam!.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+        m_cpuInternalRam!.HandleCpuWrite(cpuAddress, value: value)
     }
     
 }
