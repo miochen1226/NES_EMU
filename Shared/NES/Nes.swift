@@ -28,21 +28,11 @@ class Nes{
         m_cartridge.loadFile()
         m_cpu.Reset()
         m_ppu.Reset()
-        
-        /*
-        for _ in 0...60
-        {
-            ExecuteCpuAndPpuFrame()
-        }
-        */
     }
     
     func step()
     {
-        //for _ in 0...
-        //{
-            ExecuteCpuAndPpuFrame()
-        //}
+        ExecuteCpuAndPpuFrame()
     }
     
     func GetNameTableMirroring()->RomHeader.NameTableMirroring
@@ -52,45 +42,28 @@ class Nes{
     
     func ExecuteCpuAndPpuFrame()
     {
-        //var cpuCycles:uint32 = 0
-        
-        //m_cpu.Execute(&cpuCycles)
-        NSLog("ExecuteCpuAndPpuFrame")
         var completedFrame = false
-        var totalCpuCycles:UInt32 = 0
+        m_cpuMemoryBus.readCount = 0
+        
+        var t = clock()
         while (!completedFrame)
         {
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
             m_cpu.Execute(&cpuCycles)
-
-            // Update PPU with that many cycles
             m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
-
-            totalCpuCycles += cpuCycles//*4
-         //   m_apu.Execute(cpuCycles);
+            //m_apu.Execute(cpuCycles);
         }
-        NSLog("ExecuteCpuAndPpuFrame end %d",totalCpuCycles)
-        //bool completedFrame = false;
-        /*
-         
-        while (!completedFrame)
-        {
-            // Update CPU, get number of cycles elapsed
-            uint32 cpuCycles;
-            m_cpu.Execute(cpuCycles);
-
-            // Update PPU with that many cycles
-            m_ppu.Execute(cpuCycles, completedFrame);
-
-            m_apu.Execute(cpuCycles);
-        }*/
+        
+        t = clock() - t
+        print("The function takes \(t) ticks, which is \(Double(t) / Double(CLOCKS_PER_SEC)) seconds of CPU time")
     }
     
     func SignalCpuNmi()
     {
         m_cpu.Nmi()
     }
+    
     func SignalCpuIrq()
     {
         m_cpu.Irq()

@@ -7,14 +7,7 @@
 
 import Foundation
 
-//extension Data {
-//   func hexString() -> String {
-//       return self.map { String(format:"%02x", $0) }.joined()}
-//}
-
-
-
-class Cartridge:HandleCpuReadProtocol,HandlePpuReadProtocol{
+class Cartridge:ICartridge{
     func HandlePpuRead(_ ppuAddress: uint16) -> uint8 {
         return AccessChrMem(ppuAddress)
     }
@@ -51,6 +44,23 @@ class Cartridge:HandleCpuReadProtocol,HandlePpuReadProtocol{
 
     let kSavBankCount:uint16 = 1
     let kSavBankSize:uint16 = uint16(KB(8))
+    
+    func HandleCpuReadEx(_ cpuAddress: uint16,readValue:inout UInt8)
+    {
+        if (cpuAddress >= CpuMemory.kPrgRomBase)
+        {
+            AccessPrgMemEx(cpuAddress,readValue:&readValue)
+        }
+        else if (cpuAddress >= CpuMemory.kSaveRamBase)
+        {
+            // We don't bother with SRAM chip disable
+            readValue = AccessSavMem(cpuAddress)
+        }
+        else
+        {
+            readValue = 0
+        }
+    }
     
     func HandleCpuRead(_ cpuAddress: uint16)->uint8 {
         if (cpuAddress >= CpuMemory.kPrgRomBase)
@@ -108,12 +118,50 @@ class Cartridge:HandleCpuReadProtocol,HandlePpuReadProtocol{
         return address & (bankSize - 1)
     }
     
-    var m_mapper:Mapper = Mapper.init()
-    func AccessPrgMem(_ cpuAddress:uint16)->UInt8
+    func AccessPrgMemEx(_ cpuAddress:uint16,readValue:inout UInt8)
     {
+        //Mio speed up
+        let bankIndexCache = cache[cpuAddress]
+        if(bankIndexCache != nil)
+        {
+            let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+            let memory = m_prgBanks[bankIndexCache!]
+            readValue = memory.RawRef(address: Int(offset))
+        }
+        
         let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
         let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
         let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
+        
+        //Mio speed up
+        cache[cpuAddress] = mappedBankIndex
+        
+        let memory = m_prgBanks[mappedBankIndex]
+        readValue = memory.RawRef(address: Int(offset))
+    }
+    
+    var m_mapper:Mapper = Mapper.init()
+    var cache:[uint16:Int] = [:]
+    func AccessPrgMem(_ cpuAddress:uint16)->UInt8
+    {
+        //Mio speed up
+        let bankIndexCache = cache[cpuAddress]
+        
+        if(bankIndexCache != nil)
+        {
+            let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+            let memory = m_prgBanks[bankIndexCache!]
+            return memory.RawRef(address: Int(offset))
+        }
+        
+        
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+        let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
+        
+        //Mio speed up
+        cache[cpuAddress] = mappedBankIndex
+        
         let memory = m_prgBanks[mappedBankIndex]
         return memory.RawRef(address: Int(offset))
     }
@@ -161,7 +209,7 @@ class Cartridge:HandleCpuReadProtocol,HandlePpuReadProtocol{
     func loadMarioRom()
     {
         //Donkey Kong  mario Donkey Kong (Japan) Donkey Kong (World) (Rev A)
-        if let filepath = Bundle.main.path(forResource: "mario", ofType: "nes")
+        if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         {
             if let data = NSData(contentsOfFile: filepath)
             {

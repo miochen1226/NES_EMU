@@ -66,16 +66,39 @@ struct CpuMemory
 }
 
 class CpuMemoryBus{
-    var m_cpu:Cpu?
-    var m_ppu:Ppu?
-    var m_cartridge:Cartridge?
+    var m_cpu:ICpu?
+    var m_ppu:IPpu?
+    var m_cartridge:ICartridge?
     var m_cpuInternalRam:CpuInternalRam?
-    func Initialize(cpu:Cpu,ppu:Ppu,cartridge:Cartridge,cpuInternalRam:CpuInternalRam)
+    var readCount = 0
+    func Initialize(cpu:ICpu,ppu:IPpu,cartridge:ICartridge,cpuInternalRam:CpuInternalRam)
     {
         m_cpu = cpu
         m_ppu = ppu
         m_cartridge = cartridge
         m_cpuInternalRam = cpuInternalRam
+    }
+    
+    
+    //func HandleCpuReadEx(_ cpuAddress: uint16,readValue:inout UInt8)
+    
+    func ReadEx(_ cpuAddress:uint16,readValue:inout UInt8)
+    {
+        if (cpuAddress >= CpuMemory.kExpansionRomBase)
+        {
+            m_cartridge!.HandleCpuReadEx(cpuAddress,readValue:&readValue)
+        }
+        else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
+        {
+            //return m_cpu!.HandleCpuRead(cpuAddress)
+        }
+        else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
+        {
+            //Mio mark for test.
+            //return 0//m_ppu!.HandleCpuRead(cpuAddress)
+        }
+
+        //return m_cpuInternalRam!.HandleCpuRead(cpuAddress)
     }
     
     func Read(_ cpuAddress:uint16)->uint8

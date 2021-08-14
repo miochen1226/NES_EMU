@@ -1,5 +1,5 @@
 //
-//  MyImageView.swift
+//  ScreenCanvasView.swift
 //  NES_EMU
 //
 //  Created by mio on 2021/8/14.
@@ -16,24 +16,22 @@ extension NSObject {
 
 class DataHolder{
     static var shared:DataHolder = DataHolder.init()
-    var chartView:ChartView?
+    var canvasView:CanvasView?
 }
-class ChartView: NSView {
+class CanvasView: NSView {
     var nes:Nes?
     var data: [Color4] {
         didSet {
             self.needsDisplay = true //<-- Here
         }
     }
-    
-    //let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     init(data: [Color4]) {
         self.data = data
         print("\(data)")
         super.init(frame: .zero)
         wantsLayer = true
         layer?.backgroundColor = .white
-        DataHolder.shared.chartView = self
+        DataHolder.shared.canvasView = self
     }
     
     func step()
@@ -71,42 +69,38 @@ class ChartView: NSView {
                     ctx.fillEllipse(in: CGRect(x: x, y: y, width: 1, height: 1))
                 }
             }
-            //ctx.setFillColor(NSColor.green.cgColor)
-            //ctx.fillEllipse(in: CGRect(x: 10, y: 10, width: 10, height: 10))
         }
         
         context.restoreGraphicsState()
     }
 }
 
-struct MyImageView: NSViewRepresentable
+struct ScreenCanvasView: NSViewRepresentable
 {
-    
-    typealias NSViewType = ChartView
+    //typealias NSViewType = CanvasView
     let nes = Nes.init()
-    func updateNSView(_ nsView: ChartView, context: Context) {
+    func updateNSView(_ nsView: CanvasView, context: Context) {
         nes.loadRom()
         
-        for _ in 0...60*20
-        {
-            nes.step()
-        }
+        //for _ in 0...60*20
+        //{
+        //    nes.step()
+        //}
         nsView.data = nes.m_renderer.rawColors
         nsView.nes = nes
     }
     
-    @State var chartView:ChartView!
+    @State var canvasView:CanvasView!
     
     func step()
     {
         nes.step()
-        chartView?.data = nes.m_renderer.rawColors
+        canvasView?.data = nes.m_renderer.rawColors
     }
     
     var data: [Color4] = [Color4()]
     
-    func makeNSView(context: NSViewRepresentableContext<Self>) -> ChartView {
-        //ChartView(data: data)
-        return ChartView(data: data)
+    func makeNSView(context: NSViewRepresentableContext<Self>) -> CanvasView {
+        return CanvasView(data: data)
     }
 }

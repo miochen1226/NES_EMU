@@ -6,16 +6,13 @@
 //
 
 import Foundation
-class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
+
+class Ppu:IPpu{
    
-    
     func Reset()
     {
-        
-        
         InitPaletteColors()
         // See http://wiki.nesdev.com/w/index.php/PPU_power_up_state
-
         
         m_ppuStatusReg.initialize(ppuRegisterMemory: m_ppuRegisters,regAddress: CpuMemory.kPpuStatusReg)
         m_ppuControlReg1.initialize(ppuRegisterMemory: m_ppuRegisters,regAddress: CpuMemory.kPpuControlReg1)
@@ -623,21 +620,21 @@ class Ppu:HandleCpuReadProtocol,HandlePpuReadProtocol{
     
     func getOamArray(oamMemory:ObjectAttributeMemory)->[SpriteData]
     {
-        //TODO
         var array:[SpriteData] = []
         for i in 0...ObjectAttributeMemory.kMaxSprites-1
         {
-            var spriteData = oamMemory.getSprite(i)
+            let spriteData = oamMemory.getSprite(i)
             array.append(spriteData)
         }
         return array
     }
+    
     func getOam2Array(oamMemory:ObjectAttributeMemory2)->[SpriteData]
     {
         var array:[SpriteData] = []
         for i in 0...ObjectAttributeMemory2.kMaxSprites-1
         {
-            var spriteData = oamMemory.getSprite(i)
+            let spriteData = oamMemory.getSprite(i)
             array.append(spriteData)
         }
         return array

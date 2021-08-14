@@ -31,20 +31,15 @@ class PpuMemory
     static let kPalettesSize:UInt16                = 32
     static let kPalettesEnd:UInt16                = kPalettesBase + kPalettesSize * 8 // Mirrored
 
-        // Validate that end matches next base
-        //static_assert(kChrRomEnd == kVRamBase, "Invalid memory map");
-        //static_assert(kVRamEnd == kPalettesBase, "Invalid memory map");
-
-
     static let kNumPatternTables:UInt16            = 2
     static let kPatternTableSize:UInt16            = KB(4)
     static let kPatternTable0:UInt16                = 0x0000
     static let kPatternTable1:UInt16                = 0x1000
 
-        // There are up to 4 Name/Attribute tables, each pair is 1 KB.
-        // In fact, NES only has 2 KB total for name tables; the other 2 KB are mirrored off the first
-        // two, either horizontally or vertically, or the cart supplies and extra 2 KB memory for 4 screen.
-        // Also, a "name table" includes the attribute table, which are in the last 64 bytes.
+    // There are up to 4 Name/Attribute tables, each pair is 1 KB.
+    // In fact, NES only has 2 KB total for name tables; the other 2 KB are mirrored off the first
+    // two, either horizontally or vertically, or the cart supplies and extra 2 KB memory for 4 screen.
+    // Also, a "name table" includes the attribute table, which are in the last 64 bytes.
     static let kNameTableSize:UInt16                = 960
     static let  kAttributeTableSize:UInt16        = 64
     static let  kNameAttributeTableSize:UInt16    = kNameTableSize + kAttributeTableSize
@@ -64,19 +59,19 @@ class PpuMemory
 
     static func GetPatternTableAddress(index:Int)->UInt16
     {
-        //assert(index < kNumPatternTables);
+        assert(index < kNumPatternTables);
         return UInt16(kPatternTable0 + kPatternTableSize * UInt16(index))
     }
 
     static func GetNameTableAddress(index:Int)->UInt16
     {
-        //assert(index < kNumMaxNameTables);
+        assert(index < kNumMaxNameTables);
         return kNameTable0 + (kNameAttributeTableSize * UInt16(index))
     }
 
     static func GetAttributeTableAddress(index:Int)->UInt16
     {
-        //assert(index < kNumMaxAttributeTables);
+        assert(index < kNumMaxAttributeTables);
         return kAttributeTable0 + (kNameAttributeTableSize * UInt16(index))
     }
 }

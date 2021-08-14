@@ -6,35 +6,7 @@
 //
 
 import Foundation
-class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
-    
-    //static func BIT(_ n:Int)->UInt8
-    //{
-    //    return (1<<n)
-    //}
-    
-    enum StatusFlag : UInt8
-    {
-        case Carry              = 0b00000001//(1<<0)
-        case Zero               = 0b00000010//(1<<1)
-        case IrqDisabled        = 0b00000100// Interrupt (IRQ) disabled
-        case Decimal            = 0b00001000 // *NOTE: Present in P, but Decimal mode not supported by NES CPU
-        case BrkExecuted        = 0b00010000 // BRK executed (IRQ/software interupt) *NOTE: Not actually a bit in P, only set on stack for s/w interrupts
-        case Unused             = 0b00100000 // *NOTE: Never set in P, but always set on stack
-        case Overflow           = 0b01000000 // 'V'
-        case Negative           = 0b10000000 // aka Sign flag
-    }
-    
-    
-    var Carry = StatusFlag.Carry.rawValue
-    var Zero = StatusFlag.Zero.rawValue
-    var IrqDisabled = StatusFlag.IrqDisabled.rawValue
-    var Decimal = StatusFlag.Decimal.rawValue
-    var BrkExecuted = StatusFlag.BrkExecuted.rawValue
-    var Unused = StatusFlag.Unused.rawValue
-    var Overflow = StatusFlag.Overflow.rawValue
-    var Negative = StatusFlag.Negative.rawValue
-    
+class Cpu:CpuRegDef,ICpu{
     
     func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
         var result:UInt8 = 0;
@@ -125,6 +97,9 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
         {
             NSLog(item.getName())
             g_opCodeTable[item.opCode] = item
+            //_opCodeTableEx[item.opCode] = item
+            
+            //g_opCodeTableEx = NSDictionary.init()
         }
         
         NSLog("===OpTables end===")
@@ -133,36 +108,29 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
     
     var m_cycles:uint32 = 0
     var m_totalCycles:uint32 = 0
-    var m_opCodeEntry:OpCodeEntry?
-    var g_opCodeTable:[uint8:OpCodeEntry?] = [:]
-
+    var m_opCodeEntry:OpCodeEntry!
+    
+    var g_opCodeTableEx: NSDictionary = [0:1,1:2,2:3]
+    
+    var g_opCodeTable:[uint8:OpCodeEntry] = [:]
+    
     func Execute(_ cpuCyclesElapsed:inout uint32)
     {
         m_cycles = 0
         ExecutePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
         
-        //NSLog("PC="+String(PC))
-        let opCode = Read8(PC)
-        m_opCodeEntry = g_opCodeTable[opCode] as? OpCodeEntry
+        let opCode:uint8 = Read8(PC)
+        m_opCodeEntry = g_opCodeTable[opCode]
 
-        if (m_opCodeEntry == nil)
-        {
-            NSLog("Unknown opcode")
-            return
-        }
-        else
-        {
-            //let opName = m_opCodeEntry?.getName() ?? "UNKNOW"
-            //NSLog("Execute->" + opName)
-        }
-
+        assert((m_opCodeEntry != nil))
+        
         UpdateOperandAddress()
 
         ExecuteInstruction()
+        
         ExecutePendingInterrupts() // Handle when instruction (memory read) causes interrupt
     
         cpuCyclesElapsed = m_cycles
-        m_totalCycles += m_cycles
     }
     
     func ExecutePendingInterrupts()
@@ -194,6 +162,11 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
             m_cycles += UInt32(kInterruptCycles)
             m_pendingIrq = false
         }
+    }
+    
+    func Read8Ex(_ address:uint16,readValue:inout UInt8)
+    {
+        return m_cpuMemoryBus!.ReadEx(address,readValue:&readValue)
     }
     
     func Read8(_ address:uint16)->uint8
@@ -887,8 +860,7 @@ class Cpu:OpCodeNameSpace,HandleCpuReadProtocol{
         // Entry point is located at the Reset interrupt location
         PC = Read16(CpuMemory.kResetVector)
 
-        m_cycles = 0;
-        m_totalCycles = 0;
+        m_cycles = 0
         m_pendingNmi = false
         m_pendingIrq = false
 

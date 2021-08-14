@@ -7,7 +7,7 @@
 
 import Foundation
 
-class OpCodeTable:OpCodeNameSpace
+class OpCodeTable:OpCodeDef
 {
     static var opCodeTable:[[Any]] =
     [
