@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		350F261E26CA47F20087BC8D /* BgTileFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350F261D26CA47F20087BC8D /* BgTileFetchData.swift */; };
+		350F261F26CA47F20087BC8D /* BgTileFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350F261D26CA47F20087BC8D /* BgTileFetchData.swift */; };
 		352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
 		352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
 		352575F726BD4829005AB816 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E326BD4828005AB816 /* ContentView.swift */; };
@@ -25,6 +27,12 @@
 		35265B3C26C5548F0031E1A6 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3A26C5548F0031E1A6 /* Renderer.swift */; };
 		35265B4026C566540031E1A6 /* PpuStatusReg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3F26C566540031E1A6 /* PpuStatusReg.swift */; };
 		35265B4126C566540031E1A6 /* PpuStatusReg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3F26C566540031E1A6 /* PpuStatusReg.swift */; };
+		35283FCE26C934A5005AB757 /* INes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35283FCD26C934A5005AB757 /* INes.swift */; };
+		35283FCF26C934A5005AB757 /* INes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35283FCD26C934A5005AB757 /* INes.swift */; };
+		35283FD526C93781005AB757 /* Ppu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35283FD426C93781005AB757 /* Ppu.swift */; };
+		35283FD626C93781005AB757 /* Ppu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35283FD426C93781005AB757 /* Ppu.swift */; };
+		35283FDE26C93B8D005AB757 /* PpuDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35283FDD26C93B8D005AB757 /* PpuDef.swift */; };
+		35283FDF26C93B8D005AB757 /* PpuDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35283FDD26C93B8D005AB757 /* PpuDef.swift */; };
 		352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		3530B85126C6DD0800A2858C /* ScreenCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B85026C6DD0800A2858C /* ScreenCanvasView.swift */; };
@@ -46,8 +54,6 @@
 		3530FA3926BF6DCF00CF18DD /* Cpu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3726BF6DCF00CF18DD /* Cpu.swift */; };
 		3530FA3D26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3C26BF6E7A00CF18DD /* CpuMemoryBus.swift */; };
 		3530FA3E26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3C26BF6E7A00CF18DD /* CpuMemoryBus.swift */; };
-		3530FA4626BF70BB00CF18DD /* Ppu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA4526BF70BB00CF18DD /* Ppu.swift */; };
-		3530FA4726BF70BB00CF18DD /* Ppu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA4526BF70BB00CF18DD /* Ppu.swift */; };
 		3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA4A26BF771500CF18DD /* CpuInternalRam.swift */; };
 		3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA4A26BF771500CF18DD /* CpuInternalRam.swift */; };
 		3530FA5226BF7A6B00CF18DD /* OpCodeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA5126BF7A6B00CF18DD /* OpCodeEntry.swift */; };
@@ -62,6 +68,12 @@
 		3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
 		3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
 		3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
+		3570943526CD4F5E002F11FF /* NESScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3570943426CD4F5E002F11FF /* NESScene.swift */; };
+		3570943626CD4F5E002F11FF /* NESScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3570943426CD4F5E002F11FF /* NESScene.swift */; };
+		3570943826CD5824002F11FF /* ScreenBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3570943726CD5824002F11FF /* ScreenBuffer.swift */; };
+		3570943926CD5824002F11FF /* ScreenBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3570943726CD5824002F11FF /* ScreenBuffer.swift */; };
+		3570943B26CD584E002F11FF /* RGBA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3570943A26CD584E002F11FF /* RGBA.swift */; };
+		3570943C26CD584E002F11FF /* RGBA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3570943A26CD584E002F11FF /* RGBA.swift */; };
 		358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
@@ -81,6 +93,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		350F261D26CA47F20087BC8D /* BgTileFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BgTileFetchData.swift; sourceTree = "<group>"; };
 		352575E226BD4828005AB816 /* NES_EMUApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NES_EMUApp.swift; sourceTree = "<group>"; };
 		352575E326BD4828005AB816 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		352575E426BD4829005AB816 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -95,6 +108,9 @@
 		35265B3526C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong (World) (Rev A).nes"; sourceTree = "<group>"; };
 		35265B3A26C5548F0031E1A6 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		35265B3F26C566540031E1A6 /* PpuStatusReg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuStatusReg.swift; sourceTree = "<group>"; };
+		35283FCD26C934A5005AB757 /* INes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = INes.swift; sourceTree = "<group>"; };
+		35283FD426C93781005AB757 /* Ppu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ppu.swift; sourceTree = "<group>"; };
+		35283FDD26C93B8D005AB757 /* PpuDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuDef.swift; sourceTree = "<group>"; };
 		352F931226C18E0A00323AC1 /* Bitfield8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bitfield8.swift; sourceTree = "<group>"; };
 		3530B85026C6DD0800A2858C /* ScreenCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCanvasView.swift; sourceTree = "<group>"; };
 		3530B86A26C6DF3600A2858C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -106,7 +122,6 @@
 		3530FA3226BF6C8B00CF18DD /* Nes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nes.swift; sourceTree = "<group>"; };
 		3530FA3726BF6DCF00CF18DD /* Cpu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cpu.swift; sourceTree = "<group>"; };
 		3530FA3C26BF6E7A00CF18DD /* CpuMemoryBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuMemoryBus.swift; sourceTree = "<group>"; };
-		3530FA4526BF70BB00CF18DD /* Ppu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ppu.swift; sourceTree = "<group>"; };
 		3530FA4A26BF771500CF18DD /* CpuInternalRam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuInternalRam.swift; sourceTree = "<group>"; };
 		3530FA5126BF7A6B00CF18DD /* OpCodeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeEntry.swift; sourceTree = "<group>"; };
 		3530FA5626BF880E00CF18DD /* Mapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper.swift; sourceTree = "<group>"; };
@@ -114,6 +129,9 @@
 		3530FA6026C0590300CF18DD /* OpCodeTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeTable.swift; sourceTree = "<group>"; };
 		3547C22726BEBDB0008DB9B9 /* BaseDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDef.swift; sourceTree = "<group>"; };
 		3547C22C26BECE62008DB9B9 /* Memory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memory.swift; sourceTree = "<group>"; };
+		3570943426CD4F5E002F11FF /* NESScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NESScene.swift; sourceTree = "<group>"; };
+		3570943726CD5824002F11FF /* ScreenBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScreenBuffer.swift; sourceTree = "<group>"; };
+		3570943A26CD584E002F11FF /* RGBA.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBA.swift; sourceTree = "<group>"; };
 		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
 		35B9C57826C28F9A00E13D57 /* PpuControl1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl1.swift; sourceTree = "<group>"; };
 		35B9C57D26C291C700E13D57 /* PpuMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemory.swift; sourceTree = "<group>"; };
@@ -210,6 +228,7 @@
 			children = (
 				352575E326BD4828005AB816 /* ContentView.swift */,
 				3530B85026C6DD0800A2858C /* ScreenCanvasView.swift */,
+				3570943426CD4F5E002F11FF /* NESScene.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -223,6 +242,7 @@
 				3530B86F26C7F4AF00A2858C /* CPU */,
 				3530B86E26C7F41600A2858C /* PPU */,
 				3530FA3226BF6C8B00CF18DD /* Nes.swift */,
+				35283FCD26C934A5005AB757 /* INes.swift */,
 			);
 			path = NES;
 			sourceTree = "<group>";
@@ -238,12 +258,16 @@
 		3530B86E26C7F41600A2858C /* PPU */ = {
 			isa = PBXGroup;
 			children = (
-				3530FA4526BF70BB00CF18DD /* Ppu.swift */,
+				3570943A26CD584E002F11FF /* RGBA.swift */,
+				3570943726CD5824002F11FF /* ScreenBuffer.swift */,
+				35283FDD26C93B8D005AB757 /* PpuDef.swift */,
+				35283FD426C93781005AB757 /* Ppu.swift */,
 				35B9C57826C28F9A00E13D57 /* PpuControl1.swift */,
 				35B9C57D26C291C700E13D57 /* PpuMemory.swift */,
 				35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */,
 				35265B3F26C566540031E1A6 /* PpuStatusReg.swift */,
 				3530B87F26C7FAC400A2858C /* IPpu.swift */,
+				350F261D26CA47F20087BC8D /* BgTileFetchData.swift */,
 			);
 			path = PPU;
 			sourceTree = "<group>";
@@ -412,6 +436,7 @@
 				3530B88026C7FAC400A2858C /* IPpu.swift in Sources */,
 				3530B89D26C8006100A2858C /* CpuRegDef.swift in Sources */,
 				3530FA3326BF6C8B00CF18DD /* Nes.swift in Sources */,
+				3570943B26CD584E002F11FF /* RGBA.swift in Sources */,
 				35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */,
 				352575F726BD4829005AB816 /* ContentView.swift in Sources */,
 				3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
@@ -419,18 +444,23 @@
 				3530FA3826BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88E26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88726C7FBE600A2858C /* ICpu.swift in Sources */,
+				35283FCE26C934A5005AB757 /* INes.swift in Sources */,
 				35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */,
+				3570943526CD4F5E002F11FF /* NESScene.swift in Sources */,
 				3530FA5C26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
 				35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5726BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530B89426C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
+				350F261E26CA47F20087BC8D /* BgTileFetchData.swift in Sources */,
+				35283FDE26C93B8D005AB757 /* PpuDef.swift in Sources */,
 				3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */,
-				3530FA4626BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3530FA3D26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
 				35265B3B26C5548F0031E1A6 /* Renderer.swift in Sources */,
 				352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */,
+				3570943826CD5824002F11FF /* ScreenBuffer.swift in Sources */,
 				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
+				35283FD526C93781005AB757 /* Ppu.swift in Sources */,
 				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3530B85126C6DD0800A2858C /* ScreenCanvasView.swift in Sources */,
 				3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
@@ -449,28 +479,34 @@
 				3530B88126C7FAC400A2858C /* IPpu.swift in Sources */,
 				3530B89E26C8006100A2858C /* CpuRegDef.swift in Sources */,
 				3530FA3426BF6C8B00CF18DD /* Nes.swift in Sources */,
+				3570943C26CD584E002F11FF /* RGBA.swift in Sources */,
 				35B9C57A26C28F9A00E13D57 /* PpuControl1.swift in Sources */,
 				352575F826BD4829005AB816 /* ContentView.swift in Sources */,
 				3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				35265B4126C566540031E1A6 /* PpuStatusReg.swift in Sources */,
 				3530FA3926BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88F26C7FC4200A2858C /* ICartridge.swift in Sources */,
+				35283FDF26C93B8D005AB757 /* PpuDef.swift in Sources */,
 				3530B88826C7FBE600A2858C /* ICpu.swift in Sources */,
+				35283FCF26C934A5005AB757 /* INes.swift in Sources */,
 				35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */,
+				350F261F26CA47F20087BC8D /* BgTileFetchData.swift in Sources */,
 				3530FA5D26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
 				35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5826BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530B89526C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
 				3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */,
-				3530FA4726BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3530FA3E26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
+				3570943626CD4F5E002F11FF /* NESScene.swift in Sources */,
 				35265B3C26C5548F0031E1A6 /* Renderer.swift in Sources */,
 				352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
+				35283FD626C93781005AB757 /* Ppu.swift in Sources */,
 				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				3530B85226C6DD0800A2858C /* ScreenCanvasView.swift in Sources */,
 				3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
+				3570943926CD5824002F11FF /* ScreenBuffer.swift in Sources */,
 				35B9C5A326C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760726BD48DF005AB816 /* Cartridge.swift in Sources */,
 				35B9C58426C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
@@ -534,6 +570,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -586,6 +623,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -652,7 +690,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				SDKROOT = macosx;
@@ -676,7 +714,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				SDKROOT = macosx;

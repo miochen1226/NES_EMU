@@ -127,7 +127,7 @@ class RomHeader{
         if(char7 == 0 && bytes[12] == 0)
         {
             //Type = NES1
-            NSLog("NES1")
+            
         }
         
         m_prgRomBanks = UInt.init(bytes[4])

@@ -79,28 +79,6 @@ class CpuMemoryBus{
         m_cpuInternalRam = cpuInternalRam
     }
     
-    
-    //func HandleCpuReadEx(_ cpuAddress: uint16,readValue:inout UInt8)
-    
-    func ReadEx(_ cpuAddress:uint16,readValue:inout UInt8)
-    {
-        if (cpuAddress >= CpuMemory.kExpansionRomBase)
-        {
-            m_cartridge!.HandleCpuReadEx(cpuAddress,readValue:&readValue)
-        }
-        else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
-        {
-            //return m_cpu!.HandleCpuRead(cpuAddress)
-        }
-        else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
-        {
-            //Mio mark for test.
-            //return 0//m_ppu!.HandleCpuRead(cpuAddress)
-        }
-
-        //return m_cpuInternalRam!.HandleCpuRead(cpuAddress)
-    }
-    
     func Read(_ cpuAddress:uint16)->uint8
     {
         if (cpuAddress >= CpuMemory.kExpansionRomBase)

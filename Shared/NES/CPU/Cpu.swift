@@ -6,11 +6,14 @@
 //
 
 import Foundation
-class Cpu:CpuRegDef,ICpu{
+class Cpu:CpuStatusFlag,ICpu{
     
+    var input:UInt8 = 0
+    var lastInput:UInt8 = 0
+    var pushTime = 0
+    var inputIndex:UInt8 = 0
     func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
         var result:UInt8 = 0;
-
         switch (cpuAddress)
         {
         case CpuMemory.kSpriteDmaReg: // $4014
@@ -19,15 +22,45 @@ class Cpu:CpuRegDef,ICpu{
 
         case CpuMemory.kControllerPort1: // $4016
             //NSLog("TODOOOO")
+            inputIndex += 1
+            
+            if(inputIndex > 8)
+            {
+                inputIndex = 1
+            }
+            if(inputIndex == 10)
+            {
+                if(pushTime>1)
+                {
+                    if(lastInput == 0)
+                    {
+                        lastInput = 1
+                    }
+                    else
+                    {
+                        lastInput = 0
+                    }
+                    pushTime  = 0
+                }
+                pushTime += 1
+                return lastInput
+            }
+            else
+            {
+                input = 0
+            }
+            return input
             break
         case CpuMemory.kControllerPort2: // $4017
             //NSLog("TODOOOO")
             //result = m_controllerPorts.HandleCpuRead(cpuAddress);
+            //Irq()
+            return 0
             break
 
         default:
-            
-            //NSLog("TODOOOO")
+            print(cpuAddress)
+            //NSLog("TODOOOO m_apu->HandleCpuRead")
             //result = m_apu->HandleCpuRead(cpuAddress);
             break
         }
@@ -37,15 +70,15 @@ class Cpu:CpuRegDef,ICpu{
     
     func SpriteDmaTransfer(_ cpuAddress:UInt16)
     {
-        //for (uint16 i = 0; i < 256; ++i) //@TODO: Use constant for 256 (kSpriteMemorySize?)
         for i in 0...255
         {
             let value:UInt8 = m_cpuMemoryBus!.Read(cpuAddress + UInt16(i))
             m_cpuMemoryBus!.Write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value);
         }
-
-        // While DMA transfer occurs, the memory bus is in use, preventing CPU from fetching memory
-        m_cycles += 512
+        //mio.
+        //m_cycles += m_cycles % 2 == 0 ? 513 : 514
+        
+        m_cycles += 514
     }
     
     var m_spriteDmaRegister:UInt8 = 0
@@ -56,29 +89,25 @@ class Cpu:CpuRegDef,ICpu{
         case CpuMemory.kSpriteDmaReg: // $4014
             
             // Initiate a DMA transfer from the input page to sprite ram.
-
-            
-
             m_spriteDmaRegister = value
-            var spriteDmaRegister = TO16(m_spriteDmaRegister)
+            let spriteDmaRegister = TO16(m_spriteDmaRegister)
             let srcCpuAddress:UInt16 = spriteDmaRegister * 0x100
 
             // Note: we perform the full DMA transfer right here instead of emulating the transfers over multiple frames.
             // If we need to do it right, see http://wiki.nesdev.com/w/index.php/PPU_programmer_reference#DMA
-            SpriteDmaTransfer(srcCpuAddress);
-
-            
-            break;
+            SpriteDmaTransfer(srcCpuAddress)
+            break
 
         case CpuMemory.kControllerPort1: // $4016
-            //NSLog("TODOOOO")
+            //NSLog("write kControllerPort1")
             //m_controllerPorts.HandleCpuWrite(cpuAddress, value);
             break;
 
         case CpuMemory.kControllerPort2: // $4017 For writes, this address is mapped to the APU!
-            //NSLog("TODOOOO")
+            //NSLog("write kControllerPort2")
             break
         default:
+            //NSLog("write m_apu")
             //NSLog("TODOOOO m_apu->HandleCpuWrite(cpuAddress, value);")
             //m_apu->HandleCpuWrite(cpuAddress, value);
             break;
@@ -92,6 +121,7 @@ class Cpu:CpuRegDef,ICpu{
         
         
         NSLog("===OpTables===")
+        OpCodeTable.ValidateOpCodeTable()
         let array = OpCodeTable.GetOpCodeTable()
         for item in array
         {
@@ -113,8 +143,219 @@ class Cpu:CpuRegDef,ICpu{
     var g_opCodeTableEx: NSDictionary = [0:1,1:2,2:3]
     
     var g_opCodeTable:[uint8:OpCodeEntry] = [:]
+    var array:[UInt8] = [1,2,3,4,5,6,7,8,9,0,1,2,3,4]
+    let isDev = true
     
-    func Execute(_ cpuCyclesElapsed:inout uint32)
+    func getOpCodeEntryTtype(_ opCode:UInt8)->OpCodeEntryTtype
+    {
+        switch opCode
+        {
+            case 0x69:
+                return OpCodeEntryTtype.ADC
+            case 0x65:
+                return OpCodeEntryTtype.ADC
+            case 0x75:
+                return OpCodeEntryTtype.ADC
+            case 0x6D:
+                return OpCodeEntryTtype.ADC
+            case 0x7D:
+                return OpCodeEntryTtype.ADC
+            case 0x79:
+                return OpCodeEntryTtype.ADC
+            case 0x61:
+                return OpCodeEntryTtype.ADC
+            case 0x71:
+                return OpCodeEntryTtype.ADC
+            case 0x29:
+                return OpCodeEntryTtype.AND
+            case 0x25:
+                return OpCodeEntryTtype.AND
+            case 0x35:
+                return OpCodeEntryTtype.AND
+            case 0x2D:
+                return OpCodeEntryTtype.AND
+            case 0x3D:
+                return OpCodeEntryTtype.AND
+            case 0x39:
+                return OpCodeEntryTtype.AND
+        
+        
+            case 0x21:return OpCodeEntryTtype.AND
+            case 0x31:return OpCodeEntryTtype.AND
+
+            case 0x0A:return OpCodeEntryTtype.ASL
+            case 0x06:return OpCodeEntryTtype.ASL
+            case 0x16:return OpCodeEntryTtype.ASL
+            case 0x0E:return OpCodeEntryTtype.ASL
+            case 0x1E:return OpCodeEntryTtype.ASL
+
+            case 0x90:return OpCodeEntryTtype.BCC
+            case 0xB0:return OpCodeEntryTtype.BCS
+            case 0xF0:return OpCodeEntryTtype.BEQ
+            case 0x24:return OpCodeEntryTtype.BIT
+            case 0x2C:return OpCodeEntryTtype.BIT
+            case 0x30:return OpCodeEntryTtype.BMI
+            case 0xD0:return OpCodeEntryTtype.BNE
+            case 0x10:return OpCodeEntryTtype.BPL
+            case 0x00:return OpCodeEntryTtype.BRK
+            case 0x50:return OpCodeEntryTtype.BVC
+            case 0x70:return OpCodeEntryTtype.BVS
+
+            case 0x18:return OpCodeEntryTtype.CLC
+            case 0xD8:return OpCodeEntryTtype.CLD
+            case 0x58:return OpCodeEntryTtype.CLI
+            case 0xB8:return OpCodeEntryTtype.CLV
+
+            case 0xC9:return OpCodeEntryTtype.CMP
+            case 0xC5:return OpCodeEntryTtype.CMP
+            case 0xD5:return OpCodeEntryTtype.CMP
+            case 0xCD:return OpCodeEntryTtype.CMP
+            case 0xDD:return OpCodeEntryTtype.CMP
+            case 0xD9:return OpCodeEntryTtype.CMP
+            case 0xC1:return OpCodeEntryTtype.CMP
+            case 0xD1:return OpCodeEntryTtype.CMP
+
+            case 0xE0:return OpCodeEntryTtype.CPX
+            case 0xE4:return OpCodeEntryTtype.CPX
+            case 0xEC:return OpCodeEntryTtype.CPX
+
+            case 0xC0:return OpCodeEntryTtype.CPY
+            case 0xC4:return OpCodeEntryTtype.CPY
+            case 0xCC:return OpCodeEntryTtype.CPY
+
+            case 0xC6:return OpCodeEntryTtype.DEC
+            case 0xD6:return OpCodeEntryTtype.DEC
+            case 0xCE:return OpCodeEntryTtype.DEC
+            case 0xDE:return OpCodeEntryTtype.DEC
+
+            case 0xCA:return OpCodeEntryTtype.DEX
+
+            case 0x88:return OpCodeEntryTtype.DEY
+
+            case 0x49:return OpCodeEntryTtype.EOR
+            case 0x45:return OpCodeEntryTtype.EOR
+            case 0x55:return OpCodeEntryTtype.EOR
+            case 0x4D:return OpCodeEntryTtype.EOR
+            case 0x5D:return OpCodeEntryTtype.EOR
+            case 0x59:return OpCodeEntryTtype.EOR
+            case 0x41:return OpCodeEntryTtype.EOR
+            case 0x51:return OpCodeEntryTtype.EOR
+
+            case 0xE6:return OpCodeEntryTtype.INC
+            case 0xF6:return OpCodeEntryTtype.INC
+            case 0xEE:return OpCodeEntryTtype.INC
+            case 0xFE:return OpCodeEntryTtype.INC
+
+            case 0xE8:return OpCodeEntryTtype.INX
+            case 0xC8:return OpCodeEntryTtype.INY
+
+            case 0x4C:return OpCodeEntryTtype.JMP
+            case 0x6C:return OpCodeEntryTtype.JMP
+            case 0x20:return OpCodeEntryTtype.JSR
+
+            case 0xA9:return OpCodeEntryTtype.LDA
+            case 0xA5:return OpCodeEntryTtype.LDA
+            case 0xB5:return OpCodeEntryTtype.LDA
+            case 0xAD:return OpCodeEntryTtype.LDA
+            case 0xBD:return OpCodeEntryTtype.LDA
+            case 0xB9:return OpCodeEntryTtype.LDA
+            case 0xA1:return OpCodeEntryTtype.LDA
+            case 0xB1:return OpCodeEntryTtype.LDA
+
+            case 0xA2:return OpCodeEntryTtype.LDX
+            case 0xA6:return OpCodeEntryTtype.LDX
+            case 0xB6:return OpCodeEntryTtype.LDX
+            case 0xAE:return OpCodeEntryTtype.LDX
+            case 0xBE:return OpCodeEntryTtype.LDX
+
+            case 0xA0:return OpCodeEntryTtype.LDY
+            case 0xA4:return OpCodeEntryTtype.LDY
+            case 0xB4:return OpCodeEntryTtype.LDY
+            case 0xAC:return OpCodeEntryTtype.LDY
+            case 0xBC:return OpCodeEntryTtype.LDY
+
+            case 0x4A:return OpCodeEntryTtype.LSR
+            case 0x46:return OpCodeEntryTtype.LSR
+            case 0x56:return OpCodeEntryTtype.LSR
+            case 0x4E:return OpCodeEntryTtype.LSR
+            case 0x5E:return OpCodeEntryTtype.LSR
+
+            case 0xEA:return OpCodeEntryTtype.NOP
+
+            case 0x09:return OpCodeEntryTtype.ORA
+            case 0x05:return OpCodeEntryTtype.ORA
+            case 0x15:return OpCodeEntryTtype.ORA
+            case 0x0D:return OpCodeEntryTtype.ORA
+            case 0x1D:return OpCodeEntryTtype.ORA
+            case 0x19:return OpCodeEntryTtype.ORA
+            case 0x01:return OpCodeEntryTtype.ORA
+            case 0x11:return OpCodeEntryTtype.ORA
+
+            case 0x48:return OpCodeEntryTtype.PHA
+            case 0x08:return OpCodeEntryTtype.PHP
+            case 0x68:return OpCodeEntryTtype.PLA
+            case 0x28:return OpCodeEntryTtype.PLP
+
+            case 0x2A:return OpCodeEntryTtype.ROL
+            case 0x26:return OpCodeEntryTtype.ROL
+            case 0x36:return OpCodeEntryTtype.ROL
+            case 0x2E:return OpCodeEntryTtype.ROL
+            case 0x3E:return OpCodeEntryTtype.ROL
+
+            case 0x6A:return OpCodeEntryTtype.ROR
+            case 0x66:return OpCodeEntryTtype.ROR
+            case 0x76:return OpCodeEntryTtype.ROR
+            case 0x6E:return OpCodeEntryTtype.ROR
+            case 0x7E:return OpCodeEntryTtype.ROR
+
+            case 0x40:return OpCodeEntryTtype.RTI
+            case 0x60:return OpCodeEntryTtype.RTS
+
+            case 0xE9:return OpCodeEntryTtype.SBC
+            case 0xE5:return OpCodeEntryTtype.SBC
+            case 0xF5:return OpCodeEntryTtype.SBC
+            case 0xED:return OpCodeEntryTtype.SBC
+            case 0xFD:return OpCodeEntryTtype.SBC
+            case 0xF9:return OpCodeEntryTtype.SBC
+            case 0xE1:return OpCodeEntryTtype.SBC
+            case 0xF1:return OpCodeEntryTtype.SBC
+
+            case 0x38:return OpCodeEntryTtype.SEC
+            case 0xF8:return OpCodeEntryTtype.SED
+            case 0x78:return OpCodeEntryTtype.SEI
+
+            case 0x85:return OpCodeEntryTtype.STA
+            case 0x95:return OpCodeEntryTtype.STA
+            case 0x8D:return OpCodeEntryTtype.STA
+            case 0x9D:return OpCodeEntryTtype.STA
+            case 0x99:return OpCodeEntryTtype.STA
+            case 0x81:return OpCodeEntryTtype.STA
+            case 0x91:return OpCodeEntryTtype.STA
+
+            case 0x86:return OpCodeEntryTtype.STX
+            case 0x96:return OpCodeEntryTtype.STX
+            case 0x8E:return OpCodeEntryTtype.STX
+
+            case 0x84:return OpCodeEntryTtype.STY
+            case 0x94:return OpCodeEntryTtype.STY
+            case 0x8C:return OpCodeEntryTtype.STY
+
+            case 0xAA:return OpCodeEntryTtype.TAX
+            case 0xA8:return OpCodeEntryTtype.TAY
+            case 0xBA:return OpCodeEntryTtype.TSX
+            case 0x8A:return OpCodeEntryTtype.TXA
+            case 0x9A:return OpCodeEntryTtype.TXS
+            case 0x98:
+        return OpCodeEntryTtype.TYA
+        default:
+            return OpCodeEntryTtype.TYA
+        }
+    
+    }
+    
+    var _pCodeEntry = OpCodeEntry()
+    
+    @inline(__always) func Execute(_ cpuCyclesElapsed:inout uint32)
     {
         m_cycles = 0
         ExecutePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
@@ -122,8 +363,7 @@ class Cpu:CpuRegDef,ICpu{
         let opCode:uint8 = Read8(PC)
         m_opCodeEntry = g_opCodeTable[opCode]
 
-        assert((m_opCodeEntry != nil))
-        
+       // m_cycles = 2
         UpdateOperandAddress()
 
         ExecuteInstruction()
@@ -164,12 +404,7 @@ class Cpu:CpuRegDef,ICpu{
         }
     }
     
-    func Read8Ex(_ address:uint16,readValue:inout UInt8)
-    {
-        return m_cpuMemoryBus!.ReadEx(address,readValue:&readValue)
-    }
-    
-    func Read8(_ address:uint16)->uint8
+    @inline(__always) func Read8(_ address:uint16)->uint8
     {
         return m_cpuMemoryBus!.Read(address)
     }
@@ -308,6 +543,7 @@ class Cpu:CpuRegDef,ICpu{
             // Operation:  A + M + C -> A, C
             let value = GetMemValue()
             let result = TO16(A) + TO16(value) + TO16(P.Test01(Carry))
+            
             P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
             P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             P.Set(bits: Carry, enabled: CalcCarryFlag(result))
@@ -452,18 +688,10 @@ class Cpu:CpuRegDef,ICpu{
             
             let memValue = GetMemValue()
             
-            if(memValue > A)
-            {
-                let result = A + (255 - memValue)
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            }
-            else
-            {
-                let result = A - memValue
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            }
+            let result = A &- memValue
+            
+            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             
             var enabled = 0
             if(A >= memValue)
@@ -478,18 +706,10 @@ class Cpu:CpuRegDef,ICpu{
             
             let memValue = GetMemValue()
             
-            if(memValue > X)
-            {
-                let result = UInt8(UInt16(X)+255 - UInt16(memValue))
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            }
-            else
-            {
-                let result = X - memValue;
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            }
+            let result = X &- memValue
+            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            
             
             let enabled = X >= memValue ? 1:0
             P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
@@ -499,19 +719,10 @@ class Cpu:CpuRegDef,ICpu{
         case OpCodeEntryTtype.CPY: // CPY Compare memory and index Y
             
             let memValue = GetMemValue()
-            if(memValue>Y)
-            {
-                let result = TO8(UInt16(Y) + 255 - UInt16(memValue))
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-                
-            }
-            else
-            {
-                let result = Y - memValue
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            }
+            let result = Y &- memValue
+            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            
             let enabled = Y >= memValue ? 1:0
             P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
             
@@ -520,18 +731,8 @@ class Cpu:CpuRegDef,ICpu{
         case OpCodeEntryTtype.DEC: // Decrement memory by one
             
             let memValue = GetMemValue()
-            var result:UInt8 = 0
-            if(memValue == 0)
-            {
-                result = 255
-                
-                //GetMemValue()
-            }
-            else
-            {
-                result = memValue - 1
-            }
-            //let result = GetMemValue() - 1
+            let result = memValue &- 1
+            
             P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
             P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             SetMemValue(result)
@@ -545,30 +746,13 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case OpCodeEntryTtype.DEX: // Decrement index X by one
-            if(X == 0)
-            {
-                X = 255
-            }
-            else
-            {
-                X = X - 1
-            }
-            
+            X = X &- 1
             P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
             P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.DEY: // Decrement index Y by one
-            //Y = Y - 1
-            
-            if(Y == 0)
-            {
-                Y = 255
-            }
-            else
-            {
-                Y = Y - 1
-            }
+            Y = Y &- 1
             
             P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
             P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
@@ -582,7 +766,7 @@ class Cpu:CpuRegDef,ICpu{
 
         case OpCodeEntryTtype.INC: // Increment memory by one
             
-            let result = GetMemValue() + 1
+            let result = GetMemValue() &+ 1
             P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
             P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             SetMemValue(result)
@@ -590,29 +774,15 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case OpCodeEntryTtype.INX: // Increment Index X by one
-            if(X == 255)
-            {
-                X = 0
-            }
-            else
-            {
-                X = X + 1
-            }
+            
+            X = X &+ 1
             P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
             P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.INY: // Increment Index Y by one
             
-            if(Y == 255)
-            {
-                Y = 0
-            }
-            else
-            {
-                Y = Y + 1
-            }
-            
+            Y = Y &+ 1
             P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
             P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
             break
@@ -710,8 +880,8 @@ class Cpu:CpuRegDef,ICpu{
 
         case OpCodeEntryTtype.ROR: // Rotate one bit right (memory or accumulator)
             
-            let value = GetAccumOrMemValue()
-            let result = (value >> 1) | (P.Test01(Carry) << 7)
+            let value:UInt8 = GetAccumOrMemValue()
+            let result:UInt8 = (value >> 1) | (P.Test01(Carry) << 7)
             P.Set(bits: Carry, enabled: value & 0x01)
             P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
             P.Set(bits: Zero, enabled: CalcZeroFlag(result))
@@ -855,7 +1025,7 @@ class Cpu:CpuRegDef,ICpu{
         SP = 0xFF; // Should be FD, but for improved compatibility set to FF
         
         P.ClearAll()
-        P.Set(StatusFlag.IrqDisabled.rawValue)
+        P.Set(IrqDisabled)
 
         // Entry point is located at the Reset interrupt location
         PC = Read16(CpuMemory.kResetVector)
@@ -868,30 +1038,28 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     
-    func TO16(_ v8:uint8)->uint16
+    @inline(__always) func TO16(_ v8:uint8)->uint16
     {
         return uint16(v8)
     }
     
-    func TO8(_ v16:uint16)->uint8
+    @inline(__always) func TO8(_ v16:uint16)->uint8
     {
         let v8:UInt8 = UInt8(v16 & 0x00FF)
         return v8
     }
     
-    func Read16(_ address:uint16)->uint16
+    @inline(__always) func Read16(_ address:uint16)->uint16
     {
         return TO16(m_cpuMemoryBus!.Read(address)) | (TO16(m_cpuMemoryBus!.Read(address + 1)) << 8)
     }
     
-    func GetMemValue()->UInt8
+    @inline(__always) func GetMemValue()->UInt8
     {
-        let operandAddress = m_operandAddress
-        let result = Read8(m_operandAddress)
-        return result
+        return Read8(m_operandAddress)
     }
     
-    func CalcNegativeFlag(_ v:UInt16)->UInt8
+    @inline(__always) func CalcNegativeFlag(_ v:UInt16)->UInt8
     {
         // Check if bit 7 is set
         if((v & 0x0080) != 0)
@@ -905,7 +1073,7 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     //ok
-    func CalcNegativeFlag(_ v:UInt8)->UInt8
+    @inline(__always) func CalcNegativeFlag(_ v:UInt8)->UInt8
     {
         // Check if bit 7 is set
         if((v & 0x80) != 0)
@@ -920,7 +1088,7 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     //ok
-    func CalcZeroFlag(_ v:UInt16)->UInt8
+    @inline(__always) func CalcZeroFlag(_ v:UInt16)->UInt8
     {
         // Check if bit 7 is set
         if((v & 0x00FF) == 0)
@@ -934,7 +1102,7 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     //ok
-    func CalcZeroFlag(_ v:UInt8)->UInt8
+    @inline(__always) func CalcZeroFlag(_ v:UInt8)->UInt8
     {
         if(v == 0)
         {
@@ -947,7 +1115,7 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     //ok
-    func CalcCarryFlag(_ v:UInt16)->UInt8
+    @inline(__always) func CalcCarryFlag(_ v:UInt16)->UInt8
     {
         if((v & 0xFF00) != 0)
         {
@@ -959,29 +1127,19 @@ class Cpu:CpuRegDef,ICpu{
         }
     }
     
-    func CalcOverflowFlag(a:UInt8, b:UInt8, r:UInt16)->UInt8
+    @inline(__always) func CalcOverflowFlag(a:UInt8, b:UInt8, r:UInt16)->UInt8
     {
         // With r = a + b, overflow occurs if both a and b are negative and r is positive,
         // or both a and b are positive and r is negative. Looking at sign bits of a, b, r,
         // overflow occurs when 0 0 1 or 1 1 0, so we can use simple xor logic to figure it out.
         // return ((uint16)a ^ r) & ((uint16)b ^ r) & 0x0080;
+        let result = (uint16(a) ^ r) & (uint16(b) ^ r) & 0x0080
         
-        //TODO need check
-        let intA = Int(a)
-        let intB = Int(b)
-        let intR = Int(r)
-        
-        if(intA==0 && intB==0 && intR==0)
+        if(result != 0)
         {
-            return 1
+            //NSLog("OverFolow")
         }
-        
-        if(intA==0 && intB==0 && intR==0)
-        {
-            return 1
-        }
-        
-        return 0
+        return UInt8(result)
     }
     
     func GetAccumOrMemValue()->UInt8
@@ -1026,7 +1184,7 @@ class Cpu:CpuRegDef,ICpu{
     {
         Write8(address: CpuMemory.kStackBase + UInt16(SP), value: value);
         
-        SP = SP - 1
+        SP = SP &- 1
         
         if (SP == 0xFF)
         {
@@ -1149,9 +1307,9 @@ class Cpu:CpuRegDef,ICpu{
         Write8(address: m_operandAddress, value: value)
     }
     
-    func GetBranchOrJmpLocation()->UInt16
+    @inline(__always) func GetBranchOrJmpLocation()->UInt16
     {
-        assert(IsJmpOrBranchOperand(m_opCodeEntry!.addrMode.rawValue))
+        //assert(IsJmpOrBranchOperand(m_opCodeEntry!.addrMode.rawValue))
         return m_operandAddress
     }
     
@@ -1171,7 +1329,7 @@ class Cpu:CpuRegDef,ICpu{
         //assert(!m_pendingIrq && "Interrupt already pending");
         //assert(!m_pendingNmi && "One interrupt at at time");
 
-        if (!P.Test(StatusFlag.IrqDisabled.rawValue))
+        if (!P.Test(IrqDisabled))
         {
             m_pendingIrq = true
         }

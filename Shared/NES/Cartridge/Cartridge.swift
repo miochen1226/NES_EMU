@@ -120,6 +120,7 @@ class Cartridge:ICartridge{
     
     func AccessPrgMemEx(_ cpuAddress:uint16,readValue:inout UInt8)
     {
+        /*
         //Mio speed up
         let bankIndexCache = cache[cpuAddress]
         if(bankIndexCache != nil)
@@ -138,19 +139,216 @@ class Cartridge:ICartridge{
         
         let memory = m_prgBanks[mappedBankIndex]
         readValue = memory.RawRef(address: Int(offset))
+         */
     }
     
     var m_mapper:Mapper = Mapper.init()
-    var cache:[uint16:Int] = [:]
+    var cache:[uint16:uint16] = [:]
+    var rawCache:[uint16:uint8] = [:]
+    
+    let firstBankIndex_a = Int(CpuMemory.kPrgRomBase) / Int(globeDef.kPrgBankSize)
+    let kPrgBankSize_1 = globeDef.kPrgBankSize
+    let kPrgBankSize_2 = globeDef.kPrgBankSize*2
+    let kPrgBankSize_3 = globeDef.kPrgBankSize*3
+    let kPrgBankSize_4:UInt16 = UInt16(globeDef.kPrgBankSize*4)
+    let kPrgBankSize_5 = globeDef.kPrgBankSize*5
+    let kPrgBankSize_6 = globeDef.kPrgBankSize*6
+    let kPrgBankSize_7 = globeDef.kPrgBankSize*7
+    let kPrgBankSize_8 = globeDef.kPrgBankSize*8
+    let kPrgBankSize_9 = globeDef.kPrgBankSize*9
+    let kPrgBankSize_10 = globeDef.kPrgBankSize*10
+    let kPrgBankSize_11 = globeDef.kPrgBankSize*11
+    let kPrgBankSize_12 = globeDef.kPrgBankSize*12
+    let kPrgBankSize_13 = globeDef.kPrgBankSize*13
+    let kPrgBankSize_14 = globeDef.kPrgBankSize*14
+    let kPrgBankSize_15 = globeDef.kPrgBankSize*15
+    let kPrgBankSize_16 = globeDef.kPrgBankSize*16
+    
+    func cpuToBankIndex(_ cpuAddress_t:UInt16)->Int
+    {
+        if(cpuAddress_t>kPrgBankSize_16)
+        {
+            return 16
+        }
+        if(cpuAddress_t>kPrgBankSize_15)
+        {
+            return 15
+        }
+        if(cpuAddress_t>kPrgBankSize_14)
+        {
+            return 14
+        }
+        if(cpuAddress_t>kPrgBankSize_13)
+        {
+            return 13
+        }
+        if(cpuAddress_t>kPrgBankSize_12)
+        {
+            return 12
+        }
+        if(cpuAddress_t>kPrgBankSize_11)
+        {
+            return 11
+        }
+        if(cpuAddress_t>kPrgBankSize_10)
+        {
+            return 10
+        }
+        if(cpuAddress_t>kPrgBankSize_9)
+        {
+            return 9
+        }
+        else if(cpuAddress_t>kPrgBankSize_8)
+        {
+            return 8
+        }
+        else if(cpuAddress_t>kPrgBankSize_7)
+        {
+            return 7
+        }
+        else if(cpuAddress_t>kPrgBankSize_6)
+        {
+            return 6
+        }
+        else if(cpuAddress_t>kPrgBankSize_5)
+        {
+            return 5
+        }
+        else if(cpuAddress_t>kPrgBankSize_4)
+        {
+            return 4
+        }
+        else if(cpuAddress_t>kPrgBankSize_3)
+        {
+            return 3
+        }
+        else if(cpuAddress_t>kPrgBankSize_2)
+        {
+            return 2
+        }
+        else if(cpuAddress_t>kPrgBankSize_1)
+        {
+            return 1
+        }
+        else
+        {
+            return 0
+        }
+    }
+    
+    
     func AccessPrgMem(_ cpuAddress:uint16)->UInt8
     {
+        //let valueCache = rawCache[cpuAddress]
+        
+        //if(valueCache != nil)
+        //{
+        //    return valueCache!
+        //}
+        //Speedup version
+        /*
+        if(cpuAddress == 51102)
+        {
+            return 120
+        }
+        let valueCache = rawCache[cpuAddress]
+        
+        if(valueCache != nil)
+        {
+            return valueCache!
+        }
+        
+        if(cpuAddress == 51102)
+        {
+            rawCache[cpuAddress] = 120
+            //return m_prgBigMemory.rawMemory[120]
+            return 120
+        }
+        */
+        /*
+        if(cpuAddress == 51102)
+        {
+            return m_prgBigMemory.rawMemory[120]
+            return 120
+            for i in 0...51102
+            {
+                
+            }
+            return m_prgBigMemory.Read(1950)
+        }
+        */
+        
+        //if(cpuAddress == 51102)
+        //{
+        //    return m_prgBigMemory.rawMemory[120]
+        //}
+        
+        
+        /*
+        let addressCache = cache[cpuAddress]
+        
+        if(addressCache != nil)
+        {
+            return m_prgBigMemory.rawMemory[Int(addressCache!)]
+            //return m_prgBigMemory.Read(addressCache!)
+        }*/
+        
+        //let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        
+        //let bankIndex = (Int(cpuAddress / kPrgBankSize) - firstBankIndex_a)
+        //if(cpuAddress == 51102)
+        //{
+        //    return m_prgBigMemory.rawMemory[120]
+        //}
+        
+        //let bankIndex2 = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        
+        
+        
+        //var bankIndex = cpuToBankIndex(cpuAddress)
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+        let memory = m_prgBanks[mappedBankIndex]
+        return memory.Read(offset)
+        
+        //let correctAddress = UInt16(mappedBankIndex) * kPrgBankSize + offset
+        /*
+        if(cpuAddress == 51102)
+        {
+        //    return m_prgBigMemory.Read(1950)
+        }
+        //V1
+        let base = CpuMemory.kPrgRomBase
+        var correctAddress = cpuAddress - base
+        correctAddress -= kPrgBankSize_4
+        
+        return m_prgBigMemory.Read(correctAddress)
+        //cache[cpuAddress] = correctAddress
+        */
+        //if(correctAddress == 1950)
+        //{
+        //    return m_prgBigMemory.test()
+        //}
+        
+        //let value = m_prgBigMemory.rawMemory[Int(correctAddress)]
+        //rawCache[cpuAddress] = value
+        //return value
+        //return m_prgBigMemory.Read(correctAddress)
+        
+        /*
+        
         //Mio speed up
+        
         let bankIndexCache = cache[cpuAddress]
         
         if(bankIndexCache != nil)
         {
+            let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
             let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-            let memory = m_prgBanks[bankIndexCache!]
+            //let memory = m_prgBanks[bankIndexCache!]
+            let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
+            let memory = m_prgBanks[mappedBankIndex]
             return memory.RawRef(address: Int(offset))
         }
         
@@ -164,6 +362,7 @@ class Cartridge:ICartridge{
         
         let memory = m_prgBanks[mappedBankIndex]
         return memory.RawRef(address: Int(offset))
+        */
     }
     
     func AccessPrgMem(_ cpuAddress:uint16,value:UInt8)
@@ -203,6 +402,7 @@ class Cartridge:ICartridge{
     
     var romHeader:RomHeader?
     
+    var m_prgBigMemory:Memory = Memory.init()
     var m_prgBanks:[Memory] = []
     var m_chrBanks:[Memory] = []
     var m_savBanks:[Memory] = []
@@ -234,12 +434,19 @@ class Cartridge:ICartridge{
                 var readIndex = 16
                 for _ in 0...numPrgBanks-1
                 {
-                    let newMemory = Memory.init().initial(size: globeDef.kPrgBankSize)
+                    let newMemory = Memory.init()
+                    newMemory.initial(size: globeDef.kPrgBankSize)
                     let beginIndex:UInt = UInt(readIndex)
                     fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
                     readIndex = readIndex + Int(globeDef.kPrgBankSize)
                     m_prgBanks.append(newMemory)
                 }
+                
+                //Fill big memory
+                var bigMemSize = globeDef.kPrgBankSize * numPrgBanks
+                m_prgBigMemory.initial(size: UInt(Int(globeDef.kPrgBankSize)*Int(numPrgBanks)))
+                fillMemory(srcMem: arrayData, begin: UInt(16), size: Int(globeDef.kPrgBankSize*numPrgBanks), memory: m_prgBigMemory)
+                
                 
                 // CHR-ROM data
                 let chrRomSize = romHeader!.GetChrRomSizeBytes();
@@ -254,7 +461,8 @@ class Cartridge:ICartridge{
 
                 for _ in 0...numChrBanks-1
                 {
-                    let newMemory = Memory.init().initial(size: globeDef.kChrBankSize)
+                    let newMemory = Memory.init()
+                    newMemory.initial(size: globeDef.kChrBankSize)
                     let beginIndex:UInt = UInt(readIndex)
                     
                     fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
@@ -273,7 +481,8 @@ class Cartridge:ICartridge{
                 
                 for _ in 0...numSavBanks
                 {
-                    let newMemory = Memory.init().initial(size: globeDef.kSavBankSize)
+                    let newMemory = Memory.init()
+                    newMemory.initial(size: globeDef.kSavBankSize)
                     m_savBanks.append(newMemory)
                 }
                 //kMaxSavBanks
@@ -329,8 +538,10 @@ class Cartridge:ICartridge{
         {
             let indexInFile = Int(beginIndex)
             let rawValue = srcMem[indexInFile]
-            memory.putValue(address: Int(index), value: rawValue)
+            memory.putValue(address: UInt16(index), value: rawValue)
             beginIndex = beginIndex + 1
         }
     }
+    
+    func HACK_OnScanline(){}
 }

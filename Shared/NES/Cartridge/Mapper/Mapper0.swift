@@ -12,12 +12,12 @@ class Mapper0:Mapper
     {
         if(NumPrgBanks16k() == 1 || NumPrgBanks16k() == 2)
         {
-            NSLog("ok")
+            
         }
         
         if(NumChrBanks8k() == 1)
         {
-            NSLog("ok")
+            
         }
         
         SetPrgBankIndex16k(cpuBankIndexIn: 0, cartBankIndexIn: 0)

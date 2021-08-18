@@ -9,6 +9,189 @@ import Foundation
 
 class OpCodeTable:OpCodeDef
 {
+    /*
+     case 0x69:return OpCodeEntryTtype.ADC
+     case 0x65:return OpCodeEntryTtype.ADC
+     case 0x75:return OpCodeEntryTtype.ADC, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0x6D:return OpCodeEntryTtype.ADC, 3, 4, 0, AddressMode.Absolu ],
+     case 0x7D:return OpCodeEntryTtype.ADC, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0x79:return OpCodeEntryTtype.ADC, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0x61:return OpCodeEntryTtype.ADC, 2, 6, 0, AddressMode.IdxInd ],
+     case 0x71:return OpCodeEntryTtype.ADC, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0x29:return OpCodeEntryTtype.AND, 2, 2, 0, AddressMode.Immedt ],
+     case 0x25:return OpCodeEntryTtype.AND, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x35:return OpCodeEntryTtype.AND, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0x2D:return OpCodeEntryTtype.AND, 3, 4, 0, AddressMode.Absolu ],
+     case 0x3D:return OpCodeEntryTtype.AND, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0x39:return OpCodeEntryTtype.AND, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0x21:return OpCodeEntryTtype.AND, 2, 6, 0, AddressMode.IdxInd ],
+     case 0x31:return OpCodeEntryTtype.AND, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0x0A:return OpCodeEntryTtype.ASL, 1, 2, 0, AddressMode.Accumu ],
+     case 0x06:return OpCodeEntryTtype.ASL, 2, 5, 0, AddressMode.ZeroPg ],
+     case 0x16:return OpCodeEntryTtype.ASL, 2, 6, 0, AddressMode.ZPIdxX ],
+     case 0x0E:return OpCodeEntryTtype.ASL, 3, 6, 0, AddressMode.Absolu ],
+     case 0x1E:return OpCodeEntryTtype.ASL, 3, 7, 0, AddressMode.AbIdxX ],
+
+     case 0x90:return OpCodeEntryTtype.BCC, 2, 2, 0, AddressMode.Relatv ],
+     case 0xB0:return OpCodeEntryTtype.BCS, 2, 2, 0, AddressMode.Relatv ],
+     case 0xF0:return OpCodeEntryTtype.BEQ, 2, 2, 0, AddressMode.Relatv ],
+     case 0x24:return OpCodeEntryTtype.BIT, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x2C:return OpCodeEntryTtype.BIT, 3, 4, 0, AddressMode.Absolu ],
+     case 0x30:return OpCodeEntryTtype.BMI, 2, 2, 0, AddressMode.Relatv ],
+     case 0xD0:return OpCodeEntryTtype.BNE, 2, 2, 0, AddressMode.Relatv ],
+     case 0x10:return OpCodeEntryTtype.BPL, 2, 2, 0, AddressMode.Relatv ],
+     case 0x00:return OpCodeEntryTtype.BRK, 1, 7, 0, AddressMode.Implid ],
+     case 0x50:return OpCodeEntryTtype.BVC, 2, 2, 0, AddressMode.Relatv ],
+     case 0x70:return OpCodeEntryTtype.BVS, 2, 2, 0, AddressMode.Relatv ],
+
+     case 0x18:return OpCodeEntryTtype.CLC, 1, 2, 0, AddressMode.Implid ],
+     case 0xD8:return OpCodeEntryTtype.CLD, 1, 2, 0, AddressMode.Implid ],
+     case 0x58:return OpCodeEntryTtype.CLI, 1, 2, 0, AddressMode.Implid ],
+     case 0xB8:return OpCodeEntryTtype.CLV, 1, 2, 0, AddressMode.Implid ],
+
+     case 0xC9:return OpCodeEntryTtype.CMP, 2, 2, 0, AddressMode.Immedt ],
+     case 0xC5:return OpCodeEntryTtype.CMP, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xD5:return OpCodeEntryTtype.CMP, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0xCD:return OpCodeEntryTtype.CMP, 3, 4, 0, AddressMode.Absolu ],
+     case 0xDD:return OpCodeEntryTtype.CMP, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0xD9:return OpCodeEntryTtype.CMP, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0xC1:return OpCodeEntryTtype.CMP, 2, 6, 0, AddressMode.IdxInd ],
+     case 0xD1:return OpCodeEntryTtype.CMP, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0xE0:return OpCodeEntryTtype.CPX, 2, 2, 0, AddressMode.Immedt ],
+     case 0xE4:return OpCodeEntryTtype.CPX, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xEC:return OpCodeEntryTtype.CPX, 3, 4, 0, AddressMode.Absolu ],
+
+     case 0xC0:return OpCodeEntryTtype.CPY, 2, 2, 0, AddressMode.Immedt ],
+     case 0xC4:return OpCodeEntryTtype.CPY, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xCC:return OpCodeEntryTtype.CPY, 3, 4, 0, AddressMode.Absolu ],
+
+     case 0xC6:return OpCodeEntryTtype.DEC, 2, 5, 0, AddressMode.ZeroPg ],
+     case 0xD6:return OpCodeEntryTtype.DEC, 2, 6, 0, AddressMode.ZPIdxX ],
+     case 0xCE:return OpCodeEntryTtype.DEC, 3, 6, 0, AddressMode.Absolu ],
+     case 0xDE:return OpCodeEntryTtype.DEC, 3, 7, 0, AddressMode.AbIdxX ],
+
+     case 0xCA:return OpCodeEntryTtype.DEX, 1, 2, 0, AddressMode.Implid ],
+
+     case 0x88:return OpCodeEntryTtype.DEY, 1, 2, 0, AddressMode.Implid ],
+
+     case 0x49:return OpCodeEntryTtype.EOR, 2, 2, 0, AddressMode.Immedt ],
+     case 0x45:return OpCodeEntryTtype.EOR, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x55:return OpCodeEntryTtype.EOR, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0x4D:return OpCodeEntryTtype.EOR, 3, 4, 0, AddressMode.Absolu ],
+     case 0x5D:return OpCodeEntryTtype.EOR, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0x59:return OpCodeEntryTtype.EOR, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0x41:return OpCodeEntryTtype.EOR, 2, 6, 0, AddressMode.IdxInd ],
+     case 0x51:return OpCodeEntryTtype.EOR, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0xE6:return OpCodeEntryTtype.INC, 2, 5, 0, AddressMode.ZeroPg ],
+     case 0xF6:return OpCodeEntryTtype.INC, 2, 6, 0, AddressMode.ZPIdxX ],
+     case 0xEE:return OpCodeEntryTtype.INC, 3, 6, 0, AddressMode.Absolu ],
+     case 0xFE:return OpCodeEntryTtype.INC, 3, 7, 0, AddressMode.AbIdxX ],
+
+     case 0xE8:return OpCodeEntryTtype.INX, 1, 2, 0, AddressMode.Implid ],
+     case 0xC8:return OpCodeEntryTtype.INY, 1, 2, 0, AddressMode.Implid ],
+
+     case 0x4C:return OpCodeEntryTtype.JMP, 3, 3, 0, AddressMode.Absolu ],
+     case 0x6C:return OpCodeEntryTtype.JMP, 3, 5, 0, AddressMode.Indrct ],
+     case 0x20:return OpCodeEntryTtype.JSR, 3, 6, 0, AddressMode.Absolu ],
+
+     case 0xA9:return OpCodeEntryTtype.LDA, 2, 2, 0, AddressMode.Immedt ],
+     case 0xA5:return OpCodeEntryTtype.LDA, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xB5:return OpCodeEntryTtype.LDA, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0xAD:return OpCodeEntryTtype.LDA, 3, 4, 0, AddressMode.Absolu ],
+     case 0xBD:return OpCodeEntryTtype.LDA, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0xB9:return OpCodeEntryTtype.LDA, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0xA1:return OpCodeEntryTtype.LDA, 2, 6, 0, AddressMode.IdxInd ],
+     case 0xB1:return OpCodeEntryTtype.LDA, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0xA2:return OpCodeEntryTtype.LDX, 2, 2, 0, AddressMode.Immedt ],
+     case 0xA6:return OpCodeEntryTtype.LDX, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xB6:return OpCodeEntryTtype.LDX, 2, 4, 0, AddressMode.ZPIdxY ],
+     case 0xAE:return OpCodeEntryTtype.LDX, 3, 4, 0, AddressMode.Absolu ],
+     case 0xBE:return OpCodeEntryTtype.LDX, 3, 4, 1, AddressMode.AbIdxY ],
+
+     case 0xA0:return OpCodeEntryTtype.LDY, 2, 2, 0, AddressMode.Immedt ],
+     case 0xA4:return OpCodeEntryTtype.LDY, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xB4:return OpCodeEntryTtype.LDY, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0xAC:return OpCodeEntryTtype.LDY, 3, 4, 0, AddressMode.Absolu ],
+     case 0xBC:return OpCodeEntryTtype.LDY, 3, 4, 1, AddressMode.AbIdxX ],
+
+     case 0x4A:return OpCodeEntryTtype.LSR, 1, 2, 0, AddressMode.Accumu ],
+     case 0x46:return OpCodeEntryTtype.LSR, 2, 5, 0, AddressMode.ZeroPg ],
+     case 0x56:return OpCodeEntryTtype.LSR, 2, 6, 0, AddressMode.ZPIdxX ],
+     case 0x4E:return OpCodeEntryTtype.LSR, 3, 6, 0, AddressMode.Absolu ],
+     case 0x5E:return OpCodeEntryTtype.LSR, 3, 7, 0, AddressMode.AbIdxX ],
+
+     case 0xEA:return OpCodeEntryTtype.NOP, 1, 2, 0, AddressMode.Implid ],
+
+     case 0x09:return OpCodeEntryTtype.ORA, 2, 2, 0, AddressMode.Immedt ],
+     case 0x05:return OpCodeEntryTtype.ORA, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x15:return OpCodeEntryTtype.ORA, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0x0D:return OpCodeEntryTtype.ORA, 3, 4, 0, AddressMode.Absolu ],
+     case 0x1D:return OpCodeEntryTtype.ORA, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0x19:return OpCodeEntryTtype.ORA, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0x01:return OpCodeEntryTtype.ORA, 2, 6, 0, AddressMode.IdxInd ],
+     case 0x11:return OpCodeEntryTtype.ORA, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0x48:return OpCodeEntryTtype.PHA, 1, 3, 0, AddressMode.Implid ],
+     case 0x08:return OpCodeEntryTtype.PHP, 1, 3, 0, AddressMode.Implid ],
+     case 0x68:return OpCodeEntryTtype.PLA, 1, 4, 0, AddressMode.Implid ],
+     case 0x28:return OpCodeEntryTtype.PLP, 1, 4, 0, AddressMode.Implid ],
+
+     case 0x2A:return OpCodeEntryTtype.ROL, 1, 2, 0, AddressMode.Accumu ],
+     case 0x26:return OpCodeEntryTtype.ROL, 2, 5, 0, AddressMode.ZeroPg ],
+     case 0x36:return OpCodeEntryTtype.ROL, 2, 6, 0, AddressMode.ZPIdxX ],
+     case 0x2E:return OpCodeEntryTtype.ROL, 3, 6, 0, AddressMode.Absolu ],
+     case 0x3E:return OpCodeEntryTtype.ROL, 3, 7, 0, AddressMode.AbIdxX ],
+
+     case 0x6A:return OpCodeEntryTtype.ROR, 1, 2, 0, AddressMode.Accumu ],
+     case 0x66:return OpCodeEntryTtype.ROR, 2, 5, 0, AddressMode.ZeroPg ],
+     case 0x76:return OpCodeEntryTtype.ROR, 2, 6, 0, AddressMode.ZPIdxX ],
+     case 0x6E:return OpCodeEntryTtype.ROR, 3, 6, 0, AddressMode.Absolu ],
+     case 0x7E:return OpCodeEntryTtype.ROR, 3, 7, 0, AddressMode.AbIdxX ],
+
+     case 0x40:return OpCodeEntryTtype.RTI, 1, 6, 0, AddressMode.Implid ],
+     case 0x60:return OpCodeEntryTtype.RTS, 1, 6, 0, AddressMode.Implid ],
+
+     case 0xE9:return OpCodeEntryTtype.SBC, 2, 2, 0, AddressMode.Immedt ],
+     case 0xE5:return OpCodeEntryTtype.SBC, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0xF5:return OpCodeEntryTtype.SBC, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0xED:return OpCodeEntryTtype.SBC, 3, 4, 0, AddressMode.Absolu ],
+     case 0xFD:return OpCodeEntryTtype.SBC, 3, 4, 1, AddressMode.AbIdxX ],
+     case 0xF9:return OpCodeEntryTtype.SBC, 3, 4, 1, AddressMode.AbIdxY ],
+     case 0xE1:return OpCodeEntryTtype.SBC, 2, 6, 0, AddressMode.IdxInd ],
+     case 0xF1:return OpCodeEntryTtype.SBC, 2, 5, 1, AddressMode.IndIdx ],
+
+     case 0x38:return OpCodeEntryTtype.SEC, 1, 2, 0, AddressMode.Implid ],
+     case 0xF8:return OpCodeEntryTtype.SED, 1, 2, 0, AddressMode.Implid ],
+     case 0x78:return OpCodeEntryTtype.SEI, 1, 2, 0, AddressMode.Implid ],
+
+     case 0x85:return OpCodeEntryTtype.STA, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x95:return OpCodeEntryTtype.STA, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0x8D:return OpCodeEntryTtype.STA, 3, 4, 0, AddressMode.Absolu ],
+     case 0x9D:return OpCodeEntryTtype.STA, 3, 5, 0, AddressMode.AbIdxX ],
+     case 0x99:return OpCodeEntryTtype.STA, 3, 5, 0, AddressMode.AbIdxY ],
+     case 0x81:return OpCodeEntryTtype.STA, 2, 6, 0, AddressMode.IdxInd ],
+     case 0x91:return OpCodeEntryTtype.STA, 2, 6, 0, AddressMode.IndIdx ],
+
+     case 0x86:return OpCodeEntryTtype.STX, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x96:return OpCodeEntryTtype.STX, 2, 4, 0, AddressMode.ZPIdxY ],
+     case 0x8E:return OpCodeEntryTtype.STX, 3, 4, 0, AddressMode.Absolu ],
+
+     case 0x84:return OpCodeEntryTtype.STY, 2, 3, 0, AddressMode.ZeroPg ],
+     case 0x94:return OpCodeEntryTtype.STY, 2, 4, 0, AddressMode.ZPIdxX ],
+     case 0x8C:return OpCodeEntryTtype.STY, 3, 4, 0, AddressMode.Absolu ],
+
+     case 0xAA:return OpCodeEntryTtype.TAX, 1, 2, 0, AddressMode.Implid ],
+     case 0xA8:return OpCodeEntryTtype.TAY, 1, 2, 0, AddressMode.Implid ],
+     case 0xBA:return OpCodeEntryTtype.TSX, 1, 2, 0, AddressMode.Implid ],
+     case 0x8A:return OpCodeEntryTtype.TXA, 1, 2, 0, AddressMode.Implid ],
+     case 0x9A:return OpCodeEntryTtype.TXS, 1, 2, 0, AddressMode.Implid ],
+     case 0x98:return OpCodeEntryTtype.TYA, 1, 2, 0, AddressMode.Implid ]
+    */
     static var opCodeTable:[[Any]] =
     [
         [ 0x69, OpCodeEntryTtype.ADC, 2, 2, 0, AddressMode.Immedt ],
@@ -194,9 +377,15 @@ class OpCodeTable:OpCodeDef
         [ 0x98, OpCodeEntryTtype.TYA, 1, 2, 0, AddressMode.Implid ]
     ]
     
+    
+    static func GetOpCodeEntry(_ opCode:UInt8)->OpCodeEntry?
+    {
+        return nil
+    }
     static func GetOpCodeTable()->[OpCodeEntry]
     {
         var array:[OpCodeEntry] = []
+        //var array:[OpCodeEntry] = []
         for obj in opCodeTable
         {
            let opCode = obj[0] as! Int
@@ -211,6 +400,56 @@ class OpCodeTable:OpCodeDef
             
         }
         return array
+    }
+    
+    static func ValidateOpCodeTable()
+    {
+        for entry in GetOpCodeTable()
+        {
+            switch (entry.addrMode)
+            {
+            case AddressMode.Immedt:
+                assert(entry.numBytes == 2)
+                break;
+            case AddressMode.Implid:
+                assert(entry.numBytes == 1)
+                break;
+            case AddressMode.Accumu:
+                assert(entry.numBytes == 1)
+                break;
+            case AddressMode.Relatv:
+                assert(entry.numBytes == 2)
+                break;
+            case AddressMode.ZeroPg:
+                assert(entry.numBytes == 2)
+                break;
+            case AddressMode.ZPIdxX:
+                assert(entry.numBytes == 2)
+                break;
+            case AddressMode.ZPIdxY:
+                assert(entry.numBytes == 2)
+                break;
+            case AddressMode.Absolu:
+                assert(entry.numBytes == 3)
+                break;
+            case AddressMode.AbIdxX:
+                assert(entry.numBytes == 3)
+                break;
+            case AddressMode.AbIdxY:
+                assert(entry.numBytes == 3)
+                break;
+            case AddressMode.Indrct:
+                assert(entry.numBytes == 3)
+                assert(entry.opCodeName == OpCodeEntryTtype.JMP);
+                break;
+            case AddressMode.IdxInd:
+                assert(entry.numBytes == 2)
+                break;
+            case AddressMode.IndIdx:
+                assert(entry.numBytes == 2)
+                break;
+            }
+        }
     }
 }
 

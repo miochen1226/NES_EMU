@@ -7,26 +7,35 @@
 
 import Foundation
 
-class CpuRegDef
+class CpuStatusFlag
 {
-    enum StatusFlag:UInt8
+    static func BIT(_ n:UInt8)->UInt8
     {
-        case Carry              = 0b00000001//(1<<0)
-        case Zero               = 0b00000010//(1<<1)
-        case IrqDisabled        = 0b00000100// Interrupt (IRQ) disabled
-        case Decimal            = 0b00001000 // *NOTE: Present in P, but Decimal mode not supported by NES CPU
-        case BrkExecuted        = 0b00010000 // BRK executed (IRQ/software interupt) *NOTE: Not actually a bit in P, only set on stack for s/w interrupts
-        case Unused             = 0b00100000 // *NOTE: Never set in P, but always set on stack
-        case Overflow           = 0b01000000 // 'V'
-        case Negative           = 0b10000000 // aka Sign flag
+         return (1<<n)
     }
     
-    let Carry = StatusFlag.Carry.rawValue
-    let Zero = StatusFlag.Zero.rawValue
-    let IrqDisabled = StatusFlag.IrqDisabled.rawValue
-    let Decimal = StatusFlag.Decimal.rawValue
-    let BrkExecuted = StatusFlag.BrkExecuted.rawValue
-    let Unused = StatusFlag.Unused.rawValue
-    let Overflow = StatusFlag.Overflow.rawValue
-    let Negative = StatusFlag.Negative.rawValue
+    static let Carry = BIT(0)
+    static let Zero = BIT(1)
+    static let IrqDisabled = BIT(2)
+    static let Decimal = BIT(3)
+    static let BrkExecuted = BIT(4)
+    static let Unused = BIT(5)
+    static let Overflow = BIT(6)
+    static let Negative = BIT(7)
+    
+    let Carry = CpuStatusFlag.Carry
+    let Zero = CpuStatusFlag.Zero
+    let IrqDisabled = CpuStatusFlag.IrqDisabled
+    let Decimal = CpuStatusFlag.Decimal
+    let BrkExecuted = CpuStatusFlag.BrkExecuted
+    let Unused = CpuStatusFlag.Unused
+    let Overflow = CpuStatusFlag.Overflow
+    let Negative = CpuStatusFlag.Negative
+}
+
+class CpuRegDef
+{
+    
+
+    
 }

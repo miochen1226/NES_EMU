@@ -16,7 +16,6 @@ class CpuInternalRam: HandleCpuReadProtocol {
     let m_memory = CpuInternalMemory.init().Initialize(initSize:KB(2))
     
     func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
-        //return 0
         return m_memory.Read(MapCpuToInternalRam(cpuAddress: cpuAddress))
     }
     

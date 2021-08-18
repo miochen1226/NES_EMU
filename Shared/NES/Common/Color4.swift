@@ -10,6 +10,7 @@ import Foundation
 class Color4
 {
     var argb:UInt32 = 0
+    //var rgba:UInt32 = 0
     
     var d_r:UInt8 = 0
     var d_g:UInt8 = 0
@@ -22,7 +23,14 @@ class Color4
         d_g = g
         d_b = b
         d_a = a
-        argb = UInt32((a << 24) | (r << 16) | (g << 8) | b)
+        let uR:UInt32 = UInt32(r)
+        let uG:UInt32 = UInt32(g)
+        let uB:UInt32 = UInt32(b)
+        let uA:UInt32 = UInt32(a)
+        
+        //argb = 0x00000FF00//UInt32(a) << 24 | UInt32(r) << 16 | UInt32(g) << 8 | b
+        argb = (uA << 24) | (uB << 16) | (uG << 8) | uR
+        //rgba = UInt32((r << 24) | (g << 16) | (g << 8) | a)
     }
 
     

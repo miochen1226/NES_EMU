@@ -8,32 +8,40 @@
 import Foundation
 class Memory
 {
+    func test()->UInt8
+    {
+        return 120
+    }
     var memorySize:UInt = 0
     var rawMemory:[UInt8] = Array<UInt8>()
-    func initial(size:UInt)->Memory
+    //var memPointer:UnsafeMutablePointer<UInt8>!
+    func initial(size:UInt)
     {
         memorySize = size
-        
+        rawMemory.removeAll()
         for _ in 0...size-1
         {
             rawMemory.append(0)
         }
-        return self
+        //memPointer = UnsafePointer<UInt8>(rawMemory)
+        
+        //memPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(memorySize))
+        //memPointer!.initialize(from: &rawMemory, count: Int(memorySize))
+        
+        //return self
     }
     
-    func putValue(address:Int,value:UInt8)
+    func putValue(address:UInt16,value:UInt8)
     {
-        rawMemory[address] = value
-    }
-    
-    func RawRef(address:Int)->UInt8
-    {
-        return rawMemory[address]
+        rawMemory[Int(address)] = value
     }
     
     func Read(_ address:UInt16)->UInt8
     {
         return rawMemory[Int(address)]
+        //let alpha = memPointer! + Int(address)
+        //let value = alpha.pointee
+        //return value
     }
 
     func Write( address:UInt16,  value:UInt8)
@@ -126,6 +134,14 @@ class ObjectAttributeMemory2:Memory
             let mIndex = Int(index)
             rawMemory[mIndex] = 0xFF
         }
+    }
+    
+    func saveSprite(sprite:SpriteData,index:Int)
+    {
+        rawMemory[index*4] = sprite.bmpLow
+        rawMemory[index*4+1] = sprite.bmpHigh
+        rawMemory[index*4+2] = sprite.attributes
+        rawMemory[index*4+3] = sprite.x
     }
     
     func saveSprites(sprites:[SpriteData])

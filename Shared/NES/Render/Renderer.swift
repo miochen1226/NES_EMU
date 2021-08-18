@@ -9,24 +9,36 @@ import Foundation
 
 class Renderer
 {
-    var rawColors:[Color4] = []
+    var rawColors:[[Color4]] = [[]]
     let printDebug = false
     
     func Initialize() {
-        for _ in 0...255
+        
+        for x in 0...255
         {
+            var array:[Color4] = []
+            rawColors.append(array)
             for _ in 0...239
             {
-                rawColors.append(Color4.init())
+                rawColors[x].append(Color4.init())
             }
         }
+        
     }
     
-    func DrawPixel(x:UInt32, y:UInt32, color:Color4)
+    var enableDraw = true
+    @inline(__always)
+    func DrawPixel(x:UInt32, y:UInt32, color:inout Color4)
     {
-        self.rawColors[Int(x + y*256)].d_r = color.d_r
-        self.rawColors[Int(x + y*256)].d_g = color.d_g
-        self.rawColors[Int(x + y*256)].d_b = color.d_b
+        if(enableDraw)
+        {
+            let indexX = Int(x)
+            let indexY = Int(y)
+            self.rawColors[indexX][indexY].d_r = color.d_r
+            //self.rawColors[indexX][indexY].d_g = color.d_g
+            //self.rawColors[indexX][indexY].d_b = color.d_b
+            //self.rawColors[indexX][indexY].d_a = color.d_a
+        }
         
         if(printDebug)
         {
