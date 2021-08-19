@@ -12,6 +12,7 @@ class Cpu:CpuStatusFlag,ICpu{
     var lastInput:UInt8 = 0
     var pushTime = 0
     var inputIndex:UInt8 = 0
+    var m_apu:Apu!
     func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
         var result:UInt8 = 0;
         switch (cpuAddress)
@@ -59,9 +60,7 @@ class Cpu:CpuStatusFlag,ICpu{
             break
 
         default:
-            print(cpuAddress)
-            //NSLog("TODOOOO m_apu->HandleCpuRead")
-            //result = m_apu->HandleCpuRead(cpuAddress);
+            result = m_apu.HandleCpuRead(cpuAddress: cpuAddress);
             break
         }
         
@@ -107,18 +106,16 @@ class Cpu:CpuStatusFlag,ICpu{
             //NSLog("write kControllerPort2")
             break
         default:
-            //NSLog("write m_apu")
-            //NSLog("TODOOOO m_apu->HandleCpuWrite(cpuAddress, value);")
-            //m_apu->HandleCpuWrite(cpuAddress, value);
+            m_apu.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
             break;
         }
     }
     
     var m_cpuMemoryBus:CpuMemoryBus?
-    func Initialize(cpuMemoryBus:CpuMemoryBus)
+    func Initialize(cpuMemoryBus:CpuMemoryBus, apu:Apu)
     {
         m_cpuMemoryBus = cpuMemoryBus
-        
+        m_apu = apu
         
         NSLog("===OpTables===")
         OpCodeTable.ValidateOpCodeTable()

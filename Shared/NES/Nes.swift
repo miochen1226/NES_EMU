@@ -16,15 +16,17 @@ class Nes:INes{
     let m_cartridge = Cartridge.init()
     let m_cpu = Cpu.init()
     let m_ppu = Ppu.init()
+    let m_apu = Apu.init()
     let m_cpuMemoryBus = CpuMemoryBus.init()
     let m_ppuMemoryBus = PpuMemoryBus.init()
     let m_cpuInternalRam = CpuInternalRam.init()
     let m_renderer = Renderer.init()
     init() {
+        m_apu.Initialize()
         m_renderer.Initialize()
-        m_cpu.Initialize(cpuMemoryBus:m_cpuMemoryBus)
+        m_cpu.Initialize(cpuMemoryBus:m_cpuMemoryBus,apu:m_apu)
         m_ppu.Initialize(ppuMemoryBus: m_ppuMemoryBus, nes: self,renderer:m_renderer)
-        m_cpuMemoryBus.Initialize(cpu:m_cpu, ppu:m_ppu, cartridge:m_cartridge,cpuInternalRam: m_cpuInternalRam)
+        m_cpuMemoryBus.Initialize(cpu:m_cpu, ppu:m_ppu,cartridge:m_cartridge,cpuInternalRam: m_cpuInternalRam)
         m_ppuMemoryBus.Initialize(ppu: m_ppu, cartridge: m_cartridge)
     }
     
@@ -61,6 +63,7 @@ class Nes:INes{
         var cpuCycles:UInt32 = 0
         m_cpu.Execute(&cpuCycles)
         m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
+        m_apu.Execute(cpuCycles: cpuCycles)
         totalCycles += Int(cpuCycles)
     }
     
@@ -172,7 +175,7 @@ class Nes:INes{
             var cpuCycles:UInt32 = 0
             m_cpu.Execute(&cpuCycles)
             m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
-            //m_apu.Execute(cpuCycles);
+            m_apu.Execute(cpuCycles: cpuCycles)
         }
         
         t = clock() - t
