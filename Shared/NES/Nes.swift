@@ -53,7 +53,21 @@ class Nes:INes{
     public func step(time: TimeInterval) {
         let target = totalCycles + Int(time * Nes.frequency)
 
+        var targetRenderFrame = target - 29780
+        if(targetRenderFrame<0)
+        {
+            targetRenderFrame = 0
+        }
         while totalCycles < target {
+            
+            if(totalCycles >= targetRenderFrame)
+            {
+                m_ppu.enableRender = true
+            }
+            else
+            {
+                m_ppu.enableRender = false
+            }
             step()
         }
     }

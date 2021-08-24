@@ -13,6 +13,8 @@ class Cpu:CpuStatusFlag,ICpu{
     var pushTime = 0
     var inputIndex:UInt8 = 0
     var m_apu:Apu!
+    var alreadyStart = false
+    var alreadyStartCount = 0
     func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
         var result:UInt8 = 0;
         switch (cpuAddress)
@@ -29,13 +31,23 @@ class Cpu:CpuStatusFlag,ICpu{
             {
                 inputIndex = 1
             }
-            if(inputIndex == 10)
+            if(inputIndex == 4)
             {
+                if(alreadyStart)
+                {
+                    return 0
+                }
+                
                 if(pushTime>1)
                 {
                     if(lastInput == 0)
                     {
                         lastInput = 1
+                        alreadyStartCount = alreadyStartCount + 1
+                        if(alreadyStartCount > 30 )
+                        {
+                            alreadyStart = true
+                        }
                     }
                     else
                     {

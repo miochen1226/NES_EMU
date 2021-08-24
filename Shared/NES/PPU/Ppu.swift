@@ -7,6 +7,7 @@
 
 import Foundation
 class Ppu:PpuDef, IPpu{
+    var enableRender = false
     func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
         var result:UInt8 = 0
 
@@ -783,6 +784,10 @@ class Ppu:PpuDef, IPpu{
     @inline(__always)
     func RenderPixel(x:UInt32, y:UInt32)
     {
+        if(!enableRender)
+        {
+            return
+        }
         //TODO
         //NSLog("RenderPixel")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3501428B26D4D0A90072FB7B /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3501428A26D4D0A90072FB7B /* VideoToolbox.framework */; };
 		350F261E26CA47F20087BC8D /* BgTileFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350F261D26CA47F20087BC8D /* BgTileFetchData.swift */; };
 		350F261F26CA47F20087BC8D /* BgTileFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350F261D26CA47F20087BC8D /* BgTileFetchData.swift */; };
 		352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
@@ -118,6 +119,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3501428A26D4D0A90072FB7B /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		350F261D26CA47F20087BC8D /* BgTileFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BgTileFetchData.swift; sourceTree = "<group>"; };
 		352575E226BD4828005AB816 /* NES_EMUApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NES_EMUApp.swift; sourceTree = "<group>"; };
 		352575E326BD4828005AB816 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3501428B26D4D0A90072FB7B /* VideoToolbox.framework in Frameworks */,
 				3530B86B26C6DF3600A2858C /* AppKit.framework in Frameworks */,
 				35E4300A26CEA8B100304E4D /* SDL2.framework in Frameworks */,
 				35E4300E26CEAA8500304E4D /* hidapi.framework in Frameworks */,
@@ -289,6 +292,7 @@
 		3530B86926C6DF3600A2858C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3501428A26D4D0A90072FB7B /* VideoToolbox.framework */,
 				35E4300D26CEAA8500304E4D /* hidapi.framework */,
 				35E4300626CEA55300304E4D /* SDL2.framework */,
 				3530B86A26C6DF3600A2858C /* AppKit.framework */,
