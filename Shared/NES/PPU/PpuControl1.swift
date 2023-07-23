@@ -36,7 +36,7 @@ class PpuControl1 {
     
     static func GetNameTableAddress(_ ppuControl1:UInt16)->UInt16
     {
-        return PpuMemory.kNameTable0 + ((uint16)(ppuControl1 & UInt16(NameTableAddressMask))) * PpuMemory.kNameAttributeTableSize
+        return PpuMemory.kNameTable0 + ((UInt16)(ppuControl1 & UInt16(NameTableAddressMask))) * PpuMemory.kNameAttributeTableSize
     }
 
     static func GetAttributeTableAddress(_ ppuControl1:UInt16)->UInt16

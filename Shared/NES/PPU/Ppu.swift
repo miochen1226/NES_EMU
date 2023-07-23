@@ -196,7 +196,7 @@ class Ppu:IPpu{
     }
     
     
-    func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
+    func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         //assert(cpuAddress >= CpuMemory::kPpuRegistersBase && cpuAddress < CpuMemory::kPpuRegistersEnd);
 
         if(cpuAddress < CpuMemory.kPpuRegistersBase || cpuAddress >= CpuMemory.kPpuRegistersEnd)
@@ -607,7 +607,7 @@ class Ppu:IPpu{
         }
     }
     
-    func FlipBits(_ v:UInt8) -> uint8
+    func FlipBits(_ v:UInt8) -> UInt8
     {
         func BIT(_ n:Int)->UInt8
         {
@@ -680,6 +680,7 @@ class Ppu:IPpu{
                 {
                     patternTableAddress = 0x0000
                 }
+                
                 tileIndex = byte1
             }
             else // 8x16 sprite, both address and tile index are stored in oam byte 1
@@ -761,7 +762,7 @@ class Ppu:IPpu{
     
     var m_spriteFetchData:[SpriteFetchData] = []
     
-    func TO8(_ v16:uint16)->uint8
+    func TO8(_ v16:UInt16)->UInt8
     {
         let v8:UInt8 = UInt8(v16 & 0x00FF)
         return v8
@@ -892,6 +893,8 @@ class Ppu:IPpu{
         var bgRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground))
         var spriteRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderSprites))
         
+        
+        
         // Consider bg/sprites as disabled (for this pixel) if we're not supposed to render it in the left-most 8 pixels
         if ( !m_ppuControlReg2.Test(UInt8(PpuControl2.BackgroundShowLeft8)) && x < 8 )
         {
@@ -903,6 +906,8 @@ class Ppu:IPpu{
             spriteRenderingEnabled = false
         }
         
+        //Mio disable sprite
+        spriteRenderingEnabled = false
         
         // Get the background pixel
         var bgPaletteHighBits:UInt8 = 0
@@ -1274,9 +1279,9 @@ class Ppu:IPpu{
         v = (v & ~0x0C00) | (TO16(value) << 10)
     }
     
-    func TO16(_ v8:uint8)->uint16
+    func TO16(_ v8:UInt8)->UInt16
     {
-        return uint16(v8)
+        return UInt16(v8)
     }
     
     func HandlePpuRead(_ ppuAddress:UInt16)->UInt8

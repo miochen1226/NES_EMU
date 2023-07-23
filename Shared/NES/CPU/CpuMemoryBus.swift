@@ -19,49 +19,49 @@ struct CpuMemory
         return n*1024*1024
     }
     
-    static let kInternalRamBase:uint16            = 0x0000
-    static let kInternalRamSize:uint16            = uint16(KB(2))
-    static let kInternalRamEnd:uint16            = kInternalRamBase + kInternalRamSize * 4 // Mirrored
+    static let kInternalRamBase:UInt16            = 0x0000
+    static let kInternalRamSize:UInt16            = UInt16(KB(2))
+    static let kInternalRamEnd:UInt16            = kInternalRamBase + kInternalRamSize * 4 // Mirrored
 
-    static let kPpuRegistersBase:uint16            = 0x2000
-    static let kPpuRegistersSize:uint16            = 8
-    static let kPpuRegistersEnd:uint16            = kPpuRegistersBase + kPpuRegistersSize * 1024 // Mirrored
+    static let kPpuRegistersBase:UInt16            = 0x2000
+    static let kPpuRegistersSize:UInt16            = 8
+    static let kPpuRegistersEnd:UInt16            = kPpuRegistersBase + kPpuRegistersSize * 1024 // Mirrored
 
-    static let kCpuRegistersBase:uint16            = 0x4000
-    static let kCpuRegistersSize:uint16            = 32
-    static let kCpuRegistersEnd:uint16            = kCpuRegistersBase + kCpuRegistersSize
+    static let kCpuRegistersBase:UInt16            = 0x4000
+    static let kCpuRegistersSize:UInt16            = 32
+    static let kCpuRegistersEnd:UInt16            = kCpuRegistersBase + kCpuRegistersSize
 
-    static let kExpansionRomBase:uint16            = 0x4020
-    static let kExpansionRomSize:uint16            = UInt16(KB(8)) - kCpuRegistersSize
-    static let kExpansionRomEnd:uint16            = kExpansionRomBase + kExpansionRomSize
+    static let kExpansionRomBase:UInt16            = 0x4020
+    static let kExpansionRomSize:UInt16            = UInt16(KB(8)) - kCpuRegistersSize
+    static let kExpansionRomEnd:UInt16            = kExpansionRomBase + kExpansionRomSize
 
-    static let  kSaveRamBase:uint16                = 0x6000
-    static let  kSaveRamSize:uint16                = uint16(KB(8))
-    static let  kSaveRamEnd:uint16                = kSaveRamBase + kSaveRamSize
+    static let  kSaveRamBase:UInt16                = 0x6000
+    static let  kSaveRamSize:UInt16                = UInt16(KB(8))
+    static let  kSaveRamEnd:UInt16                = kSaveRamBase + kSaveRamSize
 
-    static let  kPrgRomBase:uint16                = 0x8000
-    static let  kPrgRomSize:uint16                = uint16(KB(32))
-    static let  kProRomEnd:uint32                    = uint32(kPrgRomBase + kPrgRomSize) // Note 32 bits
+    static let  kPrgRomBase:UInt16                = 0x8000
+    static let  kPrgRomSize:UInt16                = UInt16(KB(32))
+    static let  kProRomEnd:UInt32                    = UInt32(kPrgRomBase + kPrgRomSize) // Note 32 bits
     
-    static let  kStackBase:uint16                    = 0x0100 // Range [$0100,$01FF] (page 1)
+    static let  kStackBase:UInt16                    = 0x0100 // Range [$0100,$01FF] (page 1)
 
         // PPU memory-mapped registers
-    static let  kPpuControlReg1:uint16            = 0x2000 // (W)
-    static let  kPpuControlReg2:uint16            = 0x2001 // (W)
-    static let  kPpuStatusReg:uint16                = 0x2002 // (R)
-    static let  kPpuSprRamAddressReg:uint16        = 0x2003 // (W) \_ OAMADDR
-    static let  kPpuSprRamIoReg:uint16            = 0x2004 // (W) /  OAMDATA
-    static let  kPpuVRamAddressReg1:uint16        = 0x2005 // (W2)
-    static let  kPpuVRamAddressReg2:uint16        = 0x2006 // (W2) \_
-    static let  kPpuVRamIoReg:uint16                = 0x2007 // (RW) /
+    static let  kPpuControlReg1:UInt16            = 0x2000 // (W)
+    static let  kPpuControlReg2:UInt16            = 0x2001 // (W)
+    static let  kPpuStatusReg:UInt16                = 0x2002 // (R)
+    static let  kPpuSprRamAddressReg:UInt16        = 0x2003 // (W) \_ OAMADDR
+    static let  kPpuSprRamIoReg:UInt16            = 0x2004 // (W) /  OAMDATA
+    static let  kPpuVRamAddressReg1:UInt16        = 0x2005 // (W2)
+    static let  kPpuVRamAddressReg2:UInt16        = 0x2006 // (W2) \_
+    static let  kPpuVRamIoReg:UInt16                = 0x2007 // (RW) /
 
-    static let  kSpriteDmaReg:uint16                = 0x4014 // (W) OAMDMA
-    static let  kControllerPort1:uint16            = 0x4016 // (RW) Strobe for both controllers (bit 0), and controller 1 output
-    static let  kControllerPort2:uint16            = 0x4017 // (R) Controller 2 output
+    static let  kSpriteDmaReg:UInt16                = 0x4014 // (W) OAMDMA
+    static let  kControllerPort1:UInt16            = 0x4016 // (RW) Strobe for both controllers (bit 0), and controller 1 output
+    static let  kControllerPort2:UInt16            = 0x4017 // (R) Controller 2 output
 
-    static let kNmiVector:uint16                   = 0xFFFA // and 0xFFFB
-    static let  kResetVector:uint16                = 0xFFFC // and 0xFFFD
-    static let  kIrqVector:uint16                    = 0xFFFE // and 0xFFFF
+    static let kNmiVector:UInt16                   = 0xFFFA // and 0xFFFB
+    static let  kResetVector:UInt16                = 0xFFFC // and 0xFFFD
+    static let  kIrqVector:UInt16                    = 0xFFFE // and 0xFFFF
     
 }
 
@@ -82,7 +82,7 @@ class CpuMemoryBus{
     
     //func HandleCpuReadEx(_ cpuAddress: uint16,readValue:inout UInt8)
     
-    func ReadEx(_ cpuAddress:uint16,readValue:inout UInt8)
+    func ReadEx(_ cpuAddress:UInt16,readValue:inout UInt8)
     {
         if (cpuAddress >= CpuMemory.kExpansionRomBase)
         {
@@ -101,7 +101,7 @@ class CpuMemoryBus{
         //return m_cpuInternalRam!.HandleCpuRead(cpuAddress)
     }
     
-    func Read(_ cpuAddress:uint16)->uint8
+    func Read(_ cpuAddress:UInt16)->UInt8
     {
         if (cpuAddress >= CpuMemory.kExpansionRomBase)
         {

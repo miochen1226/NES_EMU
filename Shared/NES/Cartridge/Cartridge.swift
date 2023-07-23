@@ -8,7 +8,7 @@
 import Foundation
 
 class Cartridge:ICartridge{
-    func HandlePpuRead(_ ppuAddress: uint16) -> uint8 {
+    func HandlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
         return AccessChrMem(ppuAddress)
     }
     
@@ -36,16 +36,16 @@ class Cartridge:ICartridge{
     }
     
     let kMaxSavBanks:UInt = 4
-    let kPrgBankCount:uint16 = 8
-    let kPrgBankSize:uint16 = uint16(KB(4))
+    let kPrgBankCount:UInt16 = 8
+    let kPrgBankSize:UInt16 = UInt16(KB(4))
 
-    let kChrBankCount:uint16 = 8
-    let kChrBankSize:uint16 = uint16(KB(1))
+    let kChrBankCount:UInt16 = 8
+    let kChrBankSize:UInt16 = UInt16(KB(1))
 
-    let kSavBankCount:uint16 = 1
-    let kSavBankSize:uint16 = uint16(KB(8))
+    let kSavBankCount:UInt16 = 1
+    let kSavBankSize:UInt16 = UInt16(KB(8))
     
-    func HandleCpuReadEx(_ cpuAddress: uint16,readValue:inout UInt8)
+    func HandleCpuReadEx(_ cpuAddress: UInt16,readValue:inout UInt8)
     {
         if (cpuAddress >= CpuMemory.kPrgRomBase)
         {
@@ -62,7 +62,7 @@ class Cartridge:ICartridge{
         }
     }
     
-    func HandleCpuRead(_ cpuAddress: uint16)->uint8 {
+    func HandleCpuRead(_ cpuAddress: UInt16)->UInt8 {
         if (cpuAddress >= CpuMemory.kPrgRomBase)
         {
             return AccessPrgMem(cpuAddress)
@@ -118,7 +118,7 @@ class Cartridge:ICartridge{
         return address & (bankSize - 1)
     }
     
-    func AccessPrgMemEx(_ cpuAddress:uint16,readValue:inout UInt8)
+    func AccessPrgMemEx(_ cpuAddress:UInt16,readValue:inout UInt8)
     {
         //Mio speed up
         let bankIndexCache = cache[cpuAddress]
@@ -141,8 +141,8 @@ class Cartridge:ICartridge{
     }
     
     var m_mapper:Mapper = Mapper.init()
-    var cache:[uint16:Int] = [:]
-    func AccessPrgMem(_ cpuAddress:uint16)->UInt8
+    var cache:[UInt16:Int] = [:]
+    func AccessPrgMem(_ cpuAddress:UInt16)->UInt8
     {
         //Mio speed up
         let bankIndexCache = cache[cpuAddress]
@@ -166,7 +166,7 @@ class Cartridge:ICartridge{
         return memory.RawRef(address: Int(offset))
     }
     
-    func AccessPrgMem(_ cpuAddress:uint16,value:UInt8)
+    func AccessPrgMem(_ cpuAddress:UInt16,value:UInt8)
     {
         let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
         let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
@@ -175,7 +175,7 @@ class Cartridge:ICartridge{
         memory.Write(address: offset, value: value)
     }
     
-    func AccessSavMem(_ cpuAddress:uint16,value:UInt8)
+    func AccessSavMem(_ cpuAddress:UInt16,value:UInt8)
     {
         let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
         let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
@@ -186,7 +186,7 @@ class Cartridge:ICartridge{
         
     }
     
-    func AccessSavMem(_ cpuAddress:uint16)->UInt8
+    func AccessSavMem(_ cpuAddress:UInt16)->UInt8
     {
         let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
         let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
@@ -209,7 +209,11 @@ class Cartridge:ICartridge{
     func loadMarioRom()
     {
         //Donkey Kong  mario Donkey Kong (Japan) Donkey Kong (World) (Rev A)
+        //if let filepath = Bundle.main.path(forResource: "Super Mario Bros. (Japan, USA)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        
+        
+        //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
         if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
         {

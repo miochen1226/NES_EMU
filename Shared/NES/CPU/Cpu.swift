@@ -8,7 +8,7 @@
 import Foundation
 class Cpu:CpuRegDef,ICpu{
     
-    func HandleCpuRead(_ cpuAddress: uint16) -> uint8 {
+    func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         var result:UInt8 = 0;
 
         switch (cpuAddress)
@@ -106,20 +106,20 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     
-    var m_cycles:uint32 = 0
-    var m_totalCycles:uint32 = 0
+    var m_cycles:UInt32 = 0
+    var m_totalCycles:UInt32 = 0
     var m_opCodeEntry:OpCodeEntry!
     
     var g_opCodeTableEx: NSDictionary = [0:1,1:2,2:3]
     
-    var g_opCodeTable:[uint8:OpCodeEntry] = [:]
+    var g_opCodeTable:[UInt8:OpCodeEntry] = [:]
     
-    func Execute(_ cpuCyclesElapsed:inout uint32)
+    func Execute(_ cpuCyclesElapsed:inout UInt32)
     {
         m_cycles = 0
         ExecutePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
         
-        let opCode:uint8 = Read8(PC)
+        let opCode:UInt8 = Read8(PC)
         m_opCodeEntry = g_opCodeTable[opCode]
 
         assert((m_opCodeEntry != nil))
@@ -164,12 +164,12 @@ class Cpu:CpuRegDef,ICpu{
         }
     }
     
-    func Read8Ex(_ address:uint16,readValue:inout UInt8)
+    func Read8Ex(_ address:UInt16,readValue:inout UInt8)
     {
         return m_cpuMemoryBus!.ReadEx(address,readValue:&readValue)
     }
     
-    func Read8(_ address:uint16)->uint8
+    func Read8(_ address:UInt16)->UInt8
     {
         return m_cpuMemoryBus!.Read(address)
     }
@@ -226,7 +226,11 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case AddressMode.ZPIdxX:
-            m_operandAddress = TO16((Read8(PC+1) + X)) & 0x00FF // Wrap around zero-page boundary
+            
+            var plus_result = UInt16(Read8(PC+1)) + UInt16(X)
+            m_operandAddress = plus_result & 0x00FF // Wrap around zero-page boundary
+                
+            //m_operandAddress = TO16((Read8(PC+1) + X)) & 0x00FF // Wrap around zero-page boundary
             break
 
         case AddressMode.ZPIdxY:
@@ -265,7 +269,7 @@ class Cpu:CpuRegDef,ICpu{
 
         case AddressMode.IdxInd:
             let low:UInt16 = TO16((Read8(PC+1) + X)) & 0x00FF // Zero page low byte of operand address, wrap around zero page
-            let high:UInt16 = TO16(uint8(low + 1)) & 0x00FF // Wrap high byte around zero page
+            let high:UInt16 = TO16(UInt8(low + 1)) & 0x00FF // Wrap high byte around zero page
             m_operandAddress = TO16(Read8(low)) | TO16(Read8(high)) << 8
             break
 
@@ -388,6 +392,7 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case OpCodeEntryTtype.BNE:  // Branch on result non-zero
+            
             if (!P.Test(Zero))
             {
                 nextPC = GetBranchOrJmpLocation()
@@ -837,7 +842,7 @@ class Cpu:CpuRegDef,ICpu{
             }
         }
 
-        m_cycles += uint32(cycles)
+        m_cycles += UInt32(cycles)
         
         // Move to next instruction
         PC = nextPC
@@ -846,11 +851,11 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     
-    var PC:uint16 = 0        // Program counter
-    var SP:uint8 = 0        // Stack pointer
-    var A:uint8 = 0       // Accumulator
-    var X:uint8 = 0     // X register
-    var Y:uint8 = 0        // Y register
+    var PC:UInt16 = 0        // Program counter
+    var SP:UInt8 = 0        // Stack pointer
+    var A:UInt8 = 0       // Accumulator
+    var X:UInt8 = 0     // X register
+    var Y:UInt8 = 0        // Y register
     var P:Bitfield8 = Bitfield8()   // Processor status (flags) TODO
     var m_pendingNmi = false
     var m_pendingIrq = false
@@ -877,18 +882,18 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     
-    func TO16(_ v8:uint8)->uint16
+    func TO16(_ v8:UInt8)->UInt16
     {
-        return uint16(v8)
+        return UInt16(v8)
     }
     
-    func TO8(_ v16:uint16)->uint8
+    func TO8(_ v16:UInt16)->UInt8
     {
         let v8:UInt8 = UInt8(v16 & 0x00FF)
         return v8
     }
     
-    func Read16(_ address:uint16)->uint16
+    func Read16(_ address:UInt16)->UInt16
     {
         return TO16(m_cpuMemoryBus!.Read(address)) | (TO16(m_cpuMemoryBus!.Read(address + 1)) << 8)
     }

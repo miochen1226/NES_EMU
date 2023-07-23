@@ -9,6 +9,9 @@ import Foundation
 class Mapper1: Mapper {
     override func PostInitialize()
     {
-        
+        //m_boardType = DEFAULT;
+        //if (PrgMemorySize() == KB(512))
+        //    m_boardType = SUROM;
+
     }
 }

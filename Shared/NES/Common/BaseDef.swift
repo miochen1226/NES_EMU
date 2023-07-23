@@ -30,11 +30,11 @@ struct globeDef
 }
 
 protocol HandleCpuReadProtocol {
-    func HandleCpuRead(_ cpuAddress:uint16)->uint8
+    func HandleCpuRead(_ cpuAddress:UInt16)->UInt8
     func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
 }
 
 protocol HandlePpuReadProtocol {
-    func HandlePpuRead(_ ppuAddress:uint16)->uint8
+    func HandlePpuRead(_ ppuAddress:UInt16)->UInt8
     func HandlePpuWrite(_ ppuAddress:UInt16, value:UInt8)
 }

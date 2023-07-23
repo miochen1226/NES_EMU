@@ -9,15 +9,17 @@ import Foundation
 import SwiftUI
 
 extension NSObject {
-    func RGB(r:CGFloat, g:CGFloat, b:CGFloat, alpha:CGFloat? = 1) -> NSColor {
-        return NSColor(red: r/255, green: g/255, blue: b/255, alpha: alpha!)
+    func RGB(r:CGFloat, g:CGFloat, b:CGFloat, alpha:CGFloat? = 1) -> CGColor {
+        return CGColor(red: r/255, green: g/255, blue: b/255, alpha: alpha!)
     }
 }
 
 class DataHolder{
     static var shared:DataHolder = DataHolder.init()
-    var canvasView:CanvasView?
+    //var canvasView:CanvasView?
 }
+
+/*
 class CanvasView: NSView {
     var nes:Nes?
     var data: [Color4] {
@@ -105,7 +107,8 @@ struct ScreenCanvasView: NSViewRepresentable
     
     func makeNSView(context: NSViewRepresentableContext<Self>) -> CanvasView {
         nes.loadRom()
-        nes.startRun()
+        //nes.startRun()
         return CanvasView(data: data)
     }
 }
+*/
