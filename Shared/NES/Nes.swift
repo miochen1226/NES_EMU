@@ -40,23 +40,54 @@ class Nes{
         return m_cartridge.GetNameTableMirroring()
     }
     
+    let serialQueue = DispatchQueue(label: "SerialQueue")
+    
+    func startRun()
+    {
+        serialQueue.async {
+            while true
+            {
+                self.ExecuteCpuAndPpuFrame()
+            }
+            
+        }
+    }
+    
+    var totalFrame = 0
     func ExecuteCpuAndPpuFrame()
     {
         var completedFrame = false
         m_cpuMemoryBus.readCount = 0
         
-        var t = clock()
+        //var t = clock()
+        //var ticks = 0
         while (!completedFrame)
         {
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
             m_cpu.Execute(&cpuCycles)
-            m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
+            
+            //if(totalFrame > 360)
+            //{
+                m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
+            //}
+            /*
+            else
+            {
+                ticks += 1
+                if(ticks == 3)
+                {
+                    completedFrame = true
+                }
+            }
+             */
             //m_apu.Execute(cpuCycles);
         }
         
-        t = clock() - t
-        print("The function takes \(t) ticks, which is \(Double(t) / Double(CLOCKS_PER_SEC)) seconds of CPU time")
+        //totalFrame += 1
+        //print(totalFrame/60)
+        //t = clock() - t
+        //print("The function takes \(t) ticks, which is \(Double(t) / Double(CLOCKS_PER_SEC)) seconds of CPU time")
     }
     
     func SignalCpuNmi()

@@ -30,13 +30,14 @@ class CanvasView: NSView {
         print("\(data)")
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.backgroundColor = .white
+        //layer?.backgroundColor = .white
         DataHolder.shared.canvasView = self
+        layer?.backgroundColor = .black
     }
     
     func step()
     {
-        nes?.step()
+        //nes?.step()
         data = nes!.m_renderer.rawColors
     }
     
@@ -79,8 +80,9 @@ struct ScreenCanvasView: NSViewRepresentable
 {
     //typealias NSViewType = CanvasView
     let nes = Nes.init()
+    
     func updateNSView(_ nsView: CanvasView, context: Context) {
-        nes.loadRom()
+        
         
         //for _ in 0...60*20
         //{
@@ -88,6 +90,7 @@ struct ScreenCanvasView: NSViewRepresentable
         //}
         nsView.data = nes.m_renderer.rawColors
         nsView.nes = nes
+        
     }
     
     @State var canvasView:CanvasView!
@@ -101,6 +104,8 @@ struct ScreenCanvasView: NSViewRepresentable
     var data: [Color4] = [Color4()]
     
     func makeNSView(context: NSViewRepresentableContext<Self>) -> CanvasView {
+        nes.loadRom()
+        nes.startRun()
         return CanvasView(data: data)
     }
 }

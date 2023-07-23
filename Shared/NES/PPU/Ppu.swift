@@ -32,7 +32,9 @@ class Ppu:IPpu{
 
         // Not necessary but helps with debugging
         m_vramAddress = 0xDDDD
+        var vramAddress = m_vramAddress
         m_tempVRamAddress = 0xDDDD
+        
         m_vramBufferedValue = 0xDD
 
         m_numSpritesToRender = 0
@@ -432,6 +434,12 @@ class Ppu:IPpu{
             //assert(m_vramAndScrollFirstWrite && "User code error: trying to write to $2007 when VRAM address not yet fully set via $2006");
 
             // Write to palette or memory bus
+            var vramAddress = m_vramAddress
+            
+            if(vramAddress >= 2592 && vramAddress < 2600)
+            {
+                print(value)
+            }
             if (m_vramAddress >= PpuMemory.kPalettesBase)
             {
                 m_palette.Write(address: MapPpuToPalette(ppuAddress: m_vramAddress), value: value)
@@ -542,7 +550,7 @@ class Ppu:IPpu{
             {
                 // We didn't find 8 sprites, OAM2 contains what we've found so far, so we can bail
                 
-                m_numSpritesToRender = n2 
+                m_numSpritesToRender = n2
                 m_oam2.saveSprites(sprites: oam2)
                 return
             }
@@ -729,10 +737,17 @@ class Ppu:IPpu{
             let byte2Address:UInt16 = byte1Address + 8
 
             //auto& data = m_spriteFetchData[n]
-            m_spriteFetchData[n].bmpLow = m_ppuMemoryBus!.Read(byte1Address)
-            m_spriteFetchData[n].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
-            m_spriteFetchData[n].attributes = oam2[n].attributes
-            m_spriteFetchData[n].x = oam2[n].x
+            var spriteFetchData = SpriteFetchData()
+            spriteFetchData.bmpLow = m_ppuMemoryBus!.Read(byte1Address)
+            spriteFetchData.bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
+            spriteFetchData.attributes = oam2[n].attributes
+            spriteFetchData.x = oam2[n].x
+            
+            m_spriteFetchData[n] = spriteFetchData
+            //m_spriteFetchData[n].bmpLow = m_ppuMemoryBus!.Read(byte1Address)
+            //m_spriteFetchData[n].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
+            //m_spriteFetchData[n].attributes = oam2[n].attributes
+            //m_spriteFetchData[n].x = oam2[n].x
 
             if (flipHorz)
             {
@@ -853,6 +868,21 @@ class Ppu:IPpu{
     }
     var m_bgTileFetchDataPipeline:[BgTileFetchData] = [BgTileFetchData.init(),BgTileFetchData.init()]
     
+    
+    func isHitSprite(x:UInt32,spriteData:SpriteFetchData)->Bool
+    {
+        var left = spriteData.x
+        var right:Int = Int(spriteData.x) + 8
+        if(x >= left && x <= right)
+        {
+            return true
+        }
+        else
+        {
+            return false
+        }
+    }
+    
     func RenderPixel(x:UInt32, y:UInt32)
     {
         //TODO
@@ -872,6 +902,7 @@ class Ppu:IPpu{
         {
             spriteRenderingEnabled = false
         }
+        
         
         // Get the background pixel
         var bgPaletteHighBits:UInt8 = 0
@@ -923,21 +954,24 @@ class Ppu:IPpu{
                 for n in 0 ... m_numSpritesToRender-1
                 {
                     var spriteData = m_spriteFetchData[n]
-
-                    if ( (x >= spriteData.x) && (x < (spriteData.x + 8)) )
+                    
+                    if isHitSprite(x:x,spriteData: spriteData)
                     {
                         if (!foundSprite)
                         {
                             // Compose "sprite color" (0-3) from high bit in bitmap bytes
                             sprPaletteLowBits = (TestBits01(target: UInt16(spriteData.bmpHigh), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteData.bmpLow), value: 0x80))
+                            //sprPaletteLowBits = (TestBits01(target: UInt16(spriteData.bmpLow), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteData.bmpHigh), value: 0x80))
 
+                            
                             // First non-transparent pixel moves on to multiplexer
                             if (sprPaletteLowBits != 0)
                             {
                                 foundSprite = true;
                                 sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: 0x3)) //@TODO: cache this in spriteData
                                 spriteHasBgPriority = TestBits(target: UInt16(spriteData.attributes), value: BIT(5))
-
+                                
+                                
                                 if (m_renderSprite0 && (n == 0)) // Rendering pixel from sprite 0?
                                 {
                                     isSprite0 = true
@@ -948,6 +982,8 @@ class Ppu:IPpu{
                         // Shift out high bits - do this for all (overlapping) sprites in range
                         spriteData.bmpLow = spriteData.bmpLow << 1
                         spriteData.bmpHigh = spriteData.bmpHigh << 1
+                        
+                        m_spriteFetchData[n] = spriteData
                     }
                 }
             }

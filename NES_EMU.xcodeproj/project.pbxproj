@@ -58,6 +58,14 @@
 		3530FA5D26BFBCA900CF18DD /* Mapper1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA5B26BFBCA800CF18DD /* Mapper1.swift */; };
 		3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA6026C0590300CF18DD /* OpCodeTable.swift */; };
 		3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA6026C0590300CF18DD /* OpCodeTable.swift */; };
+		353894522A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes in Resources */ = {isa = PBXBuildFile; fileRef = 353894512A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes */; };
+		353894532A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes in Resources */ = {isa = PBXBuildFile; fileRef = 353894512A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes */; };
+		353894552A6CEE9D0080B800 /* Ice Climber (Japan).nes in Resources */ = {isa = PBXBuildFile; fileRef = 353894542A6CEE9D0080B800 /* Ice Climber (Japan).nes */; };
+		353894562A6CEE9D0080B800 /* Ice Climber (Japan).nes in Resources */ = {isa = PBXBuildFile; fileRef = 353894542A6CEE9D0080B800 /* Ice Climber (Japan).nes */; };
+		353894582A6CF05F0080B800 /* Donkey Kong 3 (World).nes in Resources */ = {isa = PBXBuildFile; fileRef = 353894572A6CF05F0080B800 /* Donkey Kong 3 (World).nes */; };
+		353894592A6CF05F0080B800 /* Donkey Kong 3 (World).nes in Resources */ = {isa = PBXBuildFile; fileRef = 353894572A6CF05F0080B800 /* Donkey Kong 3 (World).nes */; };
+		3538945B2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes in Resources */ = {isa = PBXBuildFile; fileRef = 3538945A2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes */; };
+		3538945C2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes in Resources */ = {isa = PBXBuildFile; fileRef = 3538945A2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes */; };
 		3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
 		3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
 		3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
@@ -112,6 +120,10 @@
 		3530FA5626BF880E00CF18DD /* Mapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper.swift; sourceTree = "<group>"; };
 		3530FA5B26BFBCA800CF18DD /* Mapper1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper1.swift; sourceTree = "<group>"; };
 		3530FA6026C0590300CF18DD /* OpCodeTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeTable.swift; sourceTree = "<group>"; };
+		353894512A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Super Mario Bros. 3 (USA).nes"; sourceTree = "<group>"; };
+		353894542A6CEE9D0080B800 /* Ice Climber (Japan).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ice Climber (Japan).nes"; sourceTree = "<group>"; };
+		353894572A6CF05F0080B800 /* Donkey Kong 3 (World).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong 3 (World).nes"; sourceTree = "<group>"; };
+		3538945A2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong Jr. (USA) (GameCube Edition).nes"; sourceTree = "<group>"; };
 		3547C22726BEBDB0008DB9B9 /* BaseDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDef.swift; sourceTree = "<group>"; };
 		3547C22C26BECE62008DB9B9 /* Memory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memory.swift; sourceTree = "<group>"; };
 		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
@@ -158,6 +170,10 @@
 			children = (
 				35265B3526C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes */,
 				35B9C59C26C3167400E13D57 /* Donkey Kong (Japan).nes */,
+				3538945A2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes */,
+				353894512A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes */,
+				353894572A6CF05F0080B800 /* Donkey Kong 3 (World).nes */,
+				353894542A6CEE9D0080B800 /* Ice Climber (Japan).nes */,
 				35B9C59726C3144D00E13D57 /* Donkey Kong.nes */,
 				3525760A26BD4BA6005AB816 /* mario.nes */,
 				352575E126BD4828005AB816 /* Shared */,
@@ -346,7 +362,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1230;
-				LastUpgradeCheck = 1230;
+				LastUpgradeCheck = 1320;
 				TargetAttributes = {
 					352575E826BD4829005AB816 = {
 						CreatedOnToolsVersion = 12.3;
@@ -382,9 +398,13 @@
 			files = (
 				35B9C59826C3144D00E13D57 /* Donkey Kong.nes in Resources */,
 				352575F926BD4829005AB816 /* Assets.xcassets in Resources */,
+				353894582A6CF05F0080B800 /* Donkey Kong 3 (World).nes in Resources */,
 				35265B3626C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */,
 				3525760B26BD4BA6005AB816 /* mario.nes in Resources */,
 				35B9C59D26C3167400E13D57 /* Donkey Kong (Japan).nes in Resources */,
+				3538945B2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes in Resources */,
+				353894522A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes in Resources */,
+				353894552A6CEE9D0080B800 /* Ice Climber (Japan).nes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -394,9 +414,13 @@
 			files = (
 				35B9C59926C3144D00E13D57 /* Donkey Kong.nes in Resources */,
 				352575FA26BD4829005AB816 /* Assets.xcassets in Resources */,
+				353894592A6CF05F0080B800 /* Donkey Kong 3 (World).nes in Resources */,
 				35265B3726C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */,
 				3525760C26BD4BA6005AB816 /* mario.nes in Resources */,
 				35B9C59E26C3167400E13D57 /* Donkey Kong (Japan).nes in Resources */,
+				3538945C2A6D43B30080B800 /* Donkey Kong Jr. (USA) (GameCube Edition).nes in Resources */,
+				353894532A6CEB7C0080B800 /* Super Mario Bros. 3 (USA).nes in Resources */,
+				353894562A6CEE9D0080B800 /* Ice Climber (Japan).nes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -642,6 +666,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
@@ -666,6 +691,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 82Q375NBS9;

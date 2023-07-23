@@ -209,7 +209,9 @@ class Cartridge:ICartridge{
     func loadMarioRom()
     {
         //Donkey Kong  mario Donkey Kong (Japan) Donkey Kong (World) (Rev A)
-        if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
+        if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
         {
             if let data = NSData(contentsOfFile: filepath)
             {

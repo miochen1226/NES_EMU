@@ -581,8 +581,17 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case OpCodeEntryTtype.INC: // Increment memory by one
+            var V = GetMemValue()
+            if(V == 255)
+            {
+                V = 0
+            }
+            else
+            {
+                V = V + 1
+            }
             
-            let result = GetMemValue() + 1
+            let result = V//GetMemValue() + 1
             P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
             P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             SetMemValue(result)
