@@ -22,6 +22,7 @@ class SpriteObj{
         let x = pos%8
         let dataPix:Color4 = rawColors[x + (7-y)*8]
         return [dataPix.d_r,dataPix.d_g,dataPix.d_b,dataPix.d_a]
+        //return [UInt8(0),UInt8(255),UInt8(0),UInt8(255)]
     }
     
     func getTexture()->SKTexture
@@ -30,7 +31,7 @@ class SpriteObj{
             pos in
             return getPixel(pos: pos)
         }
-        let data = Data(bytes: bytes)
+        let data = Data.init(bytes)
         let bgTexture = SKTexture.init(data: data, size: CGSize(width: 8, height: 8))
         return bgTexture
     }
@@ -80,34 +81,23 @@ class Nes{
             {
                 continue
             }
+            
+            if(spriteData.x == 0)
+            {
+                continue
+            }
             let spriteObj = SpriteObj()
             spriteObj.x = Int(spriteData.x)
             spriteObj.y = 239 - Int(spriteData.bmpLow)
             
             let attribs:UInt8 = spriteData.attributes
             let flipHorz:Bool = m_ppu.TestBits(target:UInt16(attribs), value: m_ppu.BIT(6))
-            let flipVert:Bool = m_ppu.TestBits(target:UInt16(attribs), value:m_ppu.BIT(7))
-            
-            let spriteHasBgPriority:Bool = m_ppu.TestBits(target: UInt16(attribs), value: m_ppu.BIT(5))
-            
-            /*
-            if(spriteHasBgPriority)
-            {
-                print("spriteHasBgPriority")
-            }*/
-            /*
-            for x in 0...7
-            {
-                for y in 0...7
-                {
-                    spriteObj.rawColors.append(Color4())
-                }
-            }*/
-            
-            var tileIndex:UInt8 = spriteData.bmpHigh
+            //let flipVert:Bool = m_ppu.TestBits(target:UInt16(attribs), value:m_ppu.BIT(7))
+            //let spriteHasBgPriority:Bool = m_ppu.TestBits(target: UInt16(attribs), value: m_ppu.BIT(5))
+           
+            let tileIndex:UInt8 = spriteData.bmpHigh
             let tileOffset:UInt16 = m_ppu.TO16(tileIndex) * 16
             
-            let v = m_ppu.m_vramAddress;
             let patternTableAddress:UInt16 = 0x0000
             
             var spriteFetchData = SpriteFetchData()
@@ -126,9 +116,7 @@ class Nes{
                     spriteFetchData.bmpHigh = m_ppu.FlipBits(spriteFetchData.bmpHigh)
                 }
                 
-                //auto& data = m_spriteFetchData[n]
-                
-                for spX in 0...7
+                for _ in 0...7
                 {
                     sprPaletteLowBits = (m_ppu.TestBits01(target: UInt16(spriteFetchData.bmpHigh), value: 0x80) << 1) | (m_ppu.TestBits01(target: UInt16(spriteFetchData.bmpLow), value: 0x80))
                     
@@ -141,23 +129,15 @@ class Nes{
                     var color:Color4 = Color4.init()
                     m_ppu.GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette, color: &color)
                     
-                    
                     spriteFetchData.bmpLow = spriteFetchData.bmpLow << 1
                     spriteFetchData.bmpHigh = spriteFetchData.bmpHigh << 1
                     
-                    //if(spriteHasBgPriority)
-                    /*{
-                        color.d_a = 0
-                    }
-                    else
-                    */
                     if(color.d_b == 0 && color.d_r == 0 && color.d_g == 0)
                     {
                         color.d_a = 0
                     }
                     
                     spriteObj.rawColors.append(color)
-                    
                 }
             }
             
@@ -189,6 +169,12 @@ class Nes{
         }
     }
     
+    func getFpsInfo()->String
+    {
+        let strFps = String(totalFrame)
+        totalFrame = 0
+        return "FPS: " + strFps + ""
+    }
     var totalFrame = 0
     func ExecuteCpuAndPpuFrame()
     {
@@ -202,24 +188,11 @@ class Nes{
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
             m_cpu.Execute(&cpuCycles)
-            
-            //if(totalFrame > 360)
-            //{
-                m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
-            //}
-            /*
-            else
-            {
-                ticks += 1
-                if(ticks == 3)
-                {
-                    completedFrame = true
-                }
-            }
-             */
+            m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
             //m_apu.Execute(cpuCycles);
         }
         
+        totalFrame += 1
         //totalFrame += 1
         //print(totalFrame/60)
         //t = clock() - t

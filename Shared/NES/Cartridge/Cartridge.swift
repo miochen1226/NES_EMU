@@ -198,7 +198,7 @@ class Cartridge:ICartridge{
     
     func loadFile()
     {
-        loadMarioRom()
+        loadRom()
     }
     
     var romHeader:RomHeader?
@@ -206,16 +206,13 @@ class Cartridge:ICartridge{
     var m_prgBanks:[Memory] = []
     var m_chrBanks:[Memory] = []
     var m_savBanks:[Memory] = []
-    func loadMarioRom()
+    func loadRom()
     {
-        //Donkey Kong  mario Donkey Kong (Japan) Donkey Kong (World) (Rev A)
         //if let filepath = Bundle.main.path(forResource: "Super Mario Bros. (Japan, USA)", ofType: "nes")
-        //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
-        
-        
+        if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
-        if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
         {
             if let data = NSData(contentsOfFile: filepath)
             {

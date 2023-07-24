@@ -9,13 +9,25 @@ import SwiftUI
 
 
 struct ContentView: View {
-    //@State var timer = Timer.publish (every: 0.01, on: .current, in: .common).autoconnect()
+    
+    @State var labenFps = "FPS"
+    @State var scene = GameScene()
+    @State var timer = Timer.publish (every: 1, on: .current, in: .common).autoconnect()
     var body: some View {
-        GameView(scene: GameScene()).frame(width: 256, height: 240, alignment: .center)
-        /*
-        ScreenCanvasView().frame(width: 256, height: 240).border(Color.purple, width: 0).onReceive(timer) { input in
-            DataHolder.shared.canvasView?.step()
-        }*/
+        GameView(scene: scene).frame(width: 256, height: 240, alignment: .top)
+        Text(labenFps).onReceive(timer) { _ in
+            updateFps()
+        }
+    }
+    
+    private func updateFps() {
+        //let dateFormatter = DateFormatter()
+        //dateFormatter.dateFormat = "HH:mm:ss"
+        //let date = Date()
+        //let resultString = dateFormatter.string(from: date)
+        let fpsInfo = scene.getFpsInfo()
+        labenFps = fpsInfo
+        //print("current timestamp: \(timestamp)")
     }
 }
 

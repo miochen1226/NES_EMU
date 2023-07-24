@@ -7,13 +7,13 @@
 
 import Foundation
 import SwiftUI
-
+/*
 extension NSObject {
     func RGB(r:CGFloat, g:CGFloat, b:CGFloat, alpha:CGFloat? = 1) -> CGColor {
         return CGColor(red: r/255, green: g/255, blue: b/255, alpha: alpha!)
     }
 }
-
+*/
 class DataHolder{
     static var shared:DataHolder = DataHolder.init()
     //var canvasView:CanvasView?

@@ -952,8 +952,6 @@ class Ppu:IPpu{
         var sprPaletteLowBits:UInt8 = 0
         if (spriteRenderingEnabled)
         {
-            //for (uint8 n = 0; n < m_numSpritesToRender; ++n)
-            
             if(m_numSpritesToRender != 0)
             {
                 for n in 0 ... m_numSpritesToRender-1

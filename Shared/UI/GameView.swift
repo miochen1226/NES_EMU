@@ -13,26 +13,45 @@ protocol IRenderScreen
 {
     func renderScreen()
 }
+
 class GameScene: SKScene,IRenderScreen {
     let nes = Nes.init()
-    override func didMove(to view: SKView) {
-        
+    /*
+    func initScene()->GameScene
+    {
         nes.loadRom()
         nes.startRun(iRenderScreen: self)
         
         backgroundColor = .black
         physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        return self
+    }*/
+    
+    func getFpsInfo()->String
+    {
+        return nes.getFpsInfo()
+    }
+    
+    override func didMove(to view: SKView) {
+        self.scaleMode = .resizeFill
+        nes.loadRom()
+        nes.startRun(iRenderScreen: self)
+        
+        backgroundColor = .black
+        //physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
     }
     
     var arraySKShapeNode:[SKSpriteNode] = []
     
     
-    func getPixel(pos:Int)->[UInt8]
+    func getBgPixel(pos:Int)->[UInt8]
     {
         let y = pos/256
         let x = pos%256
         let dataPix:Color4 = nes.m_renderer.rawColors[x + (239-y)*256]
+        
         return [dataPix.d_r,dataPix.d_g,dataPix.d_b,UInt8(255)]
+        //return [UInt8(drand48()*255),UInt8(drand48()*255),UInt8(drand48()*255),UInt8(255)]
     }
     
     func renderScreen()
@@ -43,21 +62,19 @@ class GameScene: SKScene,IRenderScreen {
         }
         
         arraySKShapeNode.removeAll()
-        //BG
         
+        //BG
         let width = 256
         let height = 240
-        var index = 0
         
-        let bytes = stride(from: 0, to: (256 * 240), by: 1).flatMap {
+        let bytes = stride(from: 0, to: (width * height), by: 1).flatMap {
             pos in
-            return getPixel(pos: pos)
+            return getBgPixel(pos: pos)
         }
         
-        ///var myData = bytes.withUnsafeBufferPointer {Data(buffer: $0)}
-        let data = Data(bytes: bytes)
-        let bgTexture = SKTexture.init(data: data, size: CGSize(width: 256, height: 240))
-        
+        let data = Data.init(bytes)
+        let bgTexture = SKTexture.init(data: data, size: CGSize(width: width, height: height))
+        bgTexture.filteringMode = .nearest
         let bkNode = SKSpriteNode.init(texture: bgTexture)
         bkNode.position = CGPoint.init(x: 128, y: 120)
         bkNode.size = CGSize(width: 256, height: 240)
@@ -66,16 +83,14 @@ class GameScene: SKScene,IRenderScreen {
         addChild(bkNode)
         
         let spriteObjs = nes.getSpriteObjs()
-        
         for spriteObj in spriteObjs
         {
-            let location = CGPoint.init(x: spriteObj.x+4, y: spriteObj.y-4)//event.location(in: self)
-
+            let location = CGPoint.init(x: spriteObj.x+4, y: spriteObj.y-4)
             let size = CGSize(width: 8, height: 8)
             let spriteNode = SKSpriteNode.init(texture: spriteObj.getTexture())
             spriteNode.size = size
             spriteNode.position = location
-
+            
             arraySKShapeNode.append(spriteNode)
             addChild(spriteNode)
         }
@@ -83,7 +98,25 @@ class GameScene: SKScene,IRenderScreen {
     
 }
 
+#if os(iOS)
+struct GameView: View {
+    let scene: GameScene
+    var body: some View {
+        SpriteView(scene: scene)
+                    .frame(width: 256, height: 240)
+                    .ignoresSafeArea()
+        //Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/).position(x: 0, y: 0)
+    }
+}
 
+/*
+struct GameView_Previews: PreviewProvider {
+    static var previews: some View {
+        //GameView()
+    }
+}*/
+
+#else
 struct GameView: View {
     let scene: SKScene
     
@@ -130,3 +163,5 @@ struct GameViewRepresentable: NSViewRepresentable {
         }
     }
 }
+#endif
+

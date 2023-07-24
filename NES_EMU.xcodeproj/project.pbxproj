@@ -92,6 +92,8 @@
 		35B9C5A326C3191600E13D57 /* Mapper0.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C5A126C3191600E13D57 /* Mapper0.swift */; };
 		35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
 		35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
+		35FF346B2A6DEF970052DFBF /* IOSGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FF346A2A6DEF970052DFBF /* IOSGameView.swift */; };
+		35FF346C2A6DEF970052DFBF /* IOSGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FF346A2A6DEF970052DFBF /* IOSGameView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -143,6 +145,7 @@
 		35B9C59C26C3167400E13D57 /* Donkey Kong (Japan).nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Donkey Kong (Japan).nes"; sourceTree = "<group>"; };
 		35B9C5A126C3191600E13D57 /* Mapper0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper0.swift; sourceTree = "<group>"; };
 		35DA36F826C3C10F005B2BC1 /* Color4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color4.swift; sourceTree = "<group>"; };
+		35FF346A2A6DEF970052DFBF /* IOSGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSGameView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +241,7 @@
 				352575E326BD4828005AB816 /* ContentView.swift */,
 				3530B85026C6DD0800A2858C /* ScreenCanvasView.swift */,
 				3545B4E32A6D776F00C1E32E /* GameView.swift */,
+				35FF346A2A6DEF970052DFBF /* IOSGameView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -459,6 +463,7 @@
 				3530FA3826BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88E26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88726C7FBE600A2858C /* ICpu.swift in Sources */,
+				35FF346B2A6DEF970052DFBF /* IOSGameView.swift in Sources */,
 				35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */,
 				3530FA5C26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
@@ -497,6 +502,7 @@
 				3530FA3926BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88F26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88826C7FBE600A2858C /* ICpu.swift in Sources */,
+				35FF346C2A6DEF970052DFBF /* IOSGameView.swift in Sources */,
 				35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */,
 				3530FA5D26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
