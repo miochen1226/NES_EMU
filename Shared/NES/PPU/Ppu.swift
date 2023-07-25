@@ -909,6 +909,7 @@ class Ppu:IPpu{
         //Mio disable sprite
         spriteRenderingEnabled = false
         
+        
         // Get the background pixel
         var bgPaletteHighBits:UInt8 = 0
         var bgPaletteLowBits:UInt8 = 0

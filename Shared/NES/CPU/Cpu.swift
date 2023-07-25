@@ -7,7 +7,12 @@
 
 import Foundation
 class Cpu:CpuRegDef,ICpu{
+    func setApu(apu:Apu)
+    {
+        m_apu = apu
+    }
     
+    var m_apu:Apu!
     func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         var result:UInt8 = 0;
 
@@ -20,6 +25,11 @@ class Cpu:CpuRegDef,ICpu{
         case CpuMemory.kControllerPort1: // $4016
             //NSLog("TODOOOO")
             break
+            
+        case 0x4015: // $4015
+            result = m_apu.HandleCpuRead(cpuAddress: cpuAddress)
+            break
+            
         case CpuMemory.kControllerPort2: // $4017
             //NSLog("TODOOOO")
             //result = m_controllerPorts.HandleCpuRead(cpuAddress);
@@ -28,7 +38,7 @@ class Cpu:CpuRegDef,ICpu{
         default:
             
             //NSLog("TODOOOO")
-            //result = m_apu->HandleCpuRead(cpuAddress);
+            result = m_apu.HandleCpuRead(cpuAddress: cpuAddress)
             break
         }
         
@@ -79,8 +89,7 @@ class Cpu:CpuRegDef,ICpu{
             //NSLog("TODOOOO")
             break
         default:
-            //NSLog("TODOOOO m_apu->HandleCpuWrite(cpuAddress, value);")
-            //m_apu->HandleCpuWrite(cpuAddress, value);
+            m_apu.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
             break;
         }
     }

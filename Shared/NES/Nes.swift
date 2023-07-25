@@ -40,13 +40,18 @@ class SpriteObj{
 class Nes{
     
     let m_cartridge = Cartridge.init()
-    let m_cpu = Cpu.init()
+    
     let m_ppu = Ppu.init()
+    let m_apu = Apu.init()
+    let m_cpu = Cpu.init()
+    
     let m_cpuMemoryBus = CpuMemoryBus.init()
     let m_ppuMemoryBus = PpuMemoryBus.init()
     let m_cpuInternalRam = CpuInternalRam.init()
     let m_renderer = Renderer.init()
     init() {
+        
+        m_cpu.setApu(apu: m_apu)
         m_renderer.Initialize()
         m_cpu.Initialize(cpuMemoryBus:m_cpuMemoryBus)
         m_ppu.Initialize(ppuMemoryBus: m_ppuMemoryBus, nes: self,renderer:m_renderer)
@@ -68,7 +73,6 @@ class Nes{
     
     func getSpriteObjs()->[SpriteObj]
     {
-        //return []
         var spriteObjs:[SpriteObj] = []
         
         let oam1:[SpriteData] = m_ppu.getOamArray(oamMemory:m_ppu.m_oam)
@@ -159,10 +163,28 @@ class Nes{
         serialQueue.async {
             while true
             {
-                self.ExecuteCpuAndPpuFrame()
+                var half = false
+                var dateLast = Date()
+                for _ in 0...59
+                {
+                    self.ExecuteCpuAndPpuFrame()
+                    half = !half
+                    if(half)
+                    {
+                        DispatchQueue.main.async {
+                            self.iRenderScreen?.renderScreen()
+                        }
+                    }
+                }
                 
-                DispatchQueue.main.async {
-                    self.iRenderScreen?.renderScreen()
+                
+                
+                //DispatchQueue.main.async {
+                //    self.iRenderScreen?.renderScreen()
+                //}
+                
+                while dateLast.timeIntervalSinceNow > -1
+                {
                 }
             }
             
@@ -176,6 +198,7 @@ class Nes{
         return "FPS: " + strFps + ""
     }
     var totalFrame = 0
+    
     func ExecuteCpuAndPpuFrame()
     {
         var completedFrame = false
@@ -189,7 +212,7 @@ class Nes{
             var cpuCycles:UInt32 = 0
             m_cpu.Execute(&cpuCycles)
             m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
-            //m_apu.Execute(cpuCycles);
+            m_apu.Execute(cpuCycles)
         }
         
         totalFrame += 1

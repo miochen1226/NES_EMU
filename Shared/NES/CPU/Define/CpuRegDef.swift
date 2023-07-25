@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CpuRegDef
+class CpuRegDef:NSObject
 {
     enum StatusFlag:UInt8
     {
