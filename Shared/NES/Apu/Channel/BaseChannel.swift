@@ -7,6 +7,9 @@
 
 import Foundation
 
+
+
+
 class ChannelComponent
 {
     class Divider
@@ -18,9 +21,19 @@ class ChannelComponent
             m_period  = period
         }
         
+        func GetPeriod()->UInt16
+        {
+            return m_period
+        }
+        
         func GetCounter()->UInt16
         {
             return m_counter
+        }
+        
+        func ResetCounter()
+        {
+            m_counter = m_period
         }
         
         func Clock()->Bool
@@ -28,57 +41,41 @@ class ChannelComponent
             if (m_counter == 0)
             {
                 ResetCounter()
-                var counter = m_counter
                 return true
             }
             m_counter -= 1
-            var counter = m_counter
             return false
-        }
-        
-        func ResetCounter()
-        {
-            var period = m_period
-            m_counter = m_period
-        }
-        
-        func GetPeriod()->UInt16
-        {
-            return m_period
         }
     }
 
     class LinearCounter
     {
-        func BIT(_ n:Int)->UInt8
-        {
-            return (1<<n)
-        }
-        
         let m_divider = Divider()
-        var m_control = false
-        func  SetControlAndPeriod(control:Bool, period:UInt16)
-        {
-            m_control = control;
-            assert(period < BIT(7));
-            m_divider.SetPeriod(period)
-        }
+        
+        var m_reload = true
+        var m_control = true
         
         func Restart()
         {
             m_reload = true
         }
         
-        var m_reload = false
+        func  SetControlAndPeriod(control:Bool, period:UInt16)
+        {
+            m_control = control;
+            assert(period < BIT(7))
+            m_divider.SetPeriod(period)
+        }
+        
         func Clock()
         {
             if (m_reload)
             {
-                m_divider.ResetCounter();
+                m_divider.ResetCounter()
             }
             else if (m_divider.GetCounter() > 0)
             {
-                m_divider.Clock();
+                m_divider.Clock()
             }
 
             if (!m_control)
@@ -89,13 +86,19 @@ class ChannelComponent
         
         func GetValue()->UInt16
         {
-            let value = m_divider.GetCounter()
-            return value
+            return m_divider.GetCounter()
         }
 
         func SilenceChannel()->Bool
         {
-            return GetValue() == 0
+            if(GetValue() == 0)
+            {
+                return true
+            }
+            else
+            {
+                return false
+            }
         }
     }
     
@@ -152,13 +155,19 @@ class ChannelComponent
         
         func GetValue()->UInt16
         {
-            let counter = m_counter
             return m_counter
         }
         
         func SilenceChannel()->Bool
         {
-            return m_counter == 0
+            if(m_counter == 0)
+            {
+                return true
+            }
+            else
+            {
+                return false
+            }
         }
     }
 
@@ -167,20 +176,11 @@ class ChannelComponent
         let m_divider = Divider()
         var m_minPeriod = 0
         
-        func SetPeriodHigh3(_ value:UInt16)
-        {
-            //assert(value < BIT(3));
-            var period = m_divider.GetPeriod()
-            period = (value << 8) | (period & 0xFF); // Keep low 8 bits
-            m_divider.SetPeriod(period)
-            m_divider.ResetCounter()
-        }
-        
         func Reset()
         {
             m_divider.ResetCounter()
         }
-
+        
         func GetPeriod()->UInt16
         {
             return m_divider.GetPeriod()
@@ -190,24 +190,24 @@ class ChannelComponent
         {
             m_divider.SetPeriod(period)
         }
-
+        
         func SetPeriodLow8(_ value:UInt8)
         {
-            var period = m_divider.GetPeriod()
-            period = (period & 0x700/*BITS(8,9,10)*/) | UInt16(value) // Keep high 3 bits
-            SetPeriod(period);
+            var period:UInt16 = m_divider.GetPeriod()
+            period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
+            SetPeriod(period)
         }
-
-        func SetPeriodHigh3( value:Int)
+        
+        func SetPeriodHigh3(_ value:UInt16)
         {
             //assert(value < BIT(3));
-            var period = m_divider.GetPeriod();
-            period = (UInt16(value) << 8) | (period & 0xFF); // Keep low 8 bits
-            m_divider.SetPeriod(period);
-
-            m_divider.ResetCounter();
+            var period:UInt16 = m_divider.GetPeriod()
+            //period = (value << 8) | (period & 0xFF); // Keep low 8 bits
+            period = (value << 8) | (period & 0xFF)
+            m_divider.SetPeriod(period)
+            m_divider.ResetCounter()
         }
-
+        
         func SetMinPeriod(_ minPeriod:Int)
         {
             m_minPeriod = minPeriod;
@@ -239,40 +239,6 @@ class BaseChannel
     let m_timer = ChannelComponent.Timer()
     let m_linearCounter = ChannelComponent.LinearCounter()
     var m_lengthCounter = ChannelComponent.LengthCounter()
-    
-    func ClearBits(target:inout UInt16, value:UInt8)
-    {
-        target = (target & ~UInt16(value))
-    }
-    
-    func TestBits(target:UInt16,  value:UInt8)->Bool
-    {
-        return ReadBits(target: target, value: value) != 0
-    }
-    
-    func ReadBits(target:UInt16, value:UInt8)->UInt16
-    {
-        return target & UInt16(value)
-    }
-
-    func TestBits01(target:UInt16,value:UInt8)->UInt8
-    {
-        if(ReadBits(target: target, value: value) != 0)
-        {
-            return 1
-        }
-        else
-        {
-            return 0
-        }
-        //return ReadBits(target, value) != 0? 1 : 0;
-    }
-    
-    func BIT(_ n:Int)->UInt8
-    {
-        let value = UInt8(1<<n)
-        return value
-    }
     
     func GetLengthCounter()->ChannelComponent.LengthCounter
     {

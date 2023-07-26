@@ -142,6 +142,11 @@ class Cpu:CpuRegDef,ICpu{
         cpuCyclesElapsed = m_cycles
     }
     
+    func Read16(_ address:UInt16)->UInt16
+    {
+        return TO16(m_cpuMemoryBus!.Read(address)) | (TO16(m_cpuMemoryBus!.Read(address + 1)) << 8)
+    }
+    
     func ExecutePendingInterrupts()
     {
         let kInterruptCycles = 7
@@ -889,23 +894,7 @@ class Cpu:CpuRegDef,ICpu{
 
         //m_controllerPorts.Reset();
     }
-    
-    
-    func TO16(_ v8:UInt8)->UInt16
-    {
-        return UInt16(v8)
-    }
-    
-    func TO8(_ v16:UInt16)->UInt8
-    {
-        let v8:UInt8 = UInt8(v16 & 0x00FF)
-        return v8
-    }
-    
-    func Read16(_ address:UInt16)->UInt16
-    {
-        return TO16(m_cpuMemoryBus!.Read(address)) | (TO16(m_cpuMemoryBus!.Read(address + 1)) << 8)
-    }
+
     
     func GetMemValue()->UInt8
     {

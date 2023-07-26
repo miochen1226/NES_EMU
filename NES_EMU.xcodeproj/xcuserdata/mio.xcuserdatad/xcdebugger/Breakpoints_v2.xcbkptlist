@@ -46,8 +46,8 @@
             filePath = "Shared/NES/Apu/Apu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "332"
-            endingLineNumber = "332"
+            startingLineNumber = "329"
+            endingLineNumber = "329"
             landmarkName = "HandleCpuRead(cpuAddress:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -110,8 +110,8 @@
             filePath = "Shared/NES/CPU/Cpu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "280"
-            endingLineNumber = "280"
+            startingLineNumber = "285"
+            endingLineNumber = "285"
             landmarkName = "UpdateOperandAddress()"
             landmarkType = "7">
          </BreakpointContent>
@@ -142,8 +142,8 @@
             filePath = "Shared/NES/Apu/Apu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "356"
-            endingLineNumber = "356"
+            startingLineNumber = "354"
+            endingLineNumber = "354"
             landmarkName = "HandleCpuRead(cpuAddress:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -158,42 +158,10 @@
             filePath = "Shared/NES/Apu/Apu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "341"
-            endingLineNumber = "341"
+            startingLineNumber = "339"
+            endingLineNumber = "339"
             landmarkName = "HandleCpuRead(cpuAddress:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "D508562F-0F95-4E98-A75E-BB2331AB5D1B - 8f33c8a5f3fff1b7"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "NES_EMU.Cpu.HandleCpuRead(Swift.UInt16) -&gt; Swift.UInt8"
-                  moduleName = "NES_EMU"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/mio/Documents/GitHub/NES_EMU/Shared/NES/Apu/Apu.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "341"
-                  endingLineNumber = "341"
-                  offsetFromSymbolStart = "120">
-               </Location>
-               <Location
-                  uuid = "D508562F-0F95-4E98-A75E-BB2331AB5D1B - 6381dbf727fbaaed"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "NES_EMU.Apu.HandleCpuRead(cpuAddress: Swift.UInt16) -&gt; Swift.UInt8"
-                  moduleName = "NES_EMU"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/mio/Documents/GitHub/NES_EMU/Shared/NES/Apu/Apu.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "341"
-                  endingLineNumber = "341"
-                  offsetFromSymbolStart = "32">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -206,8 +174,8 @@
             filePath = "Shared/NES/Apu/Apu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "335"
-            endingLineNumber = "335"
+            startingLineNumber = "332"
+            endingLineNumber = "332"
             landmarkName = "HandleCpuRead(cpuAddress:)"
             landmarkType = "7">
          </BreakpointContent>

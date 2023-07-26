@@ -99,10 +99,6 @@ class Ppu:IPpu{
         }
     }
     
-    func BIT(_ n:Int)->UInt8
-    {
-        return (1<<n)
-    }
     
     func MapPpuToPalette(ppuAddress:UInt16)->UInt16
     {
@@ -125,36 +121,6 @@ class Ppu:IPpu{
 
         return paletteAddress;
     }
-    
-    func ClearBits(target:inout UInt16, value:UInt8)
-    {
-        target = (target & ~UInt16(value))
-    }
-    
-    func TestBits(target:UInt16,  value:UInt8)->Bool
-    {
-        return ReadBits(target: target, value: value) != 0
-    }
-    
-    func ReadBits(target:UInt16,  value:UInt8)->UInt16
-    {
-        return target & UInt16(value)
-    }
-    
-
-    func TestBits01(target:UInt16,value:UInt8)->UInt8
-    {
-        if(ReadBits(target: target, value: value) != 0)
-        {
-            return 1
-        }
-        else
-        {
-            return 0
-        }
-        //return ReadBits(target, value) != 0? 1 : 0;
-    }
-    
     
     func ReadPpuRegister(_ cpuAddress:UInt16)->UInt8
     {
@@ -609,10 +575,6 @@ class Ppu:IPpu{
     
     func FlipBits(_ v:UInt8) -> UInt8
     {
-        func BIT(_ n:Int)->UInt8
-        {
-            return (1<<n)
-        }
         /*
         let b0 = ((v & Ppu.BIT(0)) << 7)
         let b1 = ((v & BIT(1)) << 5)
@@ -762,12 +724,6 @@ class Ppu:IPpu{
     
     var m_spriteFetchData:[SpriteFetchData] = []
     
-    func TO8(_ v16:UInt16)->UInt8
-    {
-        let v8:UInt8 = UInt8(v16 & 0x00FF)
-        return v8
-    }
-    
     func GetVRamAddressFineY(_ v:UInt16)->UInt8
     {
         return TO8((v & 0x7000) >> 12)
@@ -886,6 +842,7 @@ class Ppu:IPpu{
     
     func RenderPixel(x:UInt32, y:UInt32)
     {
+        return
         //TODO
         //NSLog("RenderPixel")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
@@ -972,7 +929,7 @@ class Ppu:IPpu{
                             if (sprPaletteLowBits != 0)
                             {
                                 foundSprite = true;
-                                sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: 0x3)) //@TODO: cache this in spriteData
+                                sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: UInt8(0x3))) //@TODO: cache this in spriteData
                                 spriteHasBgPriority = TestBits(target: UInt16(spriteData.attributes), value: BIT(5))
                                 
                                 
@@ -1276,11 +1233,6 @@ class Ppu:IPpu{
     func SetVRamAddressNameTable(v:inout UInt16,  value:UInt8)
     {
         v = (v & ~0x0C00) | (TO16(value) << 10)
-    }
-    
-    func TO16(_ v8:UInt8)->UInt16
-    {
-        return UInt16(v8)
     }
     
     func HandlePpuRead(_ ppuAddress:UInt16)->UInt8

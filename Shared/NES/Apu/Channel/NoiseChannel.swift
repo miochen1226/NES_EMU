@@ -18,6 +18,7 @@ class NoiseChannel:BaseChannel{
         {
             return 0;
         }
+        
         return Float32(m_volumeEnvelope.GetVolume())
     }
     
@@ -38,7 +39,7 @@ class NoiseChannel:BaseChannel{
             m_shiftRegister.Clock();
         }
     }
-    
+    /*
     func BITS(_ bitsIn:[Int])->UInt16
     {
         var result:UInt16 = 0
@@ -50,6 +51,7 @@ class NoiseChannel:BaseChannel{
         
         return result
     }
+     */
     
     override func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
     {
@@ -90,46 +92,29 @@ class NoiseChannel:BaseChannel{
 
 class LinearFeedbackShiftRegister
 {
-    func BIT(_ n:Int)->UInt16
-    {
-        let value = UInt16(1<<n)
-        return value
-    }
-    
-    func TestBits(target:UInt16,  value:UInt16)->Bool
-    {
-        return ReadBits(target: target, value: value) != 0
-    }
-
-    
-    func ReadBits(target:UInt16, value:UInt16)->UInt16
-    {
-        return target & UInt16(value)
-    }
-    
     var m_register:UInt16 = 1
     var m_mode = false
     // Clocked by noise channel timer
     func Clock()
     {
-        let bit0 = ReadBits(target: UInt16(BIT(0)), value: m_register)
+        let bit0:UInt16 = ReadBits(target: UInt16(BIT(0)), value: m_register)
         //(m_register, BIT(0));
 
-        var whichBitN = 1
+        var whichBitN:UInt16 = 1
         if(m_mode)
         {
             whichBitN = 6
         }
         //uint16 whichBitN = m_mode ? 6 : 1;
         //uint16 bitN = ReadBits(m_register, BIT(whichBitN)) >> whichBitN;
-        let bitN = ReadBits(target: UInt16(BIT(whichBitN)), value: m_register) >> whichBitN
+        let bitN:UInt16 = ReadBits(target: UInt16(BIT(Int(whichBitN))), value: m_register) >> whichBitN
         //ReadBits(m_register, BIT(whichBitN)) >> whichBitN;
         
-        let feedback:UInt16 = UInt16(bit0 ^ bitN);
-        //assert(feedback < 2);
+        let feedback = bit0 ^ bitN
+        assert(feedback < 2);
 
         m_register = (m_register >> 1) | (feedback << 14)
-        assert(m_register < BIT(15));
+        assert(m_register < BIT16(15));
     }
 
     func SilenceChannel()->Bool

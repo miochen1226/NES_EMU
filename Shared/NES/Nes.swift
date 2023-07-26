@@ -95,12 +95,12 @@ class Nes{
             spriteObj.y = 239 - Int(spriteData.bmpLow)
             
             let attribs:UInt8 = spriteData.attributes
-            let flipHorz:Bool = m_ppu.TestBits(target:UInt16(attribs), value: m_ppu.BIT(6))
+            let flipHorz:Bool = TestBits(target:UInt16(attribs), value: BIT(6))
             //let flipVert:Bool = m_ppu.TestBits(target:UInt16(attribs), value:m_ppu.BIT(7))
             //let spriteHasBgPriority:Bool = m_ppu.TestBits(target: UInt16(attribs), value: m_ppu.BIT(5))
            
             let tileIndex:UInt8 = spriteData.bmpHigh
-            let tileOffset:UInt16 = m_ppu.TO16(tileIndex) * 16
+            let tileOffset:UInt16 = TO16(tileIndex) * 16
             
             let patternTableAddress:UInt16 = 0x0000
             
@@ -122,11 +122,11 @@ class Nes{
                 
                 for _ in 0...7
                 {
-                    sprPaletteLowBits = (m_ppu.TestBits01(target: UInt16(spriteFetchData.bmpHigh), value: 0x80) << 1) | (m_ppu.TestBits01(target: UInt16(spriteFetchData.bmpLow), value: 0x80))
+                    sprPaletteLowBits = (TestBits01(target: UInt16(spriteFetchData.bmpHigh), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteFetchData.bmpLow), value: 0x80))
                     
                     if (sprPaletteLowBits != 0)
                     {
-                        sprPaletteHighBits = UInt8(m_ppu.ReadBits(target: UInt16(spriteData.attributes), value: 0x3))
+                        sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: UInt8(0x3)))
 
                     }
                           

@@ -71,7 +71,7 @@ class AudioDriver:NSObject {
     }
     
     var bufferF:[Float32] = []
-    let limit = 44100/1
+    let limit = 44100*1
     func AddSampleF32(sample:Float32)
     {
         assert(sample >= 0.0 && sample <= 1.0)
