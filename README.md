@@ -1,9 +1,9 @@
 # NES_EMU
 NES_EMU with swift
 <p> 7/27 correct pulseWave implementation
-  <iframe width="560" 
-        height="315" 
-        src="https://riservato-xyz.frama.io/watch/?v= 792qbxuuFA4" frameborder="0"></iframe>
+  
+  <a href="https://www.youtube.com/shorts/792qbxuuFA4">影片</a>
+    
 <p>
 <p> 7/24 support display for ios.
   <img src="./F1666584-9E5B-4A69-B5C9-2DFF10E65850.jpg">
