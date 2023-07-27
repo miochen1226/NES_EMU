@@ -1,7 +1,11 @@
 # NES_EMU
 NES_EMU with swift
-
-<p> 4/24 support display for ios.
+<p> 7/27 correct pulseWave implementation
+  
+  <a href="https://www.youtube.com/shorts/792qbxuuFA4">影片</a>
+    
+<p>
+<p> 7/24 support display for ios.
   <img src="./F1666584-9E5B-4A69-B5C9-2DFF10E65850.jpg">
 <p>
 not playable
