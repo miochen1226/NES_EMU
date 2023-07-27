@@ -1,7 +1,16 @@
 # NES_EMU
 NES_EMU with swift
-<p> 7/27 correct pulseWave implementation
-  
+<p> 7/27 
+  1.correct pulseWave implementation
+  2.Add keyboard control
+    "a": Left
+    "d": Right
+    "s": Down
+    "w": Up
+    "o": A
+    "p": B
+    "n": Select
+    "m": Start
   <a href="https://www.youtube.com/shorts/792qbxuuFA4">影片</a>
     
 <p>
