@@ -14,8 +14,10 @@ protocol IRenderScreen
     func renderScreen()
 }
 
+let nes = Nes.init()
+
 class GameScene: SKScene,IRenderScreen {
-    let nes = Nes.init()
+    
     /*
     func initScene()->GameScene
     {

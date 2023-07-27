@@ -62,18 +62,12 @@ class TimerEx
     func SetPeriod(_ period:UInt16)
     {
         m_divider.SetPeriod(period)
-        
-        //print()
     }
     
     func SetPeriodLow8(_ value:UInt8)
     {
         var period:UInt16 = m_divider.GetPeriod()
-        //period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
-        //period = UInt16(value)+1000
-        
-        //print()
-        //SetPeriod(UInt16(value))
+        period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
         SetPeriod(UInt16(value))
     }
     
@@ -85,9 +79,6 @@ class TimerEx
         period = (value << 8) | (period & 0xFF)
         
         SetPeriod(UInt16(period))
-        //m_divider.SetPeriod(period)
-        
-        print(m_divider.GetPeriod())
         m_divider.ResetCounter()
     }
     
@@ -101,10 +92,10 @@ class TimerEx
     func Clock()->Bool
     {
         // Avoid popping and weird noises from ultra sonic frequencies
-        if (m_divider.GetPeriod() < m_minPeriod)
-        {
-            return false
-        }
+        //if (m_divider.GetPeriod() < m_minPeriod)
+        //{
+        //    return false
+        //}
             
         if (m_divider.Clock())
         {
@@ -130,15 +121,9 @@ class LengthCounterEx
     {
         m_enabled = value
         
-        
         if (!m_enabled)
         {
             m_counter = 0
-            //print("LengthCounterEx disable")
-        }
-        else
-        {
-            //print("LengthCounterEx enable")
         }
     }
     
@@ -158,7 +143,7 @@ class LengthCounterEx
         //static_assert(ARRAYSIZE(lut) == 32, "Invalid");
         //assert(index < ARRAYSIZE(lut));
         m_counter = UInt16(lut[Int(index)])
-        print("LengthCounterEx LoadCounterFromLUT set m_counter->" + String(m_counter) + ",index->" + String(index))
+        //print("LengthCounterEx LoadCounterFromLUT set m_counter->" + String(m_counter) + ",index->" + String(index))
     }
     
     func Clock()
@@ -175,7 +160,6 @@ class LengthCounterEx
         {
             m_counter = m_counter-1
         }
-        //print("LengthCounterEx after clock m_counter->" + String(m_counter))
     }
     
     func GetValue()->UInt16
@@ -195,7 +179,7 @@ class LengthCounterEx
         if(m_counter == 0)
         {
             //print("LengthCounterEx SilenceChannel->true")
-            return false
+            return true
         }
         else
         {
@@ -218,6 +202,8 @@ class PulseChannel:NSObject {
     init(pulseChannelNumber:UInt8)
     {
         super.init()
+        
+        m_lengthCounterEx.SetEnabled(true)
         
         if (pulseChannelNumber == 0)
         {
@@ -245,13 +231,124 @@ class PulseChannel:NSObject {
         }
     }
     
+    func handle40004004(cpuAddress:UInt16, value:UInt8)
+    {
+        //DDlc.vvvv
+        //l
+        //表示 envelope loop 标志
+        let l = TestBits(target: UInt16(BIT(5)), value: value)
+        //c
+        //表示是否为常量音量
+        
+        let c = TestBits(target: UInt16(BIT(4)), value: value)
+        
+        //vvvv
+        //如果 c 置位，表示音量大小，否则表示 envelope 的分频计数
+        let vvvv = ReadBits(target: BITS([0,1,2,3]), value: value)
+        
+        let DD = ReadBits(target: BITS([6,7]), value: value) >> 6
+        m_pulseWaveGenerator.SetDuty(UInt8(DD))
+        
+        m_lengthCounterEx.SetHalt(l)
+        
+        m_volumeEnvelope.SetLoop(l) // Same bit for length counter halt and envelope loop
+        
+        if(c)
+        {
+            m_volumeEnvelope.SetConstantVolume(vvvv)
+        }
+        else
+        {
+            m_volumeEnvelope.SetCounter(vvvv)
+        }
+    }
+    
+    func handle40014005(cpuAddress:UInt16, value:UInt8)
+    {
+        //EPPP.NSSS
+        //E
+        //表示是否使能 sweep
+        //PPP
+        //sweep 的分频计数
+        //N
+        //sweep 是否为负，用来控制频率随时间增大还是减小
+        //SSS
+        //位移量，用于每个 sweep 周期将 timer 右移对应的位移量得到增量
+
+        let E = TestBits(target: UInt16(BIT(7)), value: value)
+        //m_sweepUnit.SetEnabled(E)
+        m_sweepUnit.SetEnabled(E)
+        
+        let PPP = ReadBits(target: BITS([4,5,6]), value: value) >> 4
+        m_sweepUnit.SetPeriod(period: PPP, timer: &m_timerEx)
+        
+        let N = TestBits(target: UInt16(BIT(3)), value: value)
+        m_sweepUnit.SetNegate(N)
+        
+        let SSS = UInt8(ReadBits( target:BITS([0,1,2]),value:value))
+        m_sweepUnit.SetShiftCount(SSS)
+        
+        m_sweepUnit.Restart()
+        
+    }
+    
+    func handle40024006(cpuAddress:UInt16, value:UInt8)
+    {
+        //LLLL.LLLL
+
+        //LLLLLLLL
+        //timer 的低 8 位（一共 11 位，用于将 cpu 二分频后的时钟继续分频）
+        m_timerEx.SetPeriodLow8(value)
+        m_timerEx.Reset()
+    }
+    
+    func handle40034007(cpuAddress:UInt16, value:UInt8)
+    {
+        //llll.lHHH
+
+        //lllll
+        //length counter 分频计数
+        //HHH
+        //timer 的高 3 位，和 0x4002 / 0x4006 组成完整的计数
+        let HHH = ReadBits(target: BITS([0,1,2]),value:value)
+        m_timerEx.SetPeriodHigh3(HHH)
+        
+        let LLLL = ReadBits( target:BITS([3,4,5,6,7]),value:value) >> 3
+        m_lengthCounterEx.LoadCounterFromLUT(UInt8(LLLL))
+        
+        //Side effect
+        m_volumeEnvelope.Restart()
+        m_pulseWaveGenerator.Restart()
+        
+        //m_volumeEnvelope.Restart()
+        //m_pulseWaveGenerator.Restart()
+        //m_volumeEnvelope.Restart()
+        //m_pulseWaveGenerator.Restart()
+    }
+    
     func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
     {
-        let newAddress:UInt16 = ReadBits(target: BITS([0,1]), value: value)
+        //let newAddress:UInt16 = ReadBits(target: BITS([0,1]), value: value)
         //ReadBits(cpuAddress, BITS(0,1))
         
-        switch (newAddress)
+        //0x4005
+        
+        switch (cpuAddress)
         {
+        case 0x4000,0x4004:
+            handle40004004(cpuAddress: cpuAddress, value: value)
+            break
+            
+        case 0x4001,0x4005:
+            handle40014005(cpuAddress: cpuAddress, value: value)
+            break
+        case 0x4002,0x4006:
+            handle40024006(cpuAddress: cpuAddress, value: value)
+            break
+        case 0x4003,0x4007:
+            handle40034007(cpuAddress: cpuAddress, value: value)
+            break
+            
         case 0:
             
             let duty = ReadBits(target: BITS([6,7]), value: value) >> 6
@@ -263,12 +360,14 @@ class PulseChannel:NSObject {
             
             m_volumeEnvelope.SetConstantVolumeMode(TestBits(target: UInt16(BIT(4)), value: value))
             m_volumeEnvelope.SetConstantVolume(ReadBits(target: BITS([0,1,2,3]), value: value))
-            
+            m_volumeEnvelope.Restart()
             break
 
         case 1: // Sweep unit setup
             
-            m_sweepUnit.SetEnabled(TestBits(target: UInt16(BIT(7)), value: value))
+            //m_sweepUnit.SetEnabled(TestBits(target: UInt16(BIT(7)), value: value))
+            
+            m_sweepUnit.SetEnabled(false)
             
             let period = ReadBits(target: BITS([4,5,6]), value: value) >> 4
             m_sweepUnit.SetPeriod(period: period, timer: &m_timerEx)
@@ -276,7 +375,7 @@ class PulseChannel:NSObject {
             m_sweepUnit.SetShiftCount(UInt8(ReadBits( target:BITS([0,1,2]),value:value)))
             
             //print("PulseChannel m_sweepUnit.Restart")
-            m_sweepUnit.Restart()// Side effect
+            //m_sweepUnit.Restart()// Side effect
             
             break
 
@@ -322,21 +421,12 @@ class PulseChannel:NSObject {
         {
             return 0
         }
-        
-        //Useless
         if (m_lengthCounterEx.SilenceChannel())
         {
             return 0
         }
         
-        //let a = m_volumeEnvelope.GetVolume()
-        //let b = m_pulseWaveGenerator.GetValue()
-        
-        //let value = 12.0 * Float32(m_pulseWaveGenerator.GetValue())
         let value = Float32(m_volumeEnvelope.GetVolume()) * Float32(m_pulseWaveGenerator.GetValue())
-
-        
-        //print(value)
         assert(value < 16)
         return value
     }
@@ -347,7 +437,7 @@ class PulseChannel:NSObject {
 
 class VolumeEnvelope
 {
-    let m_divider = ChannelComponent.Divider()
+    //let m_divider = ChannelComponent.Divider()
     var m_loop = false
     var m_restart = true
     var m_counter:UInt16 = 0
@@ -370,21 +460,15 @@ class VolumeEnvelope
         m_constantVolumeMode = mode
     }
                 
+    func SetCounter(_ value:UInt16)
+    {
+        m_divider.SetPeriod(value)
+    }
+    
     func SetConstantVolume(_ value:UInt16)
     {
-        //assert(value < 16);
         m_constantVolume = value
         m_divider.SetPeriod(m_constantVolume)
-        /*
-        if(m_constantVolumeMode)
-        {
-            m_constantVolume = value
-        }
-        else
-        {
-            m_divider.SetPeriod(m_constantVolume)
-        }*/
-        
     }
                 
     func GetVolume()->UInt16
@@ -398,7 +482,6 @@ class VolumeEnvelope
         {
             result = m_counter
         }
-        //assert(result < 16)
         
         return result
     }
@@ -408,8 +491,8 @@ class VolumeEnvelope
         if (m_restart)
         {
             m_restart = false
-            m_counter = 15
-            m_divider.ResetCounter()
+            m_counter = 15;
+            m_divider.ResetCounter();
         }
         else
         {
@@ -421,11 +504,12 @@ class VolumeEnvelope
                 }
                 else if (m_loop)
                 {
-                    m_counter = 15
+                    m_counter = 15;
                 }
             }
         }
     }
+    let m_divider = DividerEx()
 }
 
 class SweepUnit
@@ -447,28 +531,11 @@ class SweepUnit
     func SetEnabled(_ enabled:Bool)
     {
         m_enabled = enabled
-        
-        if(m_enabled)
-        {
-            print("SweepUnit->enable yes")
-        }
-        else
-        {
-            print("SweepUnit->enable No")
-        }
     }
     
     func SetNegate(_ negate:Bool)
     {
         m_negate = negate
-        if(m_negate)
-        {
-            print("SweepUnit->m_negate yes")
-        }
-        else
-        {
-            print("SweepUnit->m_negate No")
-        }
     }
     
     func SetPeriod(period:UInt16, timer: inout TimerEx)
@@ -476,7 +543,7 @@ class SweepUnit
         //assert(period < 8); // 3 bitsVolumeEnvelope
         m_divider.SetPeriod(period); // Don't reset counter
 
-        ComputeTargetPeriod(timer:&timer);
+        //ComputeTargetPeriod(timer:&timer);
     }
     
     func SetShiftCount(_ shiftCount:UInt8)
@@ -484,7 +551,7 @@ class SweepUnit
         //assert(shiftCount < BIT(3))
         
         m_shiftCount = shiftCount
-        print("SweepUnit->SetShiftCount:"+String(shiftCount))
+        //print("SweepUnit->SetShiftCount:"+String(shiftCount))
     }
     
     func Restart()
@@ -495,87 +562,34 @@ class SweepUnit
     // Clocked by FrameCounter
     func Clock(_ timer: inout TimerEx)
     {
-        /*
-        if (m_enabled)
+        if(!m_enabled)
         {
-            ComputeTargetPeriod(timer: &timer)
+            return
         }
-        */
-        ComputeTargetPeriod(timer: &timer)
+        
         if (m_reload)
         {
             if (m_enabled)
             {
-                if (m_divider.GetCounter() > 0)
+                if(m_divider.Clock())
                 {
-                    if(m_divider.Clock())
-                    {
-                        AdjustTimerPeriod(timer:&timer)
-                    }
+                    AdjustTimerPeriod(timer:&timer)
                 }
-                //if(m_divider.Clock())
-                //{
-                    //print("PulseChannel AdjustTimerPeriod A " + String(m_divider.GetCounter()))
-                    //AdjustTimerPeriod(timer:&timer)
-                    //print("SweepUnit->AdjustTimerPeriod")
-                //}
             }
             
             m_divider.ResetCounter()
-            print("SweepUnit RESET====")
             m_reload = false
         }
         else
         {
+            ComputeTargetPeriod(timer: &timer)
             if (m_enabled)
-            {
-                if (m_divider.GetCounter() > 0)
-                {
-                    if(m_divider.Clock())
-                    {
-                        AdjustTimerPeriod(timer:&timer)
-                    }
-                }
-            }
-            /*
-            if (m_enabled)
-            {
-                //print("PulseChannel process " + String(m_divider.GetCounter()))
-            }
-            
-            if (m_divider.GetCounter() > 0)
-            {
-                if (m_enabled)
-                {
-                    if(m_divider.Clock())
-                    {
-                        //print("PulseChannel AdjustTimerPeriod B")
-                        AdjustTimerPeriod(timer:&timer)
-                    }
-                }
-                else
-                {
-                    m_divider.Clock()
-                }
-            }
-            */
-            
-            
-            // From the nesdev wiki, it looks like the divider is always decremented, but only
-            // reset to its period if the sweep is enabled.
-            /*
-            if (m_divider.GetCounter() > 0)
-            {
-                //m_divider.Clock()
-            }
-            else if (m_enabled && m_divider.Clock())
             {
                 if(m_divider.Clock())
                 {
-                    //AdjustTimerPeriod(timer:&timer)
+                    AdjustTimerPeriod(timer:&timer)
                 }
-                
-            }*/
+            }
         }
     }
     
@@ -590,13 +604,39 @@ class SweepUnit
     
     func ComputeTargetPeriod(timer: inout TimerEx)
     {
+        if(!m_enabled)
+        {
+            return
+        }
         assert(m_shiftCount < 8); // 3 bits
 
         let currPeriod = timer.GetPeriod()
         let shiftedPeriod = currPeriod >> m_shiftCount
 
+        
+        if (m_negate)
+        {
+            // Pulse 1's adder's carry is hardwired, so the subtraction adds the one's complement
+            // instead of the expected two's complement (as pulse 2 does)
+            //print(String(shiftedPeriod))
+            
+            if(shiftedPeriod > m_subtractExtra)
+            {
+                let del = (shiftedPeriod - m_subtractExtra)
+                if(currPeriod > del)
+                {
+                    m_targetPeriod = currPeriod - (shiftedPeriod - m_subtractExtra)
+                }
+            }
+        }
+        else
+        {
+            m_targetPeriod = currPeriod + shiftedPeriod
+        }
+        
         if(currPeriod < 8 || m_targetPeriod > 0x7FF)
         {
+            /*
             print("=======================")
             print("PulseChannel m_shiftCount ->" + String(m_shiftCount))
             print("PulseChannel shiftedPeriod ->" + String(shiftedPeriod))
@@ -606,20 +646,7 @@ class SweepUnit
             print("PulseChannel m_silenceChannel")
             
             print("=======================")
-        }
-        else
-        {
-            if (m_negate)
-            {
-                // Pulse 1's adder's carry is hardwired, so the subtraction adds the one's complement
-                // instead of the expected two's complement (as pulse 2 does)
-                print(String(shiftedPeriod))
-                m_targetPeriod = currPeriod - (shiftedPeriod - m_subtractExtra)
-            }
-            else
-            {
-                m_targetPeriod = currPeriod + shiftedPeriod
-            }
+            */
         }
         
         //print("PulseChannel m_targetPeriod ->" + String(m_targetPeriod))
@@ -629,6 +656,10 @@ class SweepUnit
             
     func AdjustTimerPeriod(timer: inout TimerEx)
     {
+        if(!m_enabled)
+        {
+            return
+        }
         // If channel is not silenced, it means we're in range
         if (m_enabled && m_shiftCount > 0 && !m_silenceChannel)
         {

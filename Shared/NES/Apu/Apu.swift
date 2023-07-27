@@ -6,161 +6,7 @@
 //
 
 import Foundation
-import SwiftUI
-
-class FrameCounter:NSObject
-{
-    var m_apu:Apu?
-    var m_cpuCycles:UInt32 = 0
-    var m_numSteps = 4
-    var m_inhibitInterrupt = true
-    
-    init(apu:Apu)
-    {
-        super.init()
-        
-        self.m_apu = apu
-    }
-
-    func SetMode(_ mode:UInt8)
-    {
-        assert(mode < 2)
-        if (mode == 0)
-        {
-            print("PulseChannel mode 4")
-            m_numSteps = 4
-        }
-        else
-        {
-            print("PulseChannel mode 5")
-            m_numSteps = 5
-
-            //@TODO: This should happen in 3 or 4 CPU cycles
-            ClockQuarterFrameChips()
-            ClockHalfFrameChips()
-        }
-
-        // Always restart sequence
-        //@TODO: This should happen in 3 or 4 CPU cycles
-        m_cpuCycles = 0
-    }
-
-    func AllowInterrupt()
-    {
-        m_inhibitInterrupt = false
-    }
-
-    func HandleCpuWrite( cpuAddress:UInt16, value:UInt8)
-    {
-        assert(cpuAddress == 0x4017)
-
-        let mode = ReadBits(target: UInt16(BIT(7)), value: value) >> 7
-        SetMode(UInt8(mode))
-        
-        
-        if (TestBits(target: UInt16(BIT(6)), value: value))
-        {
-            AllowInterrupt()
-        }
-    }
-    
-    // Clock every CPU cycle
-    func Clock()
-    {
-        var resetCycles = false
-
-        switch (m_cpuCycles)
-        {
-        case APU_TO_CPU_CYCLE(3728.5):
-            ClockQuarterFrameChips()
-            break
-
-        case APU_TO_CPU_CYCLE(7456.5):
-            ClockQuarterFrameChips()
-            ClockHalfFrameChips()
-            break
-
-        case APU_TO_CPU_CYCLE(11185.5):
-            ClockQuarterFrameChips()
-            break
-
-        case APU_TO_CPU_CYCLE(14914):
-            if (m_numSteps == 4)
-            {
-                //@TODO: set interrupt flag if !inhibit
-            }
-            break
-
-        case APU_TO_CPU_CYCLE(14914.5):
-            if (m_numSteps == 4)
-            {
-                //@TODO: set interrupt flag if !inhibit
-                ClockQuarterFrameChips()
-                ClockHalfFrameChips()
-            }
-            break
-
-        case APU_TO_CPU_CYCLE(14915):
-            if (m_numSteps == 4)
-            {
-                //@TODO: set interrupt flag if !inhibit
-
-                resetCycles = true
-            }
-            break
-
-        case APU_TO_CPU_CYCLE(18640.5):
-            if(m_numSteps == 5)
-            {
-                ClockQuarterFrameChips()
-                ClockHalfFrameChips()
-            }
-            break
-
-        case APU_TO_CPU_CYCLE(18641):
-            if(m_numSteps == 5)
-            {
-                resetCycles = true
-            }
-            break
-        default:
-            break
-        }
-
-        if(resetCycles)
-        {
-            //print("PulseChannel mode 4 m_cpuCycles->" + String(m_cpuCycles))
-            m_cpuCycles = 0
-        }
-        else
-        {
-            m_cpuCycles += 1
-        }
-    }
-
-    func APU_TO_CPU_CYCLE(_ cpuCycle:Float32)->UInt32
-    {
-        return UInt32(cpuCycle*2)
-    }
-    
-    func ClockQuarterFrameChips()
-    {
-        m_apu?.m_pulseChannel0.ClockQuarterFrameChips()
-        m_apu?.m_pulseChannel1.ClockQuarterFrameChips()
-        m_apu?.m_triangleChannel.ClockQuarterFrameChips()
-        m_apu?.m_noiseChannel.ClockQuarterFrameChips()
-    }
-
-    func ClockHalfFrameChips()
-    {
-        m_apu?.m_pulseChannel0.ClockHalfFrameChips()
-        m_apu?.m_pulseChannel1.ClockHalfFrameChips()
-        m_apu?.m_triangleChannel.ClockHalfFrameChips()
-        m_apu?.m_noiseChannel.ClockHalfFrameChips()
-    }
-}
-
-
+//import SwiftUI
 
 class Apu:NSObject{
     enum ApuChannel
@@ -170,18 +16,29 @@ class Apu:NSObject{
         case TriangleChannel
         case NoiseChannel
     }
-    var m_audioDriver = AudioDriver()
-    var m_pulseChannel0 = PulseChannel.init(pulseChannelNumber: 0)
-    var m_pulseChannel1 = PulseChannel.init(pulseChannelNumber: 1)
-    var m_triangleChannel = TriangleChannel()
-    var m_noiseChannel = NoiseChannel()
+    
+    
+    var m_audioDriver:AudioDriver?
+    var m_frameCounter:FrameCounter?
+    
+    var m_pulseChannel0:PulseChannel?
+    var m_pulseChannel1:PulseChannel?
+    var m_triangleChannel:TriangleChannel?
+    var m_noiseChannel:NoiseChannel?
+    
     var m_elapsedCpuCycles:Float = 0
-    var m_frameCounter:FrameCounter!
+    var m_sampleRate:Float32 = 44100
     
     override init()
     {
         super.init()
-        m_frameCounter = FrameCounter.init(apu: self)
+        
+        
+        initCompoment()
+        
+        m_sampleRate = m_audioDriver?.GetSampleRate() ?? 44100
+        kCpuCyclesPerSample = Apu.kCpuCyclesPerSec / m_sampleRate
+        
         SetChannelVolume(type: .PulseChannel1, volume: 1.0)
         SetChannelVolume(type: .PulseChannel2, volume: 1.0)
         SetChannelVolume(type: .TriangleChannel, volume: 1.0)
@@ -189,9 +46,36 @@ class Apu:NSObject{
         Reset()
     }
     
+    func initCompoment()
+    {
+        m_frameCounter = FrameCounter.init(apu: self)
+        m_audioDriver = AudioDriver()
+        m_pulseChannel0 = PulseChannel.init(pulseChannelNumber: 0)
+        m_pulseChannel1 = PulseChannel.init(pulseChannelNumber: 1)
+        m_triangleChannel = TriangleChannel()
+        m_noiseChannel = NoiseChannel()
+    }
+    
     var m_evenFrame = true
     var m_sampleSum = 0
     var m_numSamples = 0
+    
+    func ClockQuarterFrameChips()
+    {
+        m_pulseChannel0?.ClockQuarterFrameChips()
+        m_pulseChannel1?.ClockQuarterFrameChips()
+        m_triangleChannel?.ClockQuarterFrameChips()
+        m_noiseChannel?.ClockQuarterFrameChips()
+    }
+
+    func ClockHalfFrameChips()
+    {
+        m_pulseChannel0?.ClockHalfFrameChips()
+        m_pulseChannel1?.ClockHalfFrameChips()
+        m_triangleChannel?.ClockHalfFrameChips()
+        m_noiseChannel?.ClockHalfFrameChips()
+    }
+    
     func Reset()
     {
         m_evenFrame = true
@@ -217,97 +101,44 @@ class Apu:NSObject{
     }
     
     var count = 0
+    
+    func getChannelValue(_ channel:ApuChannel)->Float32
+    {
+        var channelValue:Float32 = 0
+        var channelVolume:Float32 = 0
+        
+        channelVolume = m_channelVolumes[ApuChannel.PulseChannel1] ?? 0
+        
+        switch (channel)
+        {
+        case .PulseChannel1:
+            channelValue = m_pulseChannel0?.GetValue() ?? 0
+            break
+        case .PulseChannel2:
+            channelValue = m_pulseChannel1?.GetValue() ?? 0
+            break
+        case .TriangleChannel:
+            channelValue = m_triangleChannel?.GetValue() ?? 0
+            break
+        case .NoiseChannel:
+            channelValue = m_noiseChannel?.GetValue() ?? 0
+            break
+        }
+        return channelValue * channelVolume
+    }
+    
     func SampleChannelsAndMix()->Float32
     {
         let kMasterVolume:Float = 1.0
         // Sample all channels
-       
-        var pulse1:Float32 = Float32(m_pulseChannel0.GetValue() * m_channelVolumes[ApuChannel.PulseChannel1]!)
-        var pulse2:Float32 = Float32(m_pulseChannel1.GetValue() * m_channelVolumes[ApuChannel.PulseChannel2]!)
-        var triangle:Float32 = Float32(m_triangleChannel.GetValue() * m_channelVolumes[ApuChannel.TriangleChannel]!)
-        
-        //triangle = 0
-        
-        var noise = Float32(m_noiseChannel.GetValue() * m_channelVolumes[ApuChannel.NoiseChannel]!)
-        
-        //print(noise)
-        //triangle = 0
-        //noise = 0
-        //pulse1 = 0
-        //pulse1 = 0
-        //pulse2 = 0
+        let pulse1 = getChannelValue(.PulseChannel1)
+        let pulse2 = getChannelValue(.PulseChannel2)
+        let triangle = getChannelValue(.TriangleChannel)
+        let noise = getChannelValue(.NoiseChannel)
         let dmc = 0.0
-        /*
-        const size_t pulse1 = static_cast<size_t>(m_pulseChannel0->GetValue() * m_channelVolumes[ApuChannel::Pulse1]);
-        const size_t pulse2 = static_cast<size_t>(m_pulseChannel1->GetValue() * m_channelVolumes[ApuChannel::Pulse2]);
-        const size_t triangle = static_cast<size_t>(m_triangleChannel->GetValue() * m_channelVolumes[ApuChannel::Triangle]);
-        const size_t noise = static_cast<size_t>(m_noiseChannel->GetValue() * m_channelVolumes[ApuChannel::Noise]);
-        const size_t dmc = static_cast<size_t>(0.0f);
-        */
-        // Mix samples
-    //#if MIX_USING_LINEAR_APPROXIMATION
-        // Linear approximation (less accurate than lookup table)
-        var pulseOut:Float32 = 0.00752 * Float32((pulse1 + pulse2))//0.00752 * Float32((pulse1 + pulse2))
-        var tndOut:Float32 = Float32(0.00851 * Float32(triangle)) + Float32(0.00494 * Float32(noise)) + Float32(0.00335 * Float32(dmc))
         
-        //pulseOut = 0
-        /*
-        if(pulseOut != 0)
-        {
-            print(pulse1)
-            var high = 0.09
-        }
-        
-        if(count<30)
-        {
-            pulseOut = 0.09
-        }
-        else
-        {
-            if(count<60)
-            {
-                pulseOut = 0.00
-            }
-            else
-            {
-                count = 0
-            }
-            
-        }
-         
-        
-        count = count+1
-        */
-         /*
-        if(pulseOut != 0)
-        {
-            print(pulse1)
-            print(pulse2)
-        }*/
-    //#else
-        // Lookup Table (accurate)
-        /*
-        static float32 pulseTable[31] = { ~0 };
-        if (pulseTable[0] == ~0)
-        {
-            for (size_t i = 0; i < ARRAYSIZE(pulseTable); ++i)
-            {
-                pulseTable[i] = 95.52f / (8128.0f / i + 100.0f);
-            }
-        }
-        static float32 tndTable[203] = { ~0 };
-        if (tndTable[0] == ~0)
-        {
-            for (size_t i = 0; i < ARRAYSIZE(tndTable); ++i)
-            {
-                tndTable[i] = 163.67f / (24329.0f / i + 100.0f);
-            }
-        }
-
-        const float32 pulseOut = pulseTable[pulse1 + pulse2];
-        const float32 tndOut = tndTable[3 * triangle + 2 * noise + dmc];
-         */
-    //#endif
+        let pulseOut:Float32 = 0.00752 * Float32((pulse1 + pulse2))//0.00752 * Float32((pulse1 + pulse2))
+        let tndOut:Float32 = Float32(0.00851 * Float32(triangle)) + Float32(0.00494 * Float32(noise)) + Float32(0.00335 * Float32(dmc))
 
         let sample:Float32 = kMasterVolume * (pulseOut + tndOut)
         return sample
@@ -372,19 +203,19 @@ class Apu:NSObject{
         switch (cpuAddress)
         {
         case 0x4000,0x4001,0x4002,0x4003:
-            m_pulseChannel0.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
+            m_pulseChannel0?.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
             break;
 
         case 0x4004,0x4005,0x4006,0x4007:
-            m_pulseChannel1.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
+            m_pulseChannel1?.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
             break;
 
         case 0x4008,0x400A,0x400B:
-            m_triangleChannel.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
+            m_triangleChannel?.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
             break
 
         case 0x400C,0x400E,0x400F:
-            m_noiseChannel.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
+            m_noiseChannel?.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
             break
 
             /////////////////////
@@ -396,25 +227,25 @@ class Apu:NSObject{
             
             var e1 = TestBits(target: UInt16(BIT(0)), value: value)//TestBits(value, BIT(0))
             e1 = true
-            m_pulseChannel0.GetLengthCounterEx().SetEnabled(e1)
+            m_pulseChannel0?.GetLengthCounterEx().SetEnabled(e1)
             
             var e2 = TestBits(target: UInt16(BIT(1)), value: value)
             e2 = true
-            m_pulseChannel1.GetLengthCounterEx().SetEnabled(e2)
+            m_pulseChannel1?.GetLengthCounterEx().SetEnabled(e2)
             
             var e3 = TestBits(target: UInt16(BIT(2)), value: value)
             e3 = true
-            m_triangleChannel.GetLengthCounter().SetEnabled(e3)
+            m_triangleChannel?.GetLengthCounter().SetEnabled(e3)
             
             var e4 = TestBits(target: UInt16(BIT(3)), value: value)
             e4 = true
-            m_noiseChannel.GetLengthCounter().SetEnabled(e4)
+            m_noiseChannel?.GetLengthCounter().SetEnabled(e4)
             //@TODO: DMC Enable bit 4
             
             break
 
         case 0x4017:
-            m_frameCounter.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
+            m_frameCounter?.HandleCpuWrite(cpuAddress:cpuAddress,value:value)
             //m_frameCounter..HandleCpuWrite(cpuAddress:cpuAddress,value:value)
             break
         default:
@@ -422,35 +253,22 @@ class Apu:NSObject{
         }
     }
     
+    var kCpuCyclesPerSample:Float32 = 0
+    
     func Execute(_ cpuCycles:UInt32)
     {
-        let kCpuCyclesPerSample:Float = Apu.kCpuCyclesPerSec / m_audioDriver.GetSampleRate()
         for _ in 0...cpuCycles-1
         {
-            
-            m_frameCounter.Clock()
-            // Clock all timers
+            m_frameCounter?.Clock()
+            m_triangleChannel?.ClockTimer()
+            //if (m_evenFrame)
             //{
-                m_triangleChannel.ClockTimer()
-
-                // All other timers are clocked every 2nd CPU cycle (every APU cycle)
-                if (m_evenFrame)
-                {
-                    
-                    m_pulseChannel0.ClockTimer()
-                    m_pulseChannel1.ClockTimer()
-                    m_noiseChannel.ClockTimer()
-                }
-
-                
-                m_evenFrame = !m_evenFrame;
+                m_pulseChannel0?.ClockTimer()
+                m_pulseChannel1?.ClockTimer()
+                m_noiseChannel?.ClockTimer()
             //}
-
-        //#if SAMPLE_EVERY_CPU_CYCLE
-        //    m_sampleSum += SampleChannelsAndMix();
-        //    ++m_numSamples;
-        //#endif
-
+            m_evenFrame = !m_evenFrame;
+            
             // Fill the sample buffer at the current output sample rate (i.e. 48 KHz)
             m_elapsedCpuCycles += 1
             if (m_elapsedCpuCycles >= kCpuCyclesPerSample)
@@ -465,11 +283,8 @@ class Apu:NSObject{
             //#endif
                 
                 let sample:Float32 = SampleChannelsAndMix();
-                m_audioDriver.AddSampleF32(sample:sample)
+                m_audioDriver?.AddSampleF32(sample:sample)
             }
-            
-            //let sample:Float32 = SampleChannelsAndMix();
-            //m_audioDriver.AddSampleF32(sample:sample)
         }
     }
 }

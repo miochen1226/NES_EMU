@@ -16,6 +16,8 @@
 		3505EABB2A6F89F300B14943 /* NoiseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EABA2A6F89F300B14943 /* NoiseChannel.swift */; };
 		3505EABC2A6F89F300B14943 /* NoiseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EABA2A6F89F300B14943 /* NoiseChannel.swift */; };
 		3505EABF2A6FC2B900B14943 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3505EABD2A6FC2B400B14943 /* AVFoundation.framework */; };
+		350858922A72261A00318C3D /* FrameCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350858912A72261900318C3D /* FrameCounter.swift */; };
+		350858932A722B4100318C3D /* FrameCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350858912A72261900318C3D /* FrameCounter.swift */; };
 		352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
 		352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
 		352575F726BD4829005AB816 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E326BD4828005AB816 /* ContentView.swift */; };
@@ -116,6 +118,7 @@
 		3505EAB72A6F85B600B14943 /* TriangleChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriangleChannel.swift; sourceTree = "<group>"; };
 		3505EABA2A6F89F300B14943 /* NoiseChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseChannel.swift; sourceTree = "<group>"; };
 		3505EABD2A6FC2B400B14943 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS15.2.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		350858912A72261900318C3D /* FrameCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameCounter.swift; sourceTree = "<group>"; };
 		352575E226BD4828005AB816 /* NES_EMUApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NES_EMUApp.swift; sourceTree = "<group>"; };
 		352575E326BD4828005AB816 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		352575E426BD4829005AB816 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -204,6 +207,14 @@
 			path = Channel;
 			sourceTree = "<group>";
 		};
+		350858902A7225FC00318C3D /* FrameCounter */ = {
+			isa = PBXGroup;
+			children = (
+				350858912A72261900318C3D /* FrameCounter.swift */,
+			);
+			path = FrameCounter;
+			sourceTree = "<group>";
+		};
 		35111F6D26C38E5A00E8D773 /* Mapper */ = {
 			isa = PBXGroup;
 			children = (
@@ -275,6 +286,7 @@
 		352AFFE22A6E6D5E00F811F8 /* Apu */ = {
 			isa = PBXGroup;
 			children = (
+				350858902A7225FC00318C3D /* FrameCounter */,
 				3505EAB32A6F835E00B14943 /* Channel */,
 				352AFFE32A6E6DD100F811F8 /* Apu.swift */,
 				352AFFE62A6E6EA800F811F8 /* AudioDriver.swift */,
@@ -540,6 +552,7 @@
 				3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
 				35B9C5A226C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760626BD48DF005AB816 /* Cartridge.swift in Sources */,
+				350858922A72261A00318C3D /* FrameCounter.swift in Sources */,
 				35B9C58326C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -585,6 +598,7 @@
 				3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
 				35B9C5A326C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760726BD48DF005AB816 /* Cartridge.swift in Sources */,
+				350858932A722B4100318C3D /* FrameCounter.swift in Sources */,
 				35B9C58426C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

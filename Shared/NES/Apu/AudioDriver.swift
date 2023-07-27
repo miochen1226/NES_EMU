@@ -20,8 +20,6 @@ class AudioDriver:NSObject {
     {
         super.init()
         do {
-            
-            
             engine = AVAudioEngine()
             playerNode = AVAudioPlayerNode()
             let outputFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
@@ -71,7 +69,7 @@ class AudioDriver:NSObject {
     }
     
     var bufferF:[Float32] = []
-    let limit = 44100*1
+    let limit = 44100/6
     func AddSampleF32(sample:Float32)
     {
         assert(sample >= 0.0 && sample <= 1.0)

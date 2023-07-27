@@ -842,7 +842,10 @@ class Ppu:IPpu{
     
     func RenderPixel(x:UInt32, y:UInt32)
     {
-        return
+        if(!alowRendBg)
+        {
+            return
+        }
         //TODO
         //NSLog("RenderPixel")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
@@ -1079,7 +1082,8 @@ class Ppu:IPpu{
         // Copy coarse Y (5 bits), fine Y (3 bits), and high nametable bit
         target = (target & 0x041F) | ((source & ~0x041F))
     }
-    
+    var passRenderTime = 30
+    var alowRendBg = true
     func Execute(_ cpuCycles:UInt32, completedFrame: inout Bool)
     {
         let kNumTotalScanlines:UInt32 = 262
@@ -1090,7 +1094,15 @@ class Ppu:IPpu{
         let ppuCycles = CpuToPpuCycles(cpuCycles)
 
         completedFrame = false
-
+        
+        if(passRenderTime<=0)
+        {
+            alowRendBg = !alowRendBg
+        }
+        else
+        {
+            passRenderTime = passRenderTime-1
+        }
         let regValue = m_ppuControlReg2.Value()
         let renderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
         
