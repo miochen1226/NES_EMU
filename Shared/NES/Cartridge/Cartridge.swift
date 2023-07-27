@@ -209,9 +209,9 @@ class Cartridge:ICartridge{
     func loadRom()
     {
         //if let filepath = Bundle.main.path(forResource: "Super Mario Bros. (Japan, USA)", ofType: "nes")
-        //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
-        if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
         {
             if let data = NSData(contentsOfFile: filepath)
@@ -282,6 +282,7 @@ class Cartridge:ICartridge{
                 //kMaxSavBanks
 
                 let mN = romHeader!.GetMapperNumber()
+                
                 /*
                 switch (romHeader!.GetMapperNumber())
                 {

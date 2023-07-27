@@ -102,6 +102,8 @@ class GameScene: SKScene,IRenderScreen {
 
 #if os(iOS)
 struct GameView: View {
+    @EnvironmentObject private var keyInputSubjectWrapper: KeyInputSubjectWrapper
+        
     let scene: GameScene
     var body: some View {
         SpriteView(scene: scene)
@@ -135,6 +137,82 @@ struct GameViewRepresentable: NSViewRepresentable {
     let scene: SKScene
     let proxy: GeometryProxy
 
+    class KeyView: SKView {
+        override var acceptsFirstResponder: Bool { true }
+        override func keyUp(with event: NSEvent) {
+            switch(event.charactersIgnoringModifiers)
+            {
+            case "a":
+                nes.m_controllerPorts.pressL(false)
+                break
+            case "s":
+                nes.m_controllerPorts.pressD(false)
+                break
+            case "d":
+                nes.m_controllerPorts.pressR(false)
+                break
+            case "w":
+                nes.m_controllerPorts.pressU(false)
+                break
+            case "o":
+                nes.m_controllerPorts.pressA(false)
+                break
+            case "p":
+                nes.m_controllerPorts.pressB(false)
+                break
+            case "n":
+                nes.m_controllerPorts.pressSelect(false)
+                break
+            case "m":
+                nes.m_controllerPorts.pressStart(false)
+                break
+            case .none:
+                print("none")
+                break
+            case .some(_):
+                print("some")
+                break
+            }
+        }
+        override func keyDown(with event: NSEvent) {
+            print(">> key \(event.charactersIgnoringModifiers ?? "")")
+            
+            switch(event.charactersIgnoringModifiers)
+            {
+            case "a":
+                nes.m_controllerPorts.pressL()
+                break
+            case "s":
+                nes.m_controllerPorts.pressD()
+                break
+            case "d":
+                nes.m_controllerPorts.pressR()
+                break
+            case "w":
+                nes.m_controllerPorts.pressU()
+                break
+            case "o":
+                nes.m_controllerPorts.pressA()
+                break
+            case "p":
+                nes.m_controllerPorts.pressB()
+                break
+            case "n":
+                nes.m_controllerPorts.pressSelect()
+                break
+            case "m":
+                nes.m_controllerPorts.pressStart()
+                break
+            case .none:
+                print("none")
+                break
+            case .some(_):
+                print("some")
+                break
+            }
+        }
+    }
+    
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
@@ -148,7 +226,7 @@ struct GameViewRepresentable: NSViewRepresentable {
 
         
         
-        let view = SKView()
+        let view = KeyView()
         view.presentScene(scene)
         return view
     }

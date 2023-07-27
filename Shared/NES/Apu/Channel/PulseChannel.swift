@@ -250,8 +250,7 @@ class PulseChannel:NSObject {
         m_pulseWaveGenerator.SetDuty(UInt8(DD))
         
         m_lengthCounterEx.SetHalt(l)
-        
-        m_volumeEnvelope.SetLoop(l) // Same bit for length counter halt and envelope loop
+        m_volumeEnvelope.SetLoop(l)
         
         if(c)
         {
@@ -276,7 +275,6 @@ class PulseChannel:NSObject {
         //位移量，用于每个 sweep 周期将 timer 右移对应的位移量得到增量
 
         let E = TestBits(target: UInt16(BIT(7)), value: value)
-        //m_sweepUnit.SetEnabled(E)
         m_sweepUnit.SetEnabled(E)
         
         let PPP = ReadBits(target: BITS([4,5,6]), value: value) >> 4
@@ -289,7 +287,6 @@ class PulseChannel:NSObject {
         m_sweepUnit.SetShiftCount(SSS)
         
         m_sweepUnit.Restart()
-        
     }
     
     func handle40024006(cpuAddress:UInt16, value:UInt8)
@@ -319,11 +316,6 @@ class PulseChannel:NSObject {
         //Side effect
         m_volumeEnvelope.Restart()
         m_pulseWaveGenerator.Restart()
-        
-        //m_volumeEnvelope.Restart()
-        //m_pulseWaveGenerator.Restart()
-        //m_volumeEnvelope.Restart()
-        //m_pulseWaveGenerator.Restart()
     }
     
     func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
@@ -348,67 +340,6 @@ class PulseChannel:NSObject {
         case 0x4003,0x4007:
             handle40034007(cpuAddress: cpuAddress, value: value)
             break
-            
-        case 0:
-            
-            let duty = ReadBits(target: BITS([6,7]), value: value) >> 6
-            m_pulseWaveGenerator.SetDuty(UInt8(duty))
-            
-            let halt = TestBits(target: UInt16(BIT(5)), value: value)
-            m_lengthCounterEx.SetHalt(halt)
-            m_volumeEnvelope.SetLoop(halt) // Same bit for length counter halt and envelope loop
-            
-            m_volumeEnvelope.SetConstantVolumeMode(TestBits(target: UInt16(BIT(4)), value: value))
-            m_volumeEnvelope.SetConstantVolume(ReadBits(target: BITS([0,1,2,3]), value: value))
-            m_volumeEnvelope.Restart()
-            break
-
-        case 1: // Sweep unit setup
-            
-            //m_sweepUnit.SetEnabled(TestBits(target: UInt16(BIT(7)), value: value))
-            
-            m_sweepUnit.SetEnabled(false)
-            
-            let period = ReadBits(target: BITS([4,5,6]), value: value) >> 4
-            m_sweepUnit.SetPeriod(period: period, timer: &m_timerEx)
-            m_sweepUnit.SetNegate(TestBits(target: UInt16(BIT(3)), value: value))
-            m_sweepUnit.SetShiftCount(UInt8(ReadBits( target:BITS([0,1,2]),value:value)))
-            
-            //print("PulseChannel m_sweepUnit.Restart")
-            //m_sweepUnit.Restart()// Side effect
-            
-            break
-
-        case 2:
-            m_timerEx.SetPeriodLow8(value)
-            //print("PulseChannel.setPeriod(low)"+String(value))
-            break
-
-        case 3:
-            //Tri
-            //m_timer.SetPeriod(UInt16(0))
-            //let period = ReadBits(target: 0x7, value: value)//(ta value, )
-            //m_timer.SetPeriodHigh3(period)
-            
-            //m_timer.SetPeriod(UInt16(768))
-            
-            m_timerEx.SetPeriodHigh3(ReadBits(target: BITS([0,1,2]),value:value))
-            
-            //m_timer.SetPeriod(1792)
-            //print("PulseChannel.setPeriod(High)"+String(value))
-            //print("PulseChannel.GetPeriod(2)->" + String(m_timerEx.GetPeriod()))
-            
-            let readBitsResult = ReadBits( target:BITS([3,4,5,6,7]),value:value) >> 3
-            m_lengthCounterEx.LoadCounterFromLUT(UInt8(readBitsResult))
-            
-            //Tri
-            //m_lengthCounterEx.LoadCounterFromLUT(value >> 3)
-            
-            //Side effect
-            m_volumeEnvelope.Restart()
-            m_pulseWaveGenerator.Restart()
-            break
-
         default:
             //assert(false)
             break
@@ -700,18 +631,7 @@ class PulseWaveGenerator
                 
     func GetValue()->UInt8
     {
-        let duty = m_duty
-        
-        //m_duty = 0
-        let step = m_step
         let value = sequences[Int(m_duty)][Int(m_step)]
-        
-        if(m_num == 0)
-        {
-            
-        }
-        
-        //print(String(duty)+"-"+String(step))
         return value
     }
 }

@@ -12,9 +12,16 @@ class Cpu:CpuRegDef,ICpu{
         m_apu = apu
     }
     
+    func setControllerPorts(controllerPorts:ControllerPorts)
+    {
+        m_controllerPorts = controllerPorts
+    }
+    
     var m_apu:Apu!
+    
+    var m_controllerPorts:ControllerPorts!
     func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
-        var result:UInt8 = 0;
+        var result:UInt8 = 0
 
         switch (cpuAddress)
         {
@@ -24,6 +31,7 @@ class Cpu:CpuRegDef,ICpu{
 
         case CpuMemory.kControllerPort1: // $4016
             //NSLog("TODOOOO")
+            result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress)
             break
             
         case 0x4015: // $4015
@@ -32,7 +40,7 @@ class Cpu:CpuRegDef,ICpu{
             
         case CpuMemory.kControllerPort2: // $4017
             //NSLog("TODOOOO")
-            //result = m_controllerPorts.HandleCpuRead(cpuAddress);
+            result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress);
             break
 
         default:
@@ -82,15 +90,15 @@ class Cpu:CpuRegDef,ICpu{
 
         case CpuMemory.kControllerPort1: // $4016
             //NSLog("TODOOOO")
-            //m_controllerPorts.HandleCpuWrite(cpuAddress, value);
-            break;
+            m_controllerPorts.HandleCpuWrite(cpuAddress: cpuAddress, value:value)
+            break
 
         case CpuMemory.kControllerPort2: // $4017 For writes, this address is mapped to the APU!
             //NSLog("TODOOOO")
             break
         default:
             m_apu.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
-            break;
+            break
         }
     }
     

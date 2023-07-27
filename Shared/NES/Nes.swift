@@ -44,7 +44,7 @@ class Nes{
     let m_ppu = Ppu.init()
     let m_apu = Apu.init()
     let m_cpu = Cpu.init()
-    
+    let m_controllerPorts = ControllerPorts.init()
     let m_cpuMemoryBus = CpuMemoryBus.init()
     let m_ppuMemoryBus = PpuMemoryBus.init()
     let m_cpuInternalRam = CpuInternalRam.init()
@@ -52,6 +52,8 @@ class Nes{
     init() {
         
         m_cpu.setApu(apu: m_apu)
+        m_cpu.setControllerPorts(controllerPorts: m_controllerPorts)
+        
         m_renderer.Initialize()
         m_cpu.Initialize(cpuMemoryBus:m_cpuMemoryBus)
         m_ppu.Initialize(ppuMemoryBus: m_ppuMemoryBus, nes: self,renderer:m_renderer)

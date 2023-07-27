@@ -40,6 +40,8 @@
 		352AFFE52A6E6DD100F811F8 /* Apu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AFFE32A6E6DD100F811F8 /* Apu.swift */; };
 		352AFFE72A6E6EA800F811F8 /* AudioDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AFFE62A6E6EA800F811F8 /* AudioDriver.swift */; };
 		352AFFE82A6E6EA800F811F8 /* AudioDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AFFE62A6E6EA800F811F8 /* AudioDriver.swift */; };
+		352BF7602A7295D40093CB65 /* ControllerPorts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352BF75F2A7295D40093CB65 /* ControllerPorts.swift */; };
+		352BF7612A7295D70093CB65 /* ControllerPorts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352BF75F2A7295D40093CB65 /* ControllerPorts.swift */; };
 		352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
 		3530B85126C6DD0800A2858C /* ScreenCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B85026C6DD0800A2858C /* ScreenCanvasView.swift */; };
@@ -135,6 +137,7 @@
 		35265B3F26C566540031E1A6 /* PpuStatusReg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuStatusReg.swift; sourceTree = "<group>"; };
 		352AFFE32A6E6DD100F811F8 /* Apu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Apu.swift; sourceTree = "<group>"; };
 		352AFFE62A6E6EA800F811F8 /* AudioDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioDriver.swift; sourceTree = "<group>"; };
+		352BF75F2A7295D40093CB65 /* ControllerPorts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerPorts.swift; sourceTree = "<group>"; };
 		352F931226C18E0A00323AC1 /* Bitfield8.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bitfield8.swift; sourceTree = "<group>"; };
 		3530B85026C6DD0800A2858C /* ScreenCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCanvasView.swift; sourceTree = "<group>"; };
 		3530B86A26C6DF3600A2858C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -294,6 +297,14 @@
 			path = Apu;
 			sourceTree = "<group>";
 		};
+		352BF75E2A7295C20093CB65 /* ControllerPorts */ = {
+			isa = PBXGroup;
+			children = (
+				352BF75F2A7295D40093CB65 /* ControllerPorts.swift */,
+			);
+			path = ControllerPorts;
+			sourceTree = "<group>";
+		};
 		3530B85526C6DD1200A2858C /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -308,6 +319,7 @@
 		3530B85626C6DD2E00A2858C /* NES */ = {
 			isa = PBXGroup;
 			children = (
+				352BF75E2A7295C20093CB65 /* ControllerPorts */,
 				352AFFE22A6E6D5E00F811F8 /* Apu */,
 				3530B87826C7F52000A2858C /* Common */,
 				3530B87526C7F4E800A2858C /* Render */,
@@ -543,6 +555,7 @@
 				3505EAB82A6F85B600B14943 /* TriangleChannel.swift in Sources */,
 				3530FA3D26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
 				35265B3B26C5548F0031E1A6 /* Renderer.swift in Sources */,
+				352BF7602A7295D40093CB65 /* ControllerPorts.swift in Sources */,
 				352F931326C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
@@ -589,6 +602,7 @@
 				3505EAB92A6F85B600B14943 /* TriangleChannel.swift in Sources */,
 				3530FA3E26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
 				35265B3C26C5548F0031E1A6 /* Renderer.swift in Sources */,
+				352BF7612A7295D70093CB65 /* ControllerPorts.swift in Sources */,
 				352F931426C18E0A00323AC1 /* Bitfield8.swift in Sources */,
 				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
