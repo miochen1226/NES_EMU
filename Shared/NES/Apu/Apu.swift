@@ -27,7 +27,9 @@ class Apu:NSObject{
     var m_noiseChannel:NoiseChannel?
     
     var m_elapsedCpuCycles:Float = 0
-    var m_sampleRate:Float32 = 44100
+    var m_sampleRate:Double = 0
+    
+    let nesFrameProvider = NesFrameProvider()
     
     override init()
     {
@@ -36,9 +38,9 @@ class Apu:NSObject{
         
         initCompoment()
         
-        m_sampleRate = m_audioDriver?.GetSampleRate() ?? 44100
-        kCpuCyclesPerSample = Apu.kCpuCyclesPerSec / m_sampleRate
+        m_sampleRate = 44100
         
+        kCpuCyclesPerSample = Apu.kCpuCyclesPerSec / Float(m_sampleRate)
         SetChannelVolume(type: .PulseChannel1, volume: 1.0)
         SetChannelVolume(type: .PulseChannel2, volume: 1.0)
         SetChannelVolume(type: .TriangleChannel, volume: 1.0)
@@ -49,7 +51,7 @@ class Apu:NSObject{
     func initCompoment()
     {
         m_frameCounter = FrameCounter.init(apu: self)
-        m_audioDriver = AudioDriver()
+        m_audioDriver = AudioDriver(frameProvider: self.nesFrameProvider)
         m_pulseChannel0 = PulseChannel.init(pulseChannelNumber: 0)
         m_pulseChannel1 = PulseChannel.init(pulseChannelNumber: 1)
         m_triangleChannel = TriangleChannel()
@@ -282,8 +284,8 @@ class Apu:NSObject{
             //    const float32 sample = SampleChannelsAndMix();
             //#endif
                 
-                let sample:Float32 = SampleChannelsAndMix();
-                m_audioDriver?.AddSampleF32(sample:sample)
+                let sample:Float32 = SampleChannelsAndMix()
+                m_audioDriver?.m_frameProvider.enqueue(input: sample)
             }
         }
     }

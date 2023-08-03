@@ -56,15 +56,11 @@ class GameScene: SKScene,IRenderScreen {
         //return [UInt8(drand48()*255),UInt8(drand48()*255),UInt8(drand48()*255),UInt8(255)]
     }
     
-    func renderScreen()
+    var enableDrawBG = false
+    var enableDrawSprites = true
+    
+    func renderBG()
     {
-        for sKShapeNode in arraySKShapeNode
-        {
-            sKShapeNode.removeFromParent()
-        }
-        
-        arraySKShapeNode.removeAll()
-        
         //BG
         let width = 256
         let height = 240
@@ -83,7 +79,10 @@ class GameScene: SKScene,IRenderScreen {
         
         arraySKShapeNode.append(bkNode)
         addChild(bkNode)
-        
+    }
+    
+    func renderSprites()
+    {
         let spriteObjs = nes.getSpriteObjs()
         for spriteObj in spriteObjs
         {
@@ -98,12 +97,30 @@ class GameScene: SKScene,IRenderScreen {
         }
     }
     
+    func renderScreen()
+    {
+        for sKShapeNode in arraySKShapeNode
+        {
+            sKShapeNode.removeFromParent()
+        }
+        
+        arraySKShapeNode.removeAll()
+        
+        if(enableDrawBG)
+        {
+            self.renderBG()
+        }
+        
+        if(enableDrawSprites)
+        {
+            self.renderSprites()
+        }
+    }
+    
 }
 
 #if os(iOS)
 struct GameView: View {
-    @EnvironmentObject private var keyInputSubjectWrapper: KeyInputSubjectWrapper
-        
     let scene: GameScene
     var body: some View {
         SpriteView(scene: scene)
@@ -136,6 +153,7 @@ struct GameView: View {
 struct GameViewRepresentable: NSViewRepresentable {
     let scene: SKScene
     let proxy: GeometryProxy
+    
 
     class KeyView: SKView {
         override var acceptsFirstResponder: Bool { true }

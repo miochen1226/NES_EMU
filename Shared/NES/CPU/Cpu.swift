@@ -18,8 +18,10 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     var m_apu:Apu!
-    
     var m_controllerPorts:ControllerPorts!
+    
+    
+    
     func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         var result:UInt8 = 0
 

@@ -1083,7 +1083,7 @@ class Ppu:IPpu{
         target = (target & 0x041F) | ((source & ~0x041F))
     }
     var passRenderTime = 30
-    var alowRendBg = true
+    var alowRendBg = false
     func Execute(_ cpuCycles:UInt32, completedFrame: inout Bool)
     {
         let kNumTotalScanlines:UInt32 = 262
@@ -1097,7 +1097,7 @@ class Ppu:IPpu{
         
         if(passRenderTime<=0)
         {
-            alowRendBg = !alowRendBg
+            //alowRendBg = !alowRendBg
         }
         else
         {
@@ -1191,7 +1191,7 @@ class Ppu:IPpu{
                     // Render pixel at x,y using pipelined fetch data. If rendering is disabled, will render background color.
                     if (x < kScreenWidth && y < kScreenHeight)
                     {
-                        RenderPixel(x: x, y: y)
+                        //RenderPixel(x: x, y: y)
                     }
 
                     // Clear flags on pre-render line at dot 1

@@ -93,6 +93,16 @@
 		3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
 		3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
 		3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
+		3557FBAB2A7C12E90059AA50 /* AudioEnginePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA62A7C12E80059AA50 /* AudioEnginePlayer.swift */; };
+		3557FBAC2A7C12E90059AA50 /* AudioEnginePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA62A7C12E80059AA50 /* AudioEnginePlayer.swift */; };
+		3557FBAD2A7C12E90059AA50 /* AudioFileFrameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA72A7C12E80059AA50 /* AudioFileFrameProvider.swift */; };
+		3557FBAE2A7C12E90059AA50 /* AudioFileFrameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA72A7C12E80059AA50 /* AudioFileFrameProvider.swift */; };
+		3557FBAF2A7C12E90059AA50 /* AudioQueuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA82A7C12E80059AA50 /* AudioQueuePlayer.swift */; };
+		3557FBB02A7C12E90059AA50 /* AudioQueuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA82A7C12E80059AA50 /* AudioQueuePlayer.swift */; };
+		3557FBB12A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */; };
+		3557FBB22A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */; };
+		3557FBB32A7C12E90059AA50 /* AudioDriveImp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */; };
+		3557FBB42A7C12E90059AA50 /* AudioDriveImp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */; };
 		358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
@@ -164,6 +174,11 @@
 		3545B4E92A6DD83200C1E32E /* Circus Charlie (J) [p1].nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Circus Charlie (J) [p1].nes"; sourceTree = "<group>"; };
 		3547C22726BEBDB0008DB9B9 /* BaseDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDef.swift; sourceTree = "<group>"; };
 		3547C22C26BECE62008DB9B9 /* Memory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memory.swift; sourceTree = "<group>"; };
+		3557FBA62A7C12E80059AA50 /* AudioEnginePlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioEnginePlayer.swift; sourceTree = "<group>"; };
+		3557FBA72A7C12E80059AA50 /* AudioFileFrameProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioFileFrameProvider.swift; sourceTree = "<group>"; };
+		3557FBA82A7C12E80059AA50 /* AudioQueuePlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioQueuePlayer.swift; sourceTree = "<group>"; };
+		3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioUnitPlayer.swift; sourceTree = "<group>"; };
+		3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDriveImp.swift; sourceTree = "<group>"; };
 		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
 		35B9C57826C28F9A00E13D57 /* PpuControl1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl1.swift; sourceTree = "<group>"; };
 		35B9C57D26C291C700E13D57 /* PpuMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemory.swift; sourceTree = "<group>"; };
@@ -319,6 +334,7 @@
 		3530B85626C6DD2E00A2858C /* NES */ = {
 			isa = PBXGroup;
 			children = (
+				3557FBA52A7C12E80059AA50 /* AudioDriveImp */,
 				352BF75E2A7295C20093CB65 /* ControllerPorts */,
 				352AFFE22A6E6D5E00F811F8 /* Apu */,
 				3530B87826C7F52000A2858C /* Common */,
@@ -408,6 +424,18 @@
 				3530B89C26C8006100A2858C /* CpuRegDef.swift */,
 			);
 			path = Define;
+			sourceTree = "<group>";
+		};
+		3557FBA52A7C12E80059AA50 /* AudioDriveImp */ = {
+			isa = PBXGroup;
+			children = (
+				3557FBA62A7C12E80059AA50 /* AudioEnginePlayer.swift */,
+				3557FBA72A7C12E80059AA50 /* AudioFileFrameProvider.swift */,
+				3557FBA82A7C12E80059AA50 /* AudioQueuePlayer.swift */,
+				3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */,
+				3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */,
+			);
+			path = AudioDriveImp;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -538,14 +566,18 @@
 				352575F726BD4829005AB816 /* ContentView.swift in Sources */,
 				3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				35265B4026C566540031E1A6 /* PpuStatusReg.swift in Sources */,
+				3557FBB12A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */,
+				3557FBB32A7C12E90059AA50 /* AudioDriveImp.swift in Sources */,
 				3530FA3826BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88E26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88726C7FBE600A2858C /* ICpu.swift in Sources */,
 				35FF346B2A6DEF970052DFBF /* IOSGameView.swift in Sources */,
+				3557FBAF2A7C12E90059AA50 /* AudioQueuePlayer.swift in Sources */,
 				35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */,
 				3505EAB12A6F82D700B14943 /* PulseChannel.swift in Sources */,
 				3530FA5C26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
+				3557FBAB2A7C12E90059AA50 /* AudioEnginePlayer.swift in Sources */,
 				35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5726BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530B89426C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
@@ -565,6 +597,7 @@
 				3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
 				35B9C5A226C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760626BD48DF005AB816 /* Cartridge.swift in Sources */,
+				3557FBAD2A7C12E90059AA50 /* AudioFileFrameProvider.swift in Sources */,
 				350858922A72261A00318C3D /* FrameCounter.swift in Sources */,
 				35B9C58326C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
 			);
@@ -585,14 +618,18 @@
 				352575F826BD4829005AB816 /* ContentView.swift in Sources */,
 				3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				35265B4126C566540031E1A6 /* PpuStatusReg.swift in Sources */,
+				3557FBB22A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */,
+				3557FBB42A7C12E90059AA50 /* AudioDriveImp.swift in Sources */,
 				3530FA3926BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88F26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88826C7FBE600A2858C /* ICpu.swift in Sources */,
 				35FF346C2A6DEF970052DFBF /* IOSGameView.swift in Sources */,
+				3557FBB02A7C12E90059AA50 /* AudioQueuePlayer.swift in Sources */,
 				35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */,
 				3505EAB22A6F82D700B14943 /* PulseChannel.swift in Sources */,
 				3530FA5D26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
+				3557FBAC2A7C12E90059AA50 /* AudioEnginePlayer.swift in Sources */,
 				35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5826BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530B89526C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
@@ -612,6 +649,7 @@
 				3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
 				35B9C5A326C3191600E13D57 /* Mapper0.swift in Sources */,
 				3525760726BD48DF005AB816 /* Cartridge.swift in Sources */,
+				3557FBAE2A7C12E90059AA50 /* AudioFileFrameProvider.swift in Sources */,
 				350858932A722B4100318C3D /* FrameCounter.swift in Sources */,
 				35B9C58426C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
 			);

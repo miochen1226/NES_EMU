@@ -15,42 +15,42 @@ class ControllerPorts: NSObject {
     
     func pressL(_ isDown:Bool = true)
     {
-        keyPressStatus[6] = isDown
+        setKeyPressStatus(6, isPress: isDown)
     }
     
     func pressR(_ isDown:Bool = true)
     {
-        keyPressStatus[7] = isDown
+        setKeyPressStatus(7, isPress: isDown)
     }
     
     func pressU(_ isDown:Bool = true)
     {
-        keyPressStatus[4] = isDown
+        setKeyPressStatus(4, isPress: isDown)
     }
     
     func pressD(_ isDown:Bool = true)
     {
-        keyPressStatus[5] = isDown
+        setKeyPressStatus(5, isPress: isDown)
     }
     
     func pressA(_ isDown:Bool = true)
     {
-        keyPressStatus[0] = isDown
+        setKeyPressStatus(0, isPress: isDown)
     }
     
     func pressB(_ isDown:Bool = true)
     {
-        keyPressStatus[1] = isDown
+        setKeyPressStatus(1, isPress: isDown)
     }
     
     func pressStart(_ isDown:Bool = true)
     {
-        keyPressStatus[3] = isDown
+        setKeyPressStatus(3, isPress: isDown)
     }
     
     func pressSelect(_ isDown:Bool = true)
     {
-        keyPressStatus[2] = isDown
+        setKeyPressStatus(2, isPress: isDown)
     }
     
     func MapCpuToPorts(_ cpuAddress:UInt16)->Int
@@ -67,21 +67,35 @@ class ControllerPorts: NSObject {
         return 0
     }
     
-    var keyPressStatus:[Int:Bool] = [:]
+    var keyPressStatus:[Int:Bool] = [0:false,1:false,2:false,3:false,4:false,5:false,6:false,7:false]
     var isPressStart = false
+    
+    private let lock = NSLock()
+    
+    func setKeyPressStatus(_ index:Int,isPress:Bool)
+    {
+        lock.lock()
+        keyPressStatus[index] = isPress
+        lock.unlock()
+    }
+    
+    func getKeyPressStatus(_ index:Int)->Bool
+    {
+        var isPress = false
+        lock.lock()
+        isPress = keyPressStatus[index] ?? false
+        lock.unlock()
+        return isPress
+    }
+    
     func ReadInputDown(controllerIndex:Int, btnIndex:Int)->Bool
     {
-        //print("ReadInputDown" + String(controllerIndex) + "-" + String(btnIndex))
         var isDown = false
-        
-        
         if(controllerIndex == 0)
         {
-            if(keyPressStatus[btnIndex] == true)
+            if(getKeyPressStatus(btnIndex))
             {
                 isDown = true
-                
-                //keyPressStatus[btnIndex] = false
             }
         }
         

@@ -159,37 +159,44 @@ class Nes{
     
     let serialQueue = DispatchQueue(label: "SerialQueue")
     var iRenderScreen:IRenderScreen?
+    
+    var m_wantQuit = false
+   
+    func stop()
+    {
+        m_wantQuit = true
+        //m_apu.m_audioDriver?.stop()
+    }
+    
     func startRun(iRenderScreen:IRenderScreen)
     {
         self.iRenderScreen = iRenderScreen
         serialQueue.async {
-            while true
+            while self.m_wantQuit == false
             {
                 var half = false
-                var dateLast = Date()
-                for _ in 0...59
-                {
+                //let dateLast = Date()
+                //for _ in 0...59
+                //{
                     self.ExecuteCpuAndPpuFrame()
                     half = !half
+                    //half = false
                     if(half)
                     {
                         DispatchQueue.main.async {
                             self.iRenderScreen?.renderScreen()
                         }
                     }
-                }
-                
-                
-                
+                //}
                 //DispatchQueue.main.async {
                 //    self.iRenderScreen?.renderScreen()
                 //}
-                
+                /*
                 while dateLast.timeIntervalSinceNow > -1
                 {
-                }
+                }*/
             }
-            
+            print("QUIT")
         }
     }
     
@@ -197,7 +204,9 @@ class Nes{
     {
         let strFps = String(totalFrame)
         totalFrame = 0
-        return "FPS: " + strFps + ""
+        let fpsInfo = "FPS: " + strFps
+        NSLog(fpsInfo)
+        return fpsInfo
     }
     var totalFrame = 0
     

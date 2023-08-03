@@ -173,6 +173,65 @@ class ChannelComponent
 
     class Timer
     {
+        let m_divider = DividerEx()
+        var m_minPeriod = 0
+        
+        func Reset()
+        {
+            m_divider.ResetCounter()
+        }
+        
+        func GetPeriod()->UInt16
+        {
+            return m_divider.GetPeriod()
+        }
+        
+        func SetPeriod(_ period:UInt16)
+        {
+            m_divider.SetPeriod(period)
+        }
+        
+        func SetPeriodLow8(_ value:UInt8)
+        {
+            var period:UInt16 = m_divider.GetPeriod()
+            period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
+            SetPeriod(UInt16(value))
+        }
+        
+        func SetPeriodHigh3(_ value:UInt16)
+        {
+            assert(value < BIT(3));
+            var period:UInt16 = m_divider.GetPeriod()
+            //period = (value << 8) | (period & 0xFF); // Keep low 8 bits
+            period = (value << 8) | (period & 0xFF)
+            
+            SetPeriod(UInt16(period))
+            m_divider.ResetCounter()
+        }
+        
+        func SetMinPeriod(_ minPeriod:Int)
+        {
+            m_minPeriod = minPeriod;
+        }
+
+        // Clocked by CPU clock every cycle (triangle channel) or second cycle (pulse/noise channels)
+        // Returns true when output chip should be clocked
+        func Clock()->Bool
+        {
+            // Avoid popping and weird noises from ultra sonic frequencies
+            //if (m_divider.GetPeriod() < m_minPeriod)
+            //{
+            //    return false
+            //}
+                
+            if (m_divider.Clock())
+            {
+                return true
+            }
+            
+            return false
+        }
+        /*
         let m_divider = Divider()
         var m_minPeriod = 0
         
@@ -229,7 +288,7 @@ class ChannelComponent
             }
             
             return false
-        }
+        }*/
     }
 }
 
