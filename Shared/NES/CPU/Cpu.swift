@@ -32,7 +32,6 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case CpuMemory.kControllerPort1: // $4016
-            //NSLog("TODOOOO")
             result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress)
             break
             
@@ -41,8 +40,7 @@ class Cpu:CpuRegDef,ICpu{
             break
             
         case CpuMemory.kControllerPort2: // $4017
-            //NSLog("TODOOOO")
-            result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress);
+            result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress)
             break
 
         default:
@@ -178,7 +176,7 @@ class Cpu:CpuRegDef,ICpu{
         }
         else if (m_pendingIrq)
         {
-            Push16(PC);
+            Push16(PC)
             PushProcessorStatus(false)
             P.Clear(BrkExecuted)
             P.Set(IrqDisabled)
@@ -222,10 +220,13 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case AddressMode.Relatv: // For conditional branch instructions
+            
+            let offsetSigned = ToInt(Read8(PC+1))
+            m_operandAddress = UInt16(Int(PC) + Int(m_opCodeEntry!.numBytes) + Int(offsetSigned))
+            
+            /*
             let offsetSigned = ToInt(Read8(PC+1))
             
-            //let k = abs(-128)
-            //let i = UInt16(k)
             
             if(offsetSigned<0)
             {
@@ -237,7 +238,7 @@ class Cpu:CpuRegDef,ICpu{
                 let offsetAbs:UInt16 = UInt16(offsetSigned)
                 m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) + offsetAbs
             }
-            
+            */
             //Origin code
             //const int8 offset = Read8(PC+1); // Signed offset in [-128,127]
             //m_operandAddress = PC + m_opCodeEntry->numBytes + offset;
@@ -277,7 +278,15 @@ class Cpu:CpuRegDef,ICpu{
             let baseAddress = Read16(PC+1)
             let basePage = GetPageAddress(baseAddress)
             m_operandAddress = baseAddress + UInt16(Y)
-            m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress)
+            if(basePage != GetPageAddress(m_operandAddress))
+            {
+                m_operandReadCrossedPage = true
+            }
+            else
+            {
+                m_operandReadCrossedPage = false
+            }
+            //m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress)
             break
 
         case AddressMode.Indrct: // for JMP only
@@ -302,7 +311,7 @@ class Cpu:CpuRegDef,ICpu{
             let high:UInt16 = (low + 1) & 0x00FF // Wrap high byte around zero page
             let baseAddress:UInt16 = (TO16(Read8(low)) | TO16(Read8(high)) << 8)
             let basePage:UInt16 = GetPageAddress(baseAddress)
-            m_operandAddress = baseAddress + UInt16(Y);
+            m_operandAddress = baseAddress + UInt16(Y)
             m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress);
             
             //Original code
@@ -479,71 +488,83 @@ class Cpu:CpuRegDef,ICpu{
 
         case OpCodeEntryTtype.CMP: // CMP Compare memory and accumulator
             
+            
             let memValue = GetMemValue()
             
-            if(memValue > A)
-            {
-                let result = A + (255 - memValue)
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            }
-            else
+            if(A >= memValue)
             {
                 let result = A - memValue
                 P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
                 P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             }
-            
-            var enabled = 0
-            if(A >= memValue)
+            else
             {
-                enabled = 1
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: 0)
             }
+            
+            let enabled = A >= memValue ? 1:0
             P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
             
             break
 
         case OpCodeEntryTtype.CPX: // CPX Compare Memory and Index X
-            
             let memValue = GetMemValue()
             
-            if(memValue > X)
+            if(X >= memValue)
             {
-                let result = UInt8(UInt16(X)+255 - UInt16(memValue))
+                let result = X - memValue
                 P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
                 P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             }
             else
             {
-                let result = X - memValue;
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: 0)
             }
             
             let enabled = X >= memValue ? 1:0
-            P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
-            
+            P.Set(bits: Carry, enabled: UInt8(enabled))
             break
 
         case OpCodeEntryTtype.CPY: // CPY Compare memory and index Y
+            //ok
+            let memValue = GetMemValue()
             
+            if(Y >= memValue)
+            {
+                let result = Y - memValue
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            }
+            else
+            {
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: 0)
+            }
+            
+            let enabled = Y >= memValue ? 1:0
+            P.Set(bits: Carry, enabled: UInt8(enabled))
+            /*
             let memValue = GetMemValue()
             if(memValue>Y)
             {
-                let result = TO8(UInt16(Y) + 255 - UInt16(memValue))
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                let result = Y + (255 - memValue)
+                
+                P.Set(bits: Negative, enabled: 1)
+                
                 P.Set(bits: Zero, enabled: CalcZeroFlag(result))
                 
             }
             else
             {
                 let result = Y - memValue
-                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Negative, enabled: 0)
                 P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             }
             let enabled = Y >= memValue ? 1:0
             P.Set(bits: Carry, enabled: UInt8(enabled)) // Carry set if result positive or 0
-            
+            */
             break
 
         case OpCodeEntryTtype.DEC: // Decrement memory by one
@@ -554,15 +575,17 @@ class Cpu:CpuRegDef,ICpu{
             {
                 result = 255
                 
-                //GetMemValue()
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             }
             else
             {
                 result = memValue - 1
+                
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             }
-            //let result = GetMemValue() - 1
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            
             SetMemValue(result)
             
             //Original code
@@ -577,14 +600,17 @@ class Cpu:CpuRegDef,ICpu{
             if(X == 0)
             {
                 X = 255
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             }
             else
             {
                 X = X - 1
+                
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             }
             
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.DEY: // Decrement index Y by one
@@ -593,14 +619,17 @@ class Cpu:CpuRegDef,ICpu{
             if(Y == 0)
             {
                 Y = 255
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
             }
             else
             {
                 Y = Y - 1
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
+                
             }
             
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.EOR: // "Exclusive-Or" memory with accumulator
@@ -614,15 +643,23 @@ class Cpu:CpuRegDef,ICpu{
             if(V == 255)
             {
                 V = 0
+                
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: CalcZeroFlag(V))
+                
             }
             else
             {
                 V = V + 1
+                
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(V))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(V))
+                
             }
             
-            let result = V//GetMemValue() + 1
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
+            let result = V
+            
+            //P.Set(bits: Zero, enabled: CalcZeroFlag(result))
             SetMemValue(result)
             
             break
@@ -631,13 +668,18 @@ class Cpu:CpuRegDef,ICpu{
             if(X == 255)
             {
                 X = 0
+                
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             }
             else
             {
                 X = X + 1
+                
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(X))
             }
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
+            
             break
 
         case OpCodeEntryTtype.INY: // Increment Index Y by one
@@ -645,14 +687,15 @@ class Cpu:CpuRegDef,ICpu{
             if(Y == 255)
             {
                 Y = 0
+                P.Set(bits: Negative, enabled: 1)
+                P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
             }
             else
             {
                 Y = Y + 1
+                P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
+                P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
             }
-            
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.JMP: // Jump to new location
@@ -1090,7 +1133,6 @@ class Cpu:CpuRegDef,ICpu{
 
     func PopProcessorStatus()
     {
-        //123
         P.SetValue(Pop8() & ~Unused & ~BrkExecuted)
         //assert(!P.Test(Unused) && !P.Test(BrkExecuted) && "P should never have these set, only on stack");
     }

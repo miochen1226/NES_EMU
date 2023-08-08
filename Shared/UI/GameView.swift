@@ -56,8 +56,8 @@ class GameScene: SKScene,IRenderScreen {
         //return [UInt8(drand48()*255),UInt8(drand48()*255),UInt8(drand48()*255),UInt8(255)]
     }
     
-    var enableDrawBG = false
-    var enableDrawSprites = true
+    var enableDrawBG = true
+    var enableDrawSprites = false
     
     func renderBG()
     {

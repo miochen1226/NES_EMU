@@ -14,7 +14,7 @@ class Memory
     {
         memorySize = size
         
-        for _ in 0...size-1
+        for _ in 0..<size
         {
             rawMemory.append(0)
         }
@@ -121,7 +121,7 @@ class ObjectAttributeMemory2:Memory
     
     func ClearOAM2()
     {
-        for index in 0 ... memorySize-1
+        for index in 0..<memorySize
         {
             let mIndex = Int(index)
             rawMemory[mIndex] = 0xFF
@@ -170,11 +170,27 @@ class NameTableMemory:Memory
         
     }
     
-    func Initialize(initSize:UInt)->NameTableMemory
+    init(initSize:UInt)
     {
+        super.init()
         memorySize = initSize
         initial(size: initSize)
-        return self
+    }
+    
+    override func Read(_ address:UInt16)->UInt8
+    {
+        assert(address < 2048)
+        return rawMemory[Int(address)]
+    }
+    
+    override func Write( address:UInt16,  value:UInt8)
+    {
+        assert(address < 2048)
+        if(address == 960)
+        {
+            print("Write 960--->"+String(value))
+        }
+        rawMemory[Int(address)] = value
     }
 }
 

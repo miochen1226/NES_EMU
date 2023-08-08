@@ -59,7 +59,7 @@ class AudioDriver:NSObject
         self.m_frameProvider = frameProvider
         super.init()
         
-        m_audioUnitPlayer = AudioUnitPlayer(frameProvider: frameProvider)
+        //m_audioUnitPlayer = AudioUnitPlayer(frameProvider: frameProvider)
     }
 }
 /*

@@ -105,6 +105,8 @@
 		3557FBB42A7C12E90059AA50 /* AudioDriveImp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */; };
 		358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
+		35A7B8182A820FE2000FE82E /* Super_mario_brothers.nes in Resources */ = {isa = PBXBuildFile; fileRef = 35A7B8172A820FE2000FE82E /* Super_mario_brothers.nes */; };
+		35A7B8192A820FE2000FE82E /* Super_mario_brothers.nes in Resources */ = {isa = PBXBuildFile; fileRef = 35A7B8172A820FE2000FE82E /* Super_mario_brothers.nes */; };
 		35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
 		35B9C57A26C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
 		35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57D26C291C700E13D57 /* PpuMemory.swift */; };
@@ -180,6 +182,7 @@
 		3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioUnitPlayer.swift; sourceTree = "<group>"; };
 		3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDriveImp.swift; sourceTree = "<group>"; };
 		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
+		35A7B8172A820FE2000FE82E /* Super_mario_brothers.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = Super_mario_brothers.nes; sourceTree = "<group>"; };
 		35B9C57826C28F9A00E13D57 /* PpuControl1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl1.swift; sourceTree = "<group>"; };
 		35B9C57D26C291C700E13D57 /* PpuMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemory.swift; sourceTree = "<group>"; };
 		35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemoryBus.swift; sourceTree = "<group>"; };
@@ -255,6 +258,7 @@
 				353894572A6CF05F0080B800 /* Donkey Kong 3 (World).nes */,
 				353894542A6CEE9D0080B800 /* Ice Climber (Japan).nes */,
 				35B9C59726C3144D00E13D57 /* Donkey Kong.nes */,
+				35A7B8172A820FE2000FE82E /* Super_mario_brothers.nes */,
 				3525760A26BD4BA6005AB816 /* mario.nes */,
 				352575E126BD4828005AB816 /* Shared */,
 				352575EB26BD4829005AB816 /* iOS */,
@@ -518,6 +522,7 @@
 			files = (
 				3545B4EA2A6DD83200C1E32E /* Circus Charlie (J) [p1].nes in Resources */,
 				35B9C59826C3144D00E13D57 /* Donkey Kong.nes in Resources */,
+				35A7B8182A820FE2000FE82E /* Super_mario_brothers.nes in Resources */,
 				352575F926BD4829005AB816 /* Assets.xcassets in Resources */,
 				353894582A6CF05F0080B800 /* Donkey Kong 3 (World).nes in Resources */,
 				35265B3626C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */,
@@ -536,6 +541,7 @@
 			files = (
 				3545B4EB2A6DD83200C1E32E /* Circus Charlie (J) [p1].nes in Resources */,
 				35B9C59926C3144D00E13D57 /* Donkey Kong.nes in Resources */,
+				35A7B8192A820FE2000FE82E /* Super_mario_brothers.nes in Resources */,
 				352575FA26BD4829005AB816 /* Assets.xcassets in Resources */,
 				353894592A6CF05F0080B800 /* Donkey Kong 3 (World).nes in Resources */,
 				35265B3726C5153D0031E1A6 /* Donkey Kong (World) (Rev A).nes in Resources */,
@@ -713,6 +719,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -777,6 +784,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
 				ENABLE_PREVIEWS = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				INFOPLIST_FILE = iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -786,6 +794,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

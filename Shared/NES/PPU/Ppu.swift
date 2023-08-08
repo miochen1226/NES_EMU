@@ -9,6 +9,10 @@ import Foundation
 
 class Ppu:IPpu{
    
+    var m_ppuStatusReg:Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var m_ppuControlReg1:Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var m_ppuControlReg2:Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    
     func Reset()
     {
         InitPaletteColors()
@@ -18,10 +22,11 @@ class Ppu:IPpu{
         m_ppuControlReg1.initialize(ppuRegisterMemory: m_ppuRegisters,regAddress: CpuMemory.kPpuControlReg1)
         m_ppuControlReg2.initialize(ppuRegisterMemory: m_ppuRegisters,regAddress: CpuMemory.kPpuControlReg2)
         
-        //WritePpuRegister(CpuMemory.kPpuControlReg1, value: 0)
-        //WritePpuRegister(CpuMemory.kPpuControlReg2, value: 0)
-        //WritePpuRegister(CpuMemory.kPpuVRamAddressReg1, value: 0)
-        //WritePpuRegister(CpuMemory.kPpuVRamIoReg, value: 0)
+        WritePpuRegister(CpuMemory.kPpuControlReg1, value: 0)
+        WritePpuRegister(CpuMemory.kPpuControlReg2, value: 0)
+        WritePpuRegister(CpuMemory.kPpuVRamAddressReg1, value: 0)
+        WritePpuRegister(CpuMemory.kPpuVRamIoReg, value: 0)
+        
         m_spriteFetchData.removeAll()
         for _ in 0...7
         {
@@ -56,9 +61,7 @@ class Ppu:IPpu{
     var m_palette = PaletteMemory.init()
     
     
-    var m_ppuStatusReg:Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var m_ppuControlReg1:Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var m_ppuControlReg2:Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    
     
     
     
@@ -116,10 +119,12 @@ class Ppu:IPpu{
         // If least 2 bits are unset, it's one of the 8 mirrored addresses, so clear bit 4 to mirror
         if ( !TestBits(target: paletteAddress, value: (BIT(1)|BIT(0))) )
         {
+            //let stB = String(format:"0x%02X", paletteAddress)
             ClearBits(target: &paletteAddress, value: BIT(4))
+            //let stF = String(format:"0x%02X", paletteAddress)
+            //print(stB + "->" + stF)
         }
-
-        return paletteAddress;
+        return paletteAddress
     }
     
     func ReadPpuRegister(_ cpuAddress:UInt16)->UInt8
@@ -134,31 +139,11 @@ class Ppu:IPpu{
     func WritePpuRegister(_ cpuAddress:UInt16,  value:UInt8)
     {
         //NSLog("WritePpuRegister")
-        
-        let address = MapCpuToPpuRegister(cpuAddress)
         m_ppuRegisters.Write(address: MapCpuToPpuRegister(cpuAddress), value: value)
         
-        if(cpuAddress == 8194)
-        {
-            m_ppuStatusReg.reload()
-            m_ppuControlReg2.initialize(ppuRegisterMemory: m_ppuRegisters,regAddress: CpuMemory.kPpuControlReg2)
-            
-            //NSLog("write kPpuStatusReg")
-            printPpuControl1Status()
-        }
-        
-        if(cpuAddress == 8192)
-        {
-            //NSLog("write kPpuControlReg1")
-            m_ppuControlReg1.reload()
-            
-        }
-        if(cpuAddress == 8193)
-        {
-            //NSLog("write kPpuControlReg2")
-            m_ppuControlReg2.reload()
-        }
-        
+        m_ppuStatusReg.reload()
+        m_ppuControlReg1.reload()
+        m_ppuControlReg2.reload()
     }
     
     
@@ -181,6 +166,7 @@ class Ppu:IPpu{
 
         switch (cpuAddress)
         {
+        
         case CpuMemory.kPpuStatusReg: // $2002
             
             //@HACK: Some games like Bomberman and Burger Time poll $2002.7 (VBlank flag) expecting the
@@ -200,8 +186,7 @@ class Ppu:IPpu{
             }
 
             result = ReadPpuRegister(cpuAddress)
-
-            m_ppuStatusReg.Clear(PpuStatus.InVBlank);
+            m_ppuStatusReg.Clear(PpuStatus.InVBlank)
             WritePpuRegister(CpuMemory.kPpuVRamAddressReg1, value: 0)
             WritePpuRegister(CpuMemory.kPpuVRamAddressReg2, value: 0)
             m_vramAndScrollFirstWrite = true
@@ -210,7 +195,7 @@ class Ppu:IPpu{
 
         case CpuMemory.kPpuVRamIoReg: // $2007
             
-            //assert(m_vramAndScrollFirstWrite && "User code error: trying to read from $2007 when VRAM address not yet fully set via $2006");
+            assert(m_vramAndScrollFirstWrite)// && "User code error: trying to read from $2007 when VRAM address not yet fully set via $2006");
 
             // Read from palette or return buffered value
             if (m_vramAddress >= PpuMemory.kPalettesBase)
@@ -223,17 +208,17 @@ class Ppu:IPpu{
             }
 
             // Write to register memory for debugging (not actually required)
-            WritePpuRegister(cpuAddress, value: result)
+            //WritePpuRegister(cpuAddress, value: result)
 
             // Always update buffered value from current vram pointer before incrementing it.
             // Note that we don't buffer palette values, we read "under it", which mirrors the name table memory (VRAM/CIRAM).
             m_vramBufferedValue = m_ppuMemoryBus!.Read(m_vramAddress)
                 
             // Advance vram pointer
-            let advanceOffset:UInt16 = PpuControl1.GetPpuAddressIncrementSize( UInt16(m_ppuControlReg1.Value()) )
-            m_vramAddress += advanceOffset;
+            let advanceOffset:UInt16 = PpuControl1.GetPpuAddressIncrementSize( m_ppuControlReg1.Value())
+            m_vramAddress += advanceOffset
             
-            break;
+            break
 
         default:
             result = ReadPpuRegister(cpuAddress)
@@ -245,67 +230,8 @@ class Ppu:IPpu{
     var m_oam = ObjectAttributeMemory.init()
     var m_oam2 = ObjectAttributeMemory2.init()
     
-    func printPpuControl1Status()
-    {
-        let ppuRegValue = m_ppuControlReg1.Value()
-        let value = PpuControl1.BackgroundPatternTableAddress
-        if(m_ppuControlReg1.Test(PpuControl1.NameTableAddressMask))
-        {
-            //NSLog("NameTableAddressMask")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.PpuAddressIncrement))
-        {
-            //NSLog("PpuAddressIncrement")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.SpritePatternTableAddress8x8))
-        {
-            //NSLog("SpritePatternTableAddress8x8")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.BackgroundPatternTableAddress))
-        {
-            //NSLog("BackgroundPatternTableAddress")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.SpriteSize8x16))
-        {
-            //NSLog("SpriteSize8x16")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.PpuMasterSlaveSelect))
-        {
-            //NSLog("PpuMasterSlaveSelect")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.PpuMasterSlaveSelect))
-        {
-            //NSLog("PpuMasterSlaveSelect")
-        }
-        if(m_ppuControlReg1.Test(PpuControl1.NmiOnVBlank))
-        {
-            //NSLog("NmiOnVBlank")
-        }
-    }
-    
     func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
     {
-        //NSLog("HandleCpuWrite")
-        
-        if(cpuAddress == 8194)
-        {
-            //NSLog("kPpuStatusReg")
-        }
-        
-        if(cpuAddress == 8192)
-        {
-            //NSLog("kPpuControlReg1")
-        }
-        if(cpuAddress == 8193)
-        {
-            //NSLog("kPpuControlReg2")
-        }
-        
-        if(value != 0)
-        {
-            //NSLog("not 0")
-        }
-        
         let registerAddress = MapCpuToPpuRegister(cpuAddress)
         //const uint8
         let oldValue = m_ppuRegisters.Read(registerAddress)
@@ -318,22 +244,13 @@ class Ppu:IPpu{
         switch (cpuAddress)
         {
         case CpuMemory.kPpuControlReg1: // $2000
-            //Mio test
-            printPpuControl1Status()
             
             SetVRamAddressNameTable(v: &m_tempVRamAddress, value: value & 0x3)
 
 
-            let oldPpuControlReg1:Bitfield8 = Bitfield8.init()//reinterpret_cast< Bitfield8*>(&oldValue);
+            let oldPpuControlReg1:Bitfield8 = Bitfield8.init()
             oldPpuControlReg1.Set(oldValue)
             
-            let test1 = oldPpuControlReg1.Test(PpuControl1.NmiOnVBlank)
-            let test2 = m_ppuControlReg1.Test(PpuControl1.NmiOnVBlank)
-            
-            if(test2 == true)
-            {
-                //NSLog("NmiOnVBlank is true")
-            }
             let enabledNmiOnVBlank = !oldPpuControlReg1.Test(PpuControl1.NmiOnVBlank) && m_ppuControlReg1.Test(PpuControl1.NmiOnVBlank)
             
             if ( enabledNmiOnVBlank && m_ppuStatusReg.Test(PpuStatus.InVBlank) ) // In vblank (and $2002 not read yet, which resets this bit)
@@ -342,21 +259,29 @@ class Ppu:IPpu{
             }
             
             break
-        
-        case CpuMemory.kPpuSprRamIoReg: // $2004
+        case CpuMemory.kPpuControlReg2: //$2001
             
+            /*
+            m_ppuControlReg2.SetValue(value)
+            
+            var displayType = m_ppuControlReg2.Test(UInt8(PpuControl2.DisplayType))
+            if(displayType == true)
+            {
+                print("gray")
+            }
+            */
+            break
+        case CpuMemory.kPpuSprRamIoReg: // $2004
             // Write value to sprite ram at address in $2003 (OAMADDR) and increment address
+            
+            //kPpuSprRamAddressReg only use in here
             let spriteRamAddress = ReadPpuRegister(CpuMemory.kPpuSprRamAddressReg)
             m_oam.Write(address: UInt16(spriteRamAddress), value: value)
             
-            if(spriteRamAddress == 255)
-            {
-                WritePpuRegister(CpuMemory.kPpuSprRamAddressReg, value: 0)
-            }
-            else
-            {
-                WritePpuRegister(CpuMemory.kPpuSprRamAddressReg, value: spriteRamAddress + 1)
-            }
+            let newAddr = (UInt16(spriteRamAddress)+1)%256
+            //Mio new code
+            WritePpuRegister(CpuMemory.kPpuSprRamAddressReg, value: UInt8(newAddr))
+            
             break
         
         case CpuMemory.kPpuVRamAddressReg1: // $2005 (PPUSCROLL)
@@ -368,12 +293,12 @@ class Ppu:IPpu{
             }
             else // Second write: Y scroll values
             {
+                //print("SetVRamAddressFineY->" + String(value))
                 SetVRamAddressFineY(v: &m_tempVRamAddress, value: value & 0x07)
                 SetVRamAddressCoarseY(v: &m_tempVRamAddress, value: (value & ~0x07) >> 3)
             }
 
             m_vramAndScrollFirstWrite = !m_vramAndScrollFirstWrite;
-            
             break
 
         case CpuMemory.kPpuVRamAddressReg2: // $2006 (PPUADDR)
@@ -386,28 +311,29 @@ class Ppu:IPpu{
             }
             else
             {
-                m_tempVRamAddress = (m_tempVRamAddress & 0xFF00) | halfAddress;
+                m_tempVRamAddress = (m_tempVRamAddress & 0xFF00) | halfAddress
                 m_vramAddress = m_tempVRamAddress; // Update v from t on second write
+                
+                let st = String(format:"%02X", m_vramAddress)
+                print(st)
+                
             }
-
+            
             m_vramAndScrollFirstWrite = !m_vramAndScrollFirstWrite;
-            
-            break;
-
-        
+            break
         case CpuMemory.kPpuVRamIoReg: // $2007
-            
-            //assert(m_vramAndScrollFirstWrite && "User code error: trying to write to $2007 when VRAM address not yet fully set via $2006");
+            assert(m_vramAndScrollFirstWrite)// && "User code error: trying to write to $2007 when VRAM address not yet fully set via $2006");
 
             // Write to palette or memory bus
-            var vramAddress = m_vramAddress
-            
-            if(vramAddress >= 2592 && vramAddress < 2600)
-            {
-                print(value)
-            }
             if (m_vramAddress >= PpuMemory.kPalettesBase)
             {
+                let stAddrH = String(format:"%02X", m_vramAddress)
+                if(stAddrH == "3F01")
+                {
+                    let st = String(format:"W palette 0x%02X->0x%02X", m_vramAddress,value)
+                    print(st)
+                }
+                
                 m_palette.Write(address: MapPpuToPalette(ppuAddress: m_vramAddress), value: value)
             }
             else
@@ -415,9 +341,8 @@ class Ppu:IPpu{
                 m_ppuMemoryBus?.Write(m_vramAddress, value: value)
             }
 
-            let advanceOffset = PpuControl1.GetPpuAddressIncrementSize( UInt16(m_ppuControlReg1.Value()) )
+            let advanceOffset = PpuControl1.GetPpuAddressIncrementSize( m_ppuControlReg1.Value())
             m_vramAddress = m_vramAddress + advanceOffset;
-            
             break
  
         default:
@@ -452,7 +377,7 @@ class Ppu:IPpu{
     
     func IsSpriteInRangeY( y:UInt32,  spriteY:UInt8,  spriteHeight:UInt8) -> Bool
     {
-        return (y >= spriteY && y < UInt32(spriteY) + UInt32(spriteHeight) && spriteY < kScreenHeight)
+        return (y >= spriteY && (y < UInt32(spriteY) + UInt32(spriteHeight)) && spriteY < kScreenHeight)
     }
     
     var m_renderSprite0 = false
@@ -494,8 +419,8 @@ class Ppu:IPpu{
         // Attempt to find up to 8 sprites on current scanline
         while (n2 < 8)
         {
-            let spriteY:UInt8 = oam[n].bmpLow;
-            oam2[n2].bmpLow = spriteY; // (1)
+            let spriteY:UInt8 = oam[n].bmpLow
+            oam2[n2].bmpLow = spriteY // (1)
 
             if (IsSpriteInRangeY(y: y, spriteY: spriteY, spriteHeight: spriteHeight)) // (1a)
             {
@@ -591,7 +516,7 @@ class Ppu:IPpu{
     func getOamArray(oamMemory:ObjectAttributeMemory)->[SpriteData]
     {
         var array:[SpriteData] = []
-        for i in 0...ObjectAttributeMemory.kMaxSprites-1
+        for i in 0..<ObjectAttributeMemory.kMaxSprites
         {
             let spriteData = oamMemory.getSprite(i)
             array.append(spriteData)
@@ -602,7 +527,7 @@ class Ppu:IPpu{
     func getOam2Array(oamMemory:ObjectAttributeMemory2)->[SpriteData]
     {
         var array:[SpriteData] = []
-        for i in 0...ObjectAttributeMemory2.kMaxSprites-1
+        for i in 0..<ObjectAttributeMemory2.kMaxSprites
         {
             let spriteData = oamMemory.getSprite(i)
             array.append(spriteData)
@@ -700,6 +625,7 @@ class Ppu:IPpu{
             let byte2Address:UInt16 = byte1Address + 8
 
             //auto& data = m_spriteFetchData[n]
+            /*
             var spriteFetchData = SpriteFetchData()
             spriteFetchData.bmpLow = m_ppuMemoryBus!.Read(byte1Address)
             spriteFetchData.bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
@@ -711,7 +637,13 @@ class Ppu:IPpu{
             //m_spriteFetchData[n].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
             //m_spriteFetchData[n].attributes = oam2[n].attributes
             //m_spriteFetchData[n].x = oam2[n].x
-
+             */
+            
+            m_spriteFetchData[n].bmpLow = m_ppuMemoryBus!.Read(byte1Address)
+            m_spriteFetchData[n].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
+            m_spriteFetchData[n].attributes = oam2[n].attributes
+            m_spriteFetchData[n].x = oam2[n].x
+            
             if (flipHorz)
             {
                 m_spriteFetchData[n].bmpLow = FlipBits(m_spriteFetchData[n].bmpLow)
@@ -729,25 +661,30 @@ class Ppu:IPpu{
         return TO8((v & 0x7000) >> 12)
     }
     
+    var mapColorUse:[UInt8:Bool] = [:]
     func FetchBackgroundTileData()
     {
-        //123
-        //NSLog("FetchBackgroundTileData")
         // Load bg tile row data (2 bytes) at v into pipeline
         
-        let v = m_vramAddress;
-        let patternTableAddress:UInt16 = PpuControl1.GetBackgroundPatternTableAddress(UInt16(m_ppuControlReg1.Value()))
+        let v = m_vramAddress
+        let patternTableAddress:UInt16 = PpuControl1.GetBackgroundPatternTableAddress(m_ppuControlReg1.Value())
         let tileIndexAddress:UInt16 = 0x2000 | (v & 0x0FFF)
         let attributeAddress:UInt16 = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
-        assert(attributeAddress >= PpuMemory.kAttributeTable0 && attributeAddress < PpuMemory.kNameTablesEnd);
-        let tileIndex = m_ppuMemoryBus!.Read(tileIndexAddress)
         
-        if(tileIndex != 0)
+        
+        assert(attributeAddress >= PpuMemory.kAttributeTable0 && attributeAddress < PpuMemory.kNameTablesEnd)
+        
+        let tileIndex:UInt8 = m_ppuMemoryBus!.Read(tileIndexAddress)
+        
+        if(tileIndex == 0)
         {
-            //NSLog("123")
+            let tileIndexA:UInt8 = m_ppuMemoryBus!.Read(tileIndexAddress)
         }
+        
         let tileOffset:UInt16 = TO16(tileIndex) * 16
-        let fineY:UInt8 = GetVRamAddressFineY(v);
+        let fineY:UInt8 = GetVRamAddressFineY(v)
+        
+        
         let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(fineY)
         let byte2Address:UInt16 = byte1Address + 8
 
@@ -757,18 +694,18 @@ class Ppu:IPpu{
         // VRAM address as follows: [bit 6, bit 2, 0]
         let attribute:UInt8 = m_ppuMemoryBus!.Read(attributeAddress)
         let attributeShift:UInt8 = UInt8(((v & 0x40) >> 4) | (v & 0x2))
-        assert(attributeShift == 0 || attributeShift == 2 || attributeShift == 4 || attributeShift == 6);
+        assert(attributeShift == 0 || attributeShift == 2 || attributeShift == 4 || attributeShift == 6)
         let paletteHighBits:UInt8 = (attribute >> attributeShift) & 0x3
 
+        
         m_bgTileFetchDataPipeline[0].bmpLow = m_bgTileFetchDataPipeline[1].bmpLow // Shift pipelined data
         m_bgTileFetchDataPipeline[0].bmpHigh = m_bgTileFetchDataPipeline[1].bmpHigh
         m_bgTileFetchDataPipeline[0].paletteHighBits = m_bgTileFetchDataPipeline[1].paletteHighBits
         
         // Push results at top of pipeline
-        m_bgTileFetchDataPipeline[1].bmpLow = m_ppuMemoryBus!.Read(byte1Address)
-        m_bgTileFetchDataPipeline[1].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
+        m_bgTileFetchDataPipeline[1].bmpLow = m_ppuMemoryBus!.ReadCard(byte1Address)
+        m_bgTileFetchDataPipeline[1].bmpHigh = m_ppuMemoryBus!.ReadCard(byte2Address)
         m_bgTileFetchDataPipeline[1].paletteHighBits = paletteHighBits
-
     }
     
     let kNumPaletteColors:UInt = 64
@@ -792,14 +729,44 @@ class Ppu:IPpu{
             [7,7,7],[3,5,7],[4,4,7],[6,3,7],[7,0,7],[7,3,7],[7,4,0],[7,5,0],[6,6,0],[3,6,0],[0,7,0],[2,7,6],[0,7,7],[0,0,0],[0,0,0],[0,0,0],
             [7,7,7],[5,6,7],[6,5,7],[7,5,7],[7,4,7],[7,5,5],[7,6,4],[7,7,2],[7,7,3],[5,7,2],[4,7,3],[2,7,6],[4,6,7],[0,0,0],[0,0,0],[0,0,0]
         ]
-
+        
+        /*
+        let palette:[Int] = [430,326,044,660,000,755,014,630,555,310,070,003,764,770,040,572,
+                             737,200,027,747,000,222,510,740,653,053,447,140,403,000,473,357,
+                             503,031,420,006,407,507,333,704,022,666,036,020,111,773,444,707,
+                          757,777,320,700,760,276,777,467,000,750,637,567,360,657,077,120]
+        */
+        
+        /*
+        let palette:[[Int]] =
+        [
+            [0x80,0x80,0x80], [0x00,0x3D,0xA6], [0x00,0x12,0xB0], [0x44,0x00,0x96],
+            [0xA1,0x00,0x5E], [0xC7,0x00,0x28], [0xBA,0x06,0x00], [0x8C,0x17,0x00],
+            [0x5C,0x2F,0x00], [0x10,0x45,0x00], [0x05,0x4A,0x00], [0x00,0x47,0x2E],
+            [0x00,0x41,0x66], [0x00,0x00,0x00], [0x05,0x05,0x05], [0x05,0x05,0x05],
+            [0xC7,0xC7,0xC7], [0x00,0x77,0xFF], [0x21,0x55,0xFF], [0x82,0x37,0xFA],
+            [0xEB,0x2F,0xB5], [0xFF,0x29,0x50], [0xFF,0x22,0x00], [0xD6,0x32,0x00],
+            [0xC4,0x62,0x00], [0x35,0x80,0x00], [0x05,0x8F,0x00], [0x00,0x8A,0x55],
+            [0x00,0x99,0xCC], [0x21,0x21,0x21], [0x09,0x09,0x09], [0x09,0x09,0x09],
+            [0xFF,0xFF,0xFF], [0x0F,0xD7,0xFF], [0x69,0xA2,0xFF], [0xD4,0x80,0xFF],
+            [0xFF,0x45,0xF3], [0xFF,0x61,0x8B], [0xFF,0x88,0x33], [0xFF,0x9C,0x12],
+            [0xFA,0xBC,0x20], [0x9F,0xE3,0x0E], [0x2B,0xF0,0x35], [0x0C,0xF0,0xA4],
+            [0x05,0xFB,0xFF], [0x5E,0x5E,0x5E], [0x0D,0x0D,0x0D], [0x0D,0x0D,0x0D],
+            [0xFF,0xFF,0xFF], [0xA6,0xFC,0xFF], [0xB3,0xEC,0xFF], [0xDA,0xAB,0xEB],
+            [0xFF,0xA8,0xF9], [0xFF,0xAB,0xB3], [0xFF,0xD2,0xB0], [0xFF,0xEF,0xA6],
+            [0xFF,0xF7,0x9C], [0xD7,0xE8,0x95], [0xA6,0xED,0xAF], [0xA2,0xF2,0xDA],
+            [0x99,0xFF,0xFC], [0xDD,0xDD,0xDD], [0x11,0x11,0x11], [0x11,0x11,0x11]
+        ]
+         */
         for i:UInt in 0 ... kNumPaletteColors-1
         {
+            
             let colorItem = dac3Palette[Int(i)]
             
             let iR:Int = colorItem[0]
             let iG:Int = colorItem[1]
             let iB:Int = colorItem[2]
+            
             let fr = Float(iR)
             let fg = Float(iG)
             let fb = Float(iB)
@@ -809,9 +776,28 @@ class Ppu:IPpu{
             let G = (UInt8(fg/7*255))
             let B = (UInt8(fb/7*255))
             let A = 0xFF
-
+            
+            /*
+            let colorItem = palette[Int(i)]
+            
+            let fR = Float(colorItem/100)
+            let fG = Float((colorItem-Int(fR)*100)/10)
+            let fB = Float(colorItem - Int(fR)*100 - Int(fG)*10)
+            
+            let R = UInt8(fR/7*255)
+            let G = (UInt8(fG/7*255))
+            let B = (UInt8(fB/7*255))
+            let A = 0xFF
+            */
+            /*
+            let R = iR
+            let G = iG
+            let B = iB
+            let A = 0xFF
+            */
             let rgbItem = Color4.init()
-            rgbItem.SetRGBA(r: R, g: G, b: B, a: UInt8(A))
+            //rgbItem.SetRGBA(r: R, g: G, b: B, a: UInt8(A))
+            rgbItem.SetRGBA(r: UInt8(R), g: UInt8(G), b: UInt8(B), a: UInt8(A))
             
             g_paletteColors.append(rgbItem)
         }
@@ -842,18 +828,17 @@ class Ppu:IPpu{
     
     func RenderPixel(x:UInt32, y:UInt32)
     {
-        if(!alowRendBg)
-        {
-            return
-        }
-        //TODO
         //NSLog("RenderPixel")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
 
+        var displayType = m_ppuControlReg2.Test(UInt8(PpuControl2.DisplayType))
         var bgRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground))
         var spriteRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderSprites))
         
-        
+        if(displayType == true)
+        {
+            print("gray")
+        }
         
         // Consider bg/sprites as disabled (for this pixel) if we're not supposed to render it in the left-most 8 pixels
         if ( !m_ppuControlReg2.Test(UInt8(PpuControl2.BackgroundShowLeft8)) && x < 8 )
@@ -867,12 +852,20 @@ class Ppu:IPpu{
         }
         
         //Mio disable sprite
-        spriteRenderingEnabled = false
+        //spriteRenderingEnabled = false
         
         
         // Get the background pixel
         var bgPaletteHighBits:UInt8 = 0
         var bgPaletteLowBits:UInt8 = 0
+        
+        if(y == 40)
+        {
+            if(x == 60)
+            {
+                print("")
+            }
+        }
         if (bgRenderingEnabled)
         {
             // At this point, the data for the current and next tile are in m_bgTileFetchDataPipeline
@@ -880,6 +873,7 @@ class Ppu:IPpu{
             let nextTile = m_bgTileFetchDataPipeline[1]
 
             // Mux uses fine X to select a bit from shift registers
+            
             let muxMask:UInt16 = UInt16(1 << (7 - m_fineX))
 
             // Instead of actually shifting every cycle, we rebuild the shift register values
@@ -891,6 +885,19 @@ class Ppu:IPpu{
 
             bgPaletteLowBits = (TestBits01(target: muxMask,value: shiftRegHigh) << 1) | (TestBits01(target: muxMask,value: shiftRegLow))
 
+            let backgroundShowLeft8 = m_ppuControlReg2.Test(UInt8(PpuControl2.BackgroundShowLeft8))
+            var displayType = m_ppuControlReg2.Test(UInt8(PpuControl2.DisplayType))
+            if(displayType == true)
+            {
+                print("gray")
+            }
+            if(backgroundShowLeft8 == false)
+            {
+                print("hide")
+            }
+            
+            //Mio debug
+            //bgPaletteLowBits = 2
             // Technically, the mux would index 2 8-bit registers containing replicated values for the current
             // and next tile palette high bits (from attribute bytes), but this is faster.
             
@@ -929,9 +936,10 @@ class Ppu:IPpu{
 
                             
                             // First non-transparent pixel moves on to multiplexer
+                            
                             if (sprPaletteLowBits != 0)
                             {
-                                foundSprite = true;
+                                foundSprite = true
                                 sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: UInt8(0x3))) //@TODO: cache this in spriteData
                                 spriteHasBgPriority = TestBits(target: UInt16(spriteData.attributes), value: BIT(5))
                                 
@@ -968,14 +976,28 @@ class Ppu:IPpu{
             {
                 // Sprite color
                 GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette, color: &color)
+                
+                /*
+                color.d_r = 255
+                color.d_g = 0
+                color.d_b = 0
+                color.d_a = 255
+                 */
             }
         }
         else
         {
             if (foundSprite && !spriteHasBgPriority)
             {
+                
                 // Sprite color
-                GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette, color: &color);
+                GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette, color: &color)
+                /*
+                color.d_r = 255
+                color.d_g = 0
+                color.d_b = 0
+                color.d_a = 255
+                */
             }
             else
             {
@@ -985,22 +1007,57 @@ class Ppu:IPpu{
 
             if (isSprite0)
             {
-                m_ppuStatusReg.Set(PpuStatus.PpuHitSprite0);
+                m_ppuStatusReg.Set(PpuStatus.PpuHitSprite0)
             }
         }
 
+        /*
+        if(x>88 && x<96)
+        {
+            if(y>24 && y<32)
+            {
+                let colorA = Color4.init()
+                colorA.d_r = 255
+                colorA.d_g = 0
+                colorA.d_b = 0
+                
+                m_renderer?.DrawPixel(x: x, y: y, color: colorA)
+                return
+            }
+        }*/
         m_renderer?.DrawPixel(x: x, y: y, color: color)
     }
     
     var m_renderer:Renderer? = nil
     func GetPaletteColor(highBits:UInt8,lowBits:UInt8,paletteBaseAddress:UInt16,color:inout Color4)
     {
+        assert(lowBits != 0)
         let paletteOffset:UInt8 = (highBits << 2) | (lowBits & 0x3)
 
+        //let st = String(format:"0x%02X", paletteOffset)
+            
+        //let stTarget = String(format:"%02X", paletteBaseAddress + UInt16(paletteOffset))
+        
+        //3F04/$3F08/$3F0C
+        /*
+        if(stTarget == "3F01")
+        {
+            print("come")
+            color.d_r = 0
+            color.d_g = 0
+            color.d_b = 0
+            color.d_a = 255
+            return
+        }
+         */
         //@NOTE: lowBits is never 0, so we don't have to worry about mapping every 4th byte to 0 (bg color) here.
         // That case is handled specially in the multiplexer code.
         let paletteIndex:UInt8 = m_palette.Read( MapPpuToPalette(ppuAddress: paletteBaseAddress + UInt16(paletteOffset)) )
-        color = g_paletteColors[Int(paletteIndex) & (Int(kNumPaletteColors)-1)];
+        //color = g_paletteColors[Int(paletteIndex) & (Int(kNumPaletteColors)-1)];
+        
+        
+        
+        color = g_paletteColors[Int(paletteIndex)];
     }
     
     
@@ -1122,7 +1179,7 @@ class Ppu:IPpu{
                     if (x == 64)
                     {
                         // Cycles 1-64: Clear secondary OAM to $FF
-                        ClearOAM2();
+                        ClearOAM2()
                     }
                     else if (x == 256)
                     {
@@ -1175,7 +1232,7 @@ class Ppu:IPpu{
                         if (lastFetchCycle)
                         {
                             FetchBackgroundTileData()
-
+                            
                             // Data for v was just fetched, so we can now increment it
                             if (x != 256)
                             {
@@ -1191,7 +1248,7 @@ class Ppu:IPpu{
                     // Render pixel at x,y using pipelined fetch data. If rendering is disabled, will render background color.
                     if (x < kScreenWidth && y < kScreenHeight)
                     {
-                        //RenderPixel(x: x, y: y)
+                        RenderPixel(x: x, y: y)
                     }
 
                     // Clear flags on pre-render line at dot 1
@@ -1211,11 +1268,11 @@ class Ppu:IPpu{
             }
             else // Post-render and VBlank 240-260
             {
-                assert(y >= 240 && y <= 260);
+                assert(y >= 240 && y <= 260)
 
                 if (y == 241 && x == 1)
                 {
-                    SetVBlankFlag();
+                    SetVBlankFlag()
 
                     if (m_ppuControlReg1.Test(PpuControl1.NmiOnVBlank))
                     {
@@ -1253,7 +1310,7 @@ class Ppu:IPpu{
         return m_nameTables.Read(MapPpuToVRam(ppuAddress))
     }
     
-    let m_nameTables = NameTableMemory.init().initial(size: KB(2))
+    let m_nameTables = NameTableMemory.init(initSize: KB(2))
     
     static func KB(_ n:UInt)->UInt
     {
@@ -1273,9 +1330,10 @@ class Ppu:IPpu{
     
     func MapPpuToVRam(_ ppuAddress:UInt16)->UInt16
     {
-        //assert(ppuAddress >= PpuMemory.kVRamBase); // Address may go into palettes (vram pointer)
+        assert(ppuAddress >= PpuMemory.kVRamBase)
+        // Address may go into palettes (vram pointer)
 
-        let virtualVRamAddress = (ppuAddress - PpuMemory.kVRamBase) % PpuMemory.kVRamSize;
+        let virtualVRamAddress = (ppuAddress - PpuMemory.kVRamBase) % PpuMemory.kVRamSize
         
         var physicalVRamAddress:UInt16 = 0
         switch (m_nes!.GetNameTableMirroring())
@@ -1285,7 +1343,7 @@ class Ppu:IPpu{
             // A B
             // A B
             // Simplest case, just wrap >= 2K
-            physicalVRamAddress = virtualVRamAddress % UInt16(NameTableMemory.kSize);
+            physicalVRamAddress = virtualVRamAddress % UInt16(NameTableMemory.kSize)
             break
 
         case RomHeader.NameTableMirroring.Horizontal:
@@ -1327,6 +1385,6 @@ class Ppu:IPpu{
             break;
         }
 
-        return physicalVRamAddress;
+        return physicalVRamAddress
     }
 }

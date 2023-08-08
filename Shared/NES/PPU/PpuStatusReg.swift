@@ -9,8 +9,9 @@ import Foundation
 
 
 //CpuMemory.kPpuStatusReg kPpuControlReg1 kPpuControlReg2
-class Bitfield8WithPpuRegister:Bitfield8
+class Bitfield8WithPpuRegister//:Bitfield8
 {
+    var m_field:UInt8 = 0
     var m_ppuRegisters:PpuRegisterMemory? = nil
     var m_regAddress:UInt16 = 0
     
@@ -40,20 +41,59 @@ class Bitfield8WithPpuRegister:Bitfield8
         m_field = m_ppuRegisters?.Read(UInt16(address)) ?? 0
     }
     
-    override func Set(_ bits:UInt8)
+    func Value()->UInt8
+    {
+        reload()
+        return m_field
+    }
+    
+    func Read(_ bits:UInt8)->UInt8
+    {
+        reload()
+        return m_field & bits
+    }
+    
+    func Test(_ bits:UInt8)->Bool
+    {
+        reload()
+        let ret = Read(bits)
+        
+        if(ret == 0)
+        {
+            return false
+        }
+        else
+        {
+            return true
+        }
+    }
+    
+    func Test01(_ bits:UInt8)->UInt8
+    {
+        if(Read(bits) != 0)
+        {
+            return 1
+        }
+        else
+        {
+            return 0
+        }
+    }
+    
+    func Set(_ bits:UInt8)
     {
         m_field |= bits
         writeValueToMemory()
     }
     
-    override func SetValue(_ value:UInt8)->UInt8
+    func SetValue(_ value:UInt8)->UInt8
     {
         m_field = value
         writeValueToMemory()
         return m_field
     }
     
-    override func Set(bits:UInt8, enabled:UInt8)
+    func Set(bits:UInt8, enabled:UInt8)
     {
         if ((enabled) != 0)
         {
@@ -67,16 +107,21 @@ class Bitfield8WithPpuRegister:Bitfield8
         writeValueToMemory()
     }
     
+    func Clear(_ bits:UInt8)
+    {
+        m_field &= ~bits
+        writeValueToMemory()
+    }
+    
     func writeValueToMemory()
     {
         let address = Int(MapCpuToPpuRegister(m_regAddress))
         m_ppuRegisters?.putValue(address: address, value: m_field)
     }
 
-    override func  ClearAll()
+    func ClearAll()
     {
-        let address = Int(MapCpuToPpuRegister(m_regAddress))
         m_field = 0
-        m_ppuRegisters?.putValue(address: address, value: m_field)
+        writeValueToMemory()
     }
 }

@@ -59,6 +59,10 @@ class Mapper{
     var m_canWriteChrMemory = false
     var m_canWriteSavMemory = false
     
+    func CanWriteChrMemory()->Bool
+    {
+        return m_canWriteChrMemory
+    }
     func OnCpuWrite(cpuAddress:UInt16, value:UInt8)
     {
         // Nothing to do
@@ -98,9 +102,10 @@ class Mapper{
         if (m_numChrBanks == 0)
         {
             m_numChrBanks = 8; // 8K of CHR-RAM
-            m_canWriteChrMemory = true;
+            m_canWriteChrMemory = true
         }
 
+        
         // Default init banks to most common mapping
         SetPrgBankIndex32k(cpuBankIndexIn:0, cartBankIndexIn:0)
         SetChrBankIndex8k(ppuBankIndexIn:0, cartBankIndexIn:0)

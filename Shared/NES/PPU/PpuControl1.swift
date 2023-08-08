@@ -37,9 +37,9 @@ class PpuControl1
         return GetNameTableAddress(ppuControl1) + PpuMemory.kNameTableSize // Follows name table
     }
 
-    static func GetBackgroundPatternTableAddress(_ ppuControl1:UInt16)->UInt16
+    static func GetBackgroundPatternTableAddress(_ ppuControl1:UInt8)->UInt16
     {
-        if(((ppuControl1 & UInt16(BackgroundPatternTableAddress))) != 0)
+        if(((ppuControl1 & BackgroundPatternTableAddress)) != 0)
         {
             return 0x1000
         }
@@ -49,9 +49,9 @@ class PpuControl1
         }
     }
 
-    static func GetPpuAddressIncrementSize(_ ppuControl1:UInt16)->UInt16
+    static func GetPpuAddressIncrementSize(_ ppuControl1:UInt8)->UInt16
     {
-        if(((ppuControl1 & UInt16(PpuAddressIncrement))) != 0)
+        if(((ppuControl1 & PpuAddressIncrement)) != 0)
         {
             return 32
         }

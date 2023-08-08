@@ -21,7 +21,20 @@ class Cartridge:ICartridge{
     }
     
     func HandlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
-        return
+        if (m_mapper.CanWriteChrMemory())
+        {
+            AccessChrMem(ppuAddress:ppuAddress,value:value)
+        }
+    }
+    
+    func AccessChrMem( ppuAddress:UInt16,value:UInt8)
+    {
+        let bankIndex = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
+        
+        let offset = GetBankOffset(address: ppuAddress, bankSize: kChrBankSize)
+        
+        let mappedBankIndex = m_mapper.GetMappedChrBankIndex(ppuBankIndex: bankIndex)
+        m_chrBanks[mappedBankIndex].Write(address: offset, value: value)
     }
     
     
@@ -145,22 +158,26 @@ class Cartridge:ICartridge{
     func AccessPrgMem(_ cpuAddress:UInt16)->UInt8
     {
         //Mio speed up
-        let bankIndexCache = cache[cpuAddress]
-        
+        //let bankIndexCache = cache[cpuAddress]
+        /*
         if(bankIndexCache != nil)
         {
             let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
             let memory = m_prgBanks[bankIndexCache!]
             return memory.RawRef(address: Int(offset))
         }
-        
+        */
         
         let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
         let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
         let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
         
+        if(bankIndex >= 8)
+        {
+            print("TEST")
+        }
         //Mio speed up
-        cache[cpuAddress] = mappedBankIndex
+        //cache[cpuAddress] = mappedBankIndex
         
         let memory = m_prgBanks[mappedBankIndex]
         return memory.RawRef(address: Int(offset))
@@ -208,8 +225,8 @@ class Cartridge:ICartridge{
     var m_savBanks:[Memory] = []
     func loadRom()
     {
-        //if let filepath = Bundle.main.path(forResource: "Super Mario Bros. (Japan, USA)", ofType: "nes")
-        if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        if let filepath = Bundle.main.path(forResource: "Super Mario Bros. (Japan, USA)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
@@ -233,7 +250,9 @@ class Cartridge:ICartridge{
                     return
                 }
                 
-                let numPrgBanks = prgRomSize / globeDef.kPrgBankSize;
+                let pgSize = globeDef.kPrgBankSize
+                
+                let numPrgBanks = prgRomSize / globeDef.kPrgBankSize
                 var readIndex = 16
                 for _ in 0...numPrgBanks-1
                 {
@@ -255,12 +274,15 @@ class Cartridge:ICartridge{
                 
                 let numChrBanks = chrRomSize / globeDef.kChrBankSize;
 
-                for _ in 0...numChrBanks-1
+                for index in 0..<numChrBanks
                 {
                     let newMemory = Memory.init().initial(size: globeDef.kChrBankSize)
                     let beginIndex:UInt = UInt(readIndex)
                     
-                    fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
+                    if(index<=8)
+                    {
+                        fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
+                    }
                     
                     readIndex = readIndex + Int(globeDef.kChrBankSize)
                     m_chrBanks.append(newMemory)
@@ -307,7 +329,6 @@ class Cartridge:ICartridge{
                 }
                 else
                 {
-                    //Mario is Map1
                     m_mapper = Mapper1()
                     m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
                 }

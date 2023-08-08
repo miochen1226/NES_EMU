@@ -41,12 +41,12 @@ protocol HandlePpuReadProtocol {
 
 func BIT(_ n:Int)->UInt8
 {
-    return (1<<n)
+    return UInt8(1<<n)
 }
 
 func BIT16(_ n:Int)->UInt16
 {
-    return (1<<n)
+    return UInt16(1<<n)
 }
 
 func BITS(_ bitsIn:[Int])->UInt16

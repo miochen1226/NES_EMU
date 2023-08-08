@@ -31,10 +31,21 @@ class PpuMemoryBus
         return m_cartridge!.HandlePpuRead(ppuAddress)
     }
 
+    func ReadCard(_ ppuAddressIn:UInt16)->UInt8
+    {
+        var ppuAddress = ppuAddressIn
+        ppuAddress = ppuAddress % PpuMemory.kPpuMemorySize // Handle mirroring above 16K to 64K
+        if (ppuAddress >= PpuMemory.kVRamBase)
+        {
+            return m_ppu!.HandlePpuRead(ppuAddress)
+        }
+        return m_cartridge!.HandlePpuRead(ppuAddress)
+    }
+    
     func Write(_ ppuAddressIn:UInt16,  value:UInt8)
     {
         var ppuAddress = ppuAddressIn
-        ppuAddress = ppuAddress % PpuMemory.kPpuMemorySize; // Handle mirroring above 16K to 64K
+        ppuAddress = ppuAddress % PpuMemory.kPpuMemorySize // Handle mirroring above 16K to 64K
 
         if (ppuAddress >= PpuMemory.kVRamBase)
         {

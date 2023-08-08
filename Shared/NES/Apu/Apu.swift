@@ -285,7 +285,7 @@ class Apu:NSObject{
             //#endif
                 
                 let sample:Float32 = SampleChannelsAndMix()
-                m_audioDriver?.m_frameProvider.enqueue(input: sample)
+                //m_audioDriver?.m_frameProvider.enqueue(input: sample)
             }
         }
     }
