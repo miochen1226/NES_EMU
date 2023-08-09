@@ -1,0 +1,30 @@
+
+name: Swift
+
+on:
+  #watch:
+  #  types: [started]
+  #watch
+   # types: [started]
+  push:
+    branches: [ master ]
+  #pull_request:
+  #  branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: Apple-Actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.CERTIFICATES_FILE_BASE64 }}
+        p12-password: ${{ secrets.CERTIFICATES_PASSWORD }}
+    - name: Start xcodebuild
+      run: sh build.sh
+    - uses: actions/upload-artifact@v1
+      with:
+        name: output
+        path: output/NES_EMU.ipa
