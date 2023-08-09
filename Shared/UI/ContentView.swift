@@ -14,10 +14,18 @@ struct ContentView: View {
     @State var scene = GameScene()
     @State var timer = Timer.publish (every: 1, on: .current, in: .common).autoconnect()
     var body: some View {
-        GameView(scene: scene).frame(width: 256, height: 240, alignment: .top)
-        Text(labenFps).onReceive(timer) { _ in
-            updateFps()
+        
+        ZStack {
+            GameView(scene: scene).frame(width: 256, height: 240, alignment: .top)
+            Text(labenFps).position(x: 20, y: 20).onReceive(timer) { _ in
+                updateFps()
+            }
+#if os(iOS)
+            VirtualControllerView()
+#else
+#endif
         }
+        
     }
     
     private func updateFps() {

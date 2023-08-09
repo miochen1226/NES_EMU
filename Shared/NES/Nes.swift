@@ -38,6 +38,7 @@ class SpriteObj{
 }
 
 class Nes{
+    static let sharedInstance = Nes()
     
     let m_cartridge = Cartridge.init()
     
@@ -140,6 +141,15 @@ class Nes{
                     
                     if(color.d_b == 0 && color.d_r == 0 && color.d_g == 0)
                     {
+                        color.d_a = 0
+                    }
+                    
+                    //Transparent pixel
+                    if(sprPaletteLowBits == 0)
+                    {
+                        color.d_r = 0
+                        color.d_g = 0
+                        color.d_b = 0
                         color.d_a = 0
                     }
                     

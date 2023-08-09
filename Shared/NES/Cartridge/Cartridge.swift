@@ -225,118 +225,123 @@ class Cartridge:ICartridge{
     var m_savBanks:[Memory] = []
     func loadRom()
     {
-        if let filepath = Bundle.main.path(forResource: "Super Mario Bros. (Japan, USA)", ofType: "nes")
+        //let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        
+        let bundleUrl = Bundle.main.url(forResource: "Roms", withExtension: "bundle")
+        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. (Japan, USA).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Donkey Kong (Japan).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Ice Climber (Japan).nes")
+        
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
+        
+        if let data = NSData(contentsOf: filepath)
         {
-            if let data = NSData(contentsOfFile: filepath)
+            let arrayData = [UInt8](data)
+            romHeader = RomHeader.init().Initialize(bytes: arrayData)
+            
+            if(romHeader == nil)
             {
-                let arrayData = [UInt8](data)
-                romHeader = RomHeader.init().Initialize(bytes: arrayData)
-                
-                if(romHeader == nil)
-                {
-                    NSLog("Rom header incorrect")
-                    return
-                }
-                
-                //PRG_ROM
-                let prgRomSize = romHeader!.GetPrgRomSizeBytes();
-                if(prgRomSize % globeDef.kPrgBankSize != 0)
-                {
-                    NSLog("prgRomSize incorrect")
-                    return
-                }
-                
-                let numPrgBanks = prgRomSize / globeDef.kPrgBankSize
-                var readIndex = 16
-                for _ in 0..<numPrgBanks
-                {
-                    let newMemory = Memory.init()
-                    newMemory.initial(size: globeDef.kPrgBankSize)
-                    let beginIndex:UInt = UInt(readIndex)
-                    fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
-                    readIndex = readIndex + Int(globeDef.kPrgBankSize)
-                    m_prgBanks.append(newMemory)
-                }
-                
-                // CHR-ROM data
-                let chrRomSize = romHeader!.GetChrRomSizeBytes();
-                
-                if(chrRomSize % globeDef.kChrBankSize != 0)
-                {
-                    NSLog("chrRomSize incorrect")
-                    return
-                }
-                
-                let numChrBanks = chrRomSize / globeDef.kChrBankSize;
-
-                for index in 0..<numChrBanks
-                {
-                    let newMemory = Memory.init()
-                    newMemory.initial(size: globeDef.kChrBankSize)
-                    let beginIndex:UInt = UInt(readIndex)
-                    
-                    if(index<=8)
-                    {
-                        fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
-                    }
-                    
-                    readIndex = readIndex + Int(globeDef.kChrBankSize)
-                    m_chrBanks.append(newMemory)
-                }
-                
-                
-                let numSavBanks = romHeader!.GetNumPrgRamBanks();
-                if(numSavBanks > kMaxSavBanks)
-                {
-                    NSLog("numSavBanks incorrect")
-                    return
-                }
-                
-                for _ in 0...numSavBanks
-                {
-                    let newMemory = Memory.init()
-                    newMemory.initial(size: globeDef.kSavBankSize)
-                    m_savBanks.append(newMemory)
-                }
-                //kMaxSavBanks
-
-                let mN = romHeader!.GetMapperNumber()
-                
-                /*
-                switch (romHeader!.GetMapperNumber())
-                {
-                    case 0: m_mapperHolder.reset(new Mapper0()); break;
-                    case 1: m_mapperHolder.reset(new Mapper1()); break;
-                    case 2: m_mapperHolder.reset(new Mapper2()); break;
-                    case 3: m_mapperHolder.reset(new Mapper3()); break;
-                    case 4: m_mapperHolder.reset(new Mapper4()); break;
-                    case 7: m_mapperHolder.reset(new Mapper7()); break;
-                default:
-                    NSLog("Unsupported mapper")
-                    //FAIL("Unsupported mapper: %d", romHeader.GetMapperNumber());
-                }
-                */
-                
-                //m_mapper = m_mapperHolder.get();
-                
-                if(mN == 0)
-                {
-                    m_mapper = Mapper0()
-                    m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
-                }
-                else
-                {
-                    m_mapper = Mapper1()
-                    m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
-                }
-                
-                m_cartNameTableMirroring = romHeader!.GetNameTableMirroring()
-                m_hasSRAM = romHeader!.HasSRAM();
+                NSLog("Rom header incorrect")
+                return
             }
+            
+            //PRG_ROM
+            let prgRomSize = romHeader!.GetPrgRomSizeBytes();
+            if(prgRomSize % globeDef.kPrgBankSize != 0)
+            {
+                NSLog("prgRomSize incorrect")
+                return
+            }
+            
+            let numPrgBanks = prgRomSize / globeDef.kPrgBankSize
+            var readIndex = 16
+            for _ in 0..<numPrgBanks
+            {
+                let newMemory = Memory.init()
+                newMemory.initial(size: globeDef.kPrgBankSize)
+                let beginIndex:UInt = UInt(readIndex)
+                fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
+                readIndex = readIndex + Int(globeDef.kPrgBankSize)
+                m_prgBanks.append(newMemory)
+            }
+            
+            // CHR-ROM data
+            let chrRomSize = romHeader!.GetChrRomSizeBytes();
+            
+            if(chrRomSize % globeDef.kChrBankSize != 0)
+            {
+                NSLog("chrRomSize incorrect")
+                return
+            }
+            
+            let numChrBanks = chrRomSize / globeDef.kChrBankSize;
+
+            for index in 0..<numChrBanks
+            {
+                let newMemory = Memory.init()
+                newMemory.initial(size: globeDef.kChrBankSize)
+                let beginIndex:UInt = UInt(readIndex)
+                
+                if(index<=8)
+                {
+                    fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
+                }
+                
+                readIndex = readIndex + Int(globeDef.kChrBankSize)
+                m_chrBanks.append(newMemory)
+            }
+            
+            
+            let numSavBanks = romHeader!.GetNumPrgRamBanks();
+            if(numSavBanks > kMaxSavBanks)
+            {
+                NSLog("numSavBanks incorrect")
+                return
+            }
+            
+            for _ in 0...numSavBanks
+            {
+                let newMemory = Memory.init()
+                newMemory.initial(size: globeDef.kSavBankSize)
+                m_savBanks.append(newMemory)
+            }
+            //kMaxSavBanks
+
+            let mN = romHeader!.GetMapperNumber()
+            
+            /*
+            switch (romHeader!.GetMapperNumber())
+            {
+                case 0: m_mapperHolder.reset(new Mapper0()); break;
+                case 1: m_mapperHolder.reset(new Mapper1()); break;
+                case 2: m_mapperHolder.reset(new Mapper2()); break;
+                case 3: m_mapperHolder.reset(new Mapper3()); break;
+                case 4: m_mapperHolder.reset(new Mapper4()); break;
+                case 7: m_mapperHolder.reset(new Mapper7()); break;
+            default:
+                NSLog("Unsupported mapper")
+                //FAIL("Unsupported mapper: %d", romHeader.GetMapperNumber());
+            }
+            */
+            
+            //m_mapper = m_mapperHolder.get();
+            
+            if(mN == 0)
+            {
+                m_mapper = Mapper0()
+                m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+            }
+            else
+            {
+                m_mapper = Mapper1()
+                m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+            }
+            
+            m_cartNameTableMirroring = romHeader!.GetNameTableMirroring()
+            m_hasSRAM = romHeader!.HasSRAM();
         }
     }
     

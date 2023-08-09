@@ -58,16 +58,23 @@ class NoiseChannel:BaseChannel{
         switch (cpuAddress)
         {
         case 0x400C:
-            
+            /*
             m_lengthCounter.SetHalt(TestBits(target: BIT(5), value: value))
             m_volumeEnvelope.SetConstantVolumeMode(TestBits(target: BIT(4), value: value))
-            m_volumeEnvelope.SetConstantVolume(UInt16(ReadBits8(target: BITS([0, 1, 2, 3]), value: value)))
+            m_volumeEnvelope.SetConstantVolume(UInt16(ReadBits8(target: BITS([0, 1, 2, 3]), value: value)))*/
+            
+            m_lengthCounter.SetHalt(TestBits(target: UInt16(BIT(5)), value: value))
+            m_volumeEnvelope.SetConstantVolumeMode(TestBits(target: UInt16(BIT(4)), value: value))
+            m_volumeEnvelope.SetConstantVolume(ReadBits(target: BITS16([0, 1, 2, 3]), value: value))
             break;
 
         case 0x400E:
+            /*
             m_shiftRegister.m_mode = TestBits(target: BIT(7), value: value)
             SetNoiseTimerPeriod(UInt16(ReadBits8(target: BITS([0, 1, 2, 3]), value: value)))
-            
+            */
+            m_shiftRegister.m_mode = TestBits(target: UInt16(BIT(7)), value: value)
+            SetNoiseTimerPeriod(ReadBits(target: BITS16([0, 1, 2, 3]), value: value))
             break;
 
         case 0x400F:

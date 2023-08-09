@@ -14,7 +14,7 @@ protocol IRenderScreen
     func renderScreen()
 }
 
-let nes = Nes.init()
+let nes = Nes.sharedInstance
 
 class GameScene: SKScene,IRenderScreen {
     
@@ -72,8 +72,7 @@ class GameScene: SKScene,IRenderScreen {
     
     var enableDrawBG = true
     var enableDrawSprites = false
-    var buffer:[UInt8] = []// UnsafeMutablePointer<UInt8>.allocate(capacity: 256*240*4)
-    
+    var buffer:[UInt8] = []
     
     func getPixelColor(_ pos:Int,dataArray:[Color4])->[UInt8]
     {

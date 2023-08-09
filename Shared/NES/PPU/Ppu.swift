@@ -796,6 +796,7 @@ class Ppu:IPpu{
             spriteRenderingEnabled = false
         }
         
+        //spriteRenderingEnabled = false
         //Mio disable sprite
         //spriteRenderingEnabled = false
         

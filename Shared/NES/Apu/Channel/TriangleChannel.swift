@@ -59,7 +59,7 @@ class TriangleChannel:BaseChannel{
 
         case 0x400B:
             let period = ReadBits8(target: 0x7, value: value)
-            m_timer.SetPeriodHigh3(period)
+            m_timer.SetPeriodHigh3(UInt16(period))
             m_linearCounter.Restart()
             m_lengthCounter.LoadCounterFromLUT(value >> 3)
             break

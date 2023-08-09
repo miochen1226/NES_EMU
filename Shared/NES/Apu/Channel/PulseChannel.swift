@@ -73,7 +73,7 @@ class TimerEx
     
     func SetPeriodHigh3(_ value:UInt16)
     {
-        assert(value < BIT(3));
+        assert(value < BIT(3))
         var period:UInt16 = m_divider.GetPeriod()
         //period = (value << 8) | (period & 0xFF); // Keep low 8 bits
         period = (value << 8) | (period & 0xFF)
@@ -283,7 +283,7 @@ class PulseChannel:NSObject {
         let N = TestBits(target: BIT(3), value: value)
         m_sweepUnit.SetNegate(N)
         
-        let SSS = UInt8(ReadBits8( target:BITS([0,1,2]),value:value))
+        let SSS = ReadBits8( target:BITS([0,1,2]),value:value)
         m_sweepUnit.SetShiftCount(SSS)
         
         m_sweepUnit.Restart()
@@ -296,7 +296,7 @@ class PulseChannel:NSObject {
         //LLLLLLLL
         //timer 的低 8 位（一共 11 位，用于将 cpu 二分频后的时钟继续分频）
         m_timerEx.SetPeriodLow8(value)
-        m_timerEx.Reset()
+        //m_timerEx.Reset()
     }
     
     func handle40034007(cpuAddress:UInt16, value:UInt8)
@@ -311,7 +311,7 @@ class PulseChannel:NSObject {
         m_timerEx.SetPeriodHigh3(UInt16(HHH))
         
         let LLLL = ReadBits8( target:BITS([3,4,5,6,7]),value:value) >> 3
-        m_lengthCounterEx.LoadCounterFromLUT(UInt8(LLLL))
+        m_lengthCounterEx.LoadCounterFromLUT(LLLL)
         
         //Side effect
         m_volumeEnvelope.Restart()
@@ -422,7 +422,7 @@ class VolumeEnvelope
         if (m_restart)
         {
             m_restart = false
-            m_counter = 15;
+            m_counter = 15
             m_divider.ResetCounter();
         }
         else
@@ -435,7 +435,7 @@ class VolumeEnvelope
                 }
                 else if (m_loop)
                 {
-                    m_counter = 15;
+                    m_counter = 15
                 }
             }
         }
@@ -502,6 +502,8 @@ class SweepUnit
         {
             if (m_enabled)
             {
+                timer.Reset()
+                ComputeTargetPeriod(timer: &timer)
                 if(m_divider.Clock())
                 {
                     AdjustTimerPeriod(timer:&timer)
@@ -539,7 +541,7 @@ class SweepUnit
         {
             return
         }
-        assert(m_shiftCount < 8); // 3 bits
+        assert(m_shiftCount < 8)
 
         let currPeriod = timer.GetPeriod()
         let shiftedPeriod = currPeriod >> m_shiftCount
