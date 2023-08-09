@@ -1,6 +1,6 @@
 echo "copy provision"
 mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-cpNESEMUAPPSTORE.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+cp NESEMUAPPSTORE.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 ls ~/Library/MobileDevice/Provisioning\ Profiles/
 
 OBJROOT="${OBJROOT}/DependentBuilds"
