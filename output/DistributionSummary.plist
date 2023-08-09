@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NES_EMU.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>bitcode</key>
+			<true/>
+			<key>buildNumber</key>
+			<string>1</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>8C80923140C1F252E72F32E69EE296C84FD88861</string>
+				<key>dateExpires</key>
+				<string>2023/9/10</string>
+				<key>type</key>
+				<string>Apple Distribution</string>
+			</dict>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>82Q375NBS9.com.mio.NES-EMU</string>
+				<key>beta-reports-active</key>
+				<true/>
+				<key>com.apple.developer.team-identifier</key>
+				<string>82Q375NBS9</string>
+				<key>get-task-allow</key>
+				<false/>
+				<key>keychain-access-groups</key>
+				<array>
+					<string>82Q375NBS9.com.mio.NES-EMU</string>
+				</array>
+			</dict>
+			<key>name</key>
+			<string>NES_EMU.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>ceac58bc-5375-4b25-b369-3e40f9f47ad1</string>
+				<key>dateExpires</key>
+				<string>2023/9/10</string>
+				<key>name</key>
+				<string>NES-EMU-APPSTORE</string>
+			</dict>
+			<key>symbols</key>
+			<true/>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>82Q375NBS9</string>
+				<key>name</key>
+				<string></string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>
