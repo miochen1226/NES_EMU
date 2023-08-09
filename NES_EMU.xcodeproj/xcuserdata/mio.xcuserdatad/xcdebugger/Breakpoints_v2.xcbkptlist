@@ -55,38 +55,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "9B67237C-9247-4A04-9988-BE59085FC7E3"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/NES/Nes.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "168"
-            endingLineNumber = "168"
-            landmarkName = "stop()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "2799252D-9223-4C52-8681-BCCFA2D9B5C3"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/NES/Apu/Apu.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "167"
-            endingLineNumber = "167"
-            landmarkName = "HandleCpuRead(cpuAddress:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "19FEC453-8CF1-4B15-8BAF-99894DF783AA"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -94,13 +62,13 @@
             filePath = "Shared/NES/PPU/Ppu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1374"
-            endingLineNumber = "1374"
+            startingLineNumber = "1266"
+            endingLineNumber = "1266"
             landmarkName = "MapPpuToVRam(_:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "19FEC453-8CF1-4B15-8BAF-99894DF783AA - 2cb72f19bbed26e8"
+                  uuid = "19FEC453-8CF1-4B15-8BAF-99894DF783AA - 2cb72f19bbed34dc"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -110,12 +78,27 @@
                   urlString = "file:///Users/mio/Documents/GitHub/NES_EMU/Shared/NES/PPU/Ppu.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1374"
-                  endingLineNumber = "1374"
+                  startingLineNumber = "1266"
+                  endingLineNumber = "1266"
                   offsetFromSymbolStart = "116">
                </Location>
                <Location
-                  uuid = "19FEC453-8CF1-4B15-8BAF-99894DF783AA - 849389c2ee982956"
+                  uuid = "19FEC453-8CF1-4B15-8BAF-99894DF783AA - 4a03a3e551f83831"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "NES_EMU.Ppu.HandlePpuWrite(_: Swift.UInt16, value: Swift.UInt8) -&gt; ()"
+                  moduleName = "NES_EMU"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/mio/Documents/GitHub/NES_EMU/Shared/NES/PPU/Ppu.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1266"
+                  endingLineNumber = "1266"
+                  offsetFromSymbolStart = "136">
+               </Location>
+               <Location
+                  uuid = "19FEC453-8CF1-4B15-8BAF-99894DF783AA - 849389c2ee983b62"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
@@ -125,8 +108,8 @@
                   urlString = "file:///Users/mio/Documents/GitHub/NES_EMU/Shared/NES/PPU/Ppu.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1374"
-                  endingLineNumber = "1374"
+                  startingLineNumber = "1266"
+                  endingLineNumber = "1266"
                   offsetFromSymbolStart = "94">
                </Location>
             </Locations>
@@ -142,8 +125,8 @@
             filePath = "Shared/NES/CPU/Cpu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "179"
-            endingLineNumber = "179"
+            startingLineNumber = "173"
+            endingLineNumber = "173"
             landmarkName = "ExecutePendingInterrupts()"
             landmarkType = "7">
          </BreakpointContent>
@@ -161,38 +144,6 @@
             startingLineNumber = "63"
             endingLineNumber = "63"
             landmarkName = "GetPatternTableAddress(index:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "61654C80-5F93-4BEB-AB40-7EED00CDA601"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/NES/PPU/Ppu.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "577"
-            endingLineNumber = "577"
-            landmarkName = "FetchSpriteData(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "1BCAE40F-6AA0-4227-95B0-8D9F2CC47B01"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Shared/NES/PPU/Ppu.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "581"
-            endingLineNumber = "581"
-            landmarkName = "FetchSpriteData(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

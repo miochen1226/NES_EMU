@@ -23,14 +23,13 @@ class NesFrameProvider:FrameProvider
     func dequeue(byteSize: UInt32)->FrameObj
     {
         let frameObj = FrameObj()
-        var floatCount:Int = Int(byteSize/4)
+        let floatCount:Int = Int(byteSize/4)
         
         
         lockInput.lock()
         
         if(frames.count >= byteSize/4)
         {
-            var arrayToPlay:[Float32] = []
             for _ in 0..<floatCount
             {
                 frameObj.arrayFloat.append(frames.removeFirst())
@@ -38,8 +37,6 @@ class NesFrameProvider:FrameProvider
             
             frameObj.countFloat = UInt32(frameObj.arrayFloat.count)
         }
-        
-        
         
         lockInput.unlock()
         
@@ -59,7 +56,7 @@ class AudioDriver:NSObject
         self.m_frameProvider = frameProvider
         super.init()
         
-        //m_audioUnitPlayer = AudioUnitPlayer(frameProvider: frameProvider)
+        m_audioUnitPlayer = AudioUnitPlayer(frameProvider: frameProvider)
     }
 }
 /*

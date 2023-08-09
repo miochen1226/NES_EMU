@@ -33,10 +33,17 @@ class AudioController:NSObject
         
         //ios use kAudioUnitSubType_RemoteIO
         //mac use kAudioUnitSubType_HALOutput
+#if os(iOS)
+        var audioComponentDesc = AudioComponentDescription(componentType: OSType(kAudioUnitType_Output),
+                                                           componentSubType: OSType(kAudioUnitSubType_RemoteIO),
+                                                           componentManufacturer: OSType(kAudioUnitManufacturer_Apple),
+                                                           componentFlags: 0, componentFlagsMask: 0)
+#else
         var audioComponentDesc = AudioComponentDescription(componentType: OSType(kAudioUnitType_Output),
                                                            componentSubType: OSType(kAudioUnitSubType_HALOutput),
                                                            componentManufacturer: OSType(kAudioUnitManufacturer_Apple),
                                                            componentFlags: 0, componentFlagsMask: 0)
+#endif
         let inputComponent = AudioComponentFindNext(nil, &audioComponentDesc)
         status = AudioComponentInstanceNew(inputComponent!, &remoteIOUnit)
         

@@ -74,18 +74,12 @@ class Cpu:CpuRegDef,ICpu{
         case CpuMemory.kSpriteDmaReg: // $4014
             
             // Initiate a DMA transfer from the input page to sprite ram.
-
-            
-
             m_spriteDmaRegister = value
-            var spriteDmaRegister = TO16(m_spriteDmaRegister)
+            let spriteDmaRegister = TO16(m_spriteDmaRegister)
             let srcCpuAddress:UInt16 = spriteDmaRegister * 0x100
-
             // Note: we perform the full DMA transfer right here instead of emulating the transfers over multiple frames.
             // If we need to do it right, see http://wiki.nesdev.com/w/index.php/PPU_programmer_reference#DMA
-            SpriteDmaTransfer(srcCpuAddress);
-
-            
+            SpriteDmaTransfer(srcCpuAddress)
             break;
 
         case CpuMemory.kControllerPort1: // $4016
@@ -252,7 +246,7 @@ class Cpu:CpuRegDef,ICpu{
 
         case AddressMode.ZPIdxX:
             
-            var plus_result = UInt16(Read8(PC+1)) + UInt16(X)
+            let plus_result = UInt16(Read8(PC+1)) + UInt16(X)
             m_operandAddress = plus_result & 0x00FF // Wrap around zero-page boundary
                 
             //m_operandAddress = TO16((Read8(PC+1) + X)) & 0x00FF // Wrap around zero-page boundary
@@ -816,7 +810,6 @@ class Cpu:CpuRegDef,ICpu{
     
     func GetMemValue()->UInt8
     {
-        let operandAddress = m_operandAddress
         let result = Read8(m_operandAddress)
         return result
     }
@@ -1101,8 +1094,6 @@ class Cpu:CpuRegDef,ICpu{
     
     func IsJmpOrBranchOperand(_ v:UInt32)->Bool
     {
-        let attrMode = m_opCodeEntry!.addrMode
-        //Relatv|Absolu|Indrct
         if(v == AddressMode.Relatv.rawValue)
         {
             return true
@@ -1115,8 +1106,6 @@ class Cpu:CpuRegDef,ICpu{
         {
             return true
         }
-        
-        
         return false
     }
     

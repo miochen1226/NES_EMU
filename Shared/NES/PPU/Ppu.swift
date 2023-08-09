@@ -37,11 +37,8 @@ class Ppu:IPpu{
 
         // Not necessary but helps with debugging
         m_vramAddress = 0xDDDD
-        var vramAddress = m_vramAddress
         m_tempVRamAddress = 0xDDDD
-        
         m_vramBufferedValue = 0xDD
-
         m_numSpritesToRender = 0
 
         m_cycle = 0
@@ -119,28 +116,19 @@ class Ppu:IPpu{
         // If least 2 bits are unset, it's one of the 8 mirrored addresses, so clear bit 4 to mirror
         if ( !TestBits(target: paletteAddress, value: (BIT(1)|BIT(0))) )
         {
-            //let stB = String(format:"0x%02X", paletteAddress)
             ClearBits(target: &paletteAddress, value: BIT(4))
-            //let stF = String(format:"0x%02X", paletteAddress)
-            //print(stB + "->" + stF)
         }
         return paletteAddress
     }
     
     func ReadPpuRegister(_ cpuAddress:UInt16)->UInt8
     {
-        if(cpuAddress == 8194)
-        {
-            //NSLog("ReadPpuRegister 8194")
-        }
         return m_ppuRegisters.Read(MapCpuToPpuRegister(cpuAddress))
     }
 
     func WritePpuRegister(_ cpuAddress:UInt16,  value:UInt8)
     {
-        //NSLog("WritePpuRegister")
         m_ppuRegisters.Write(address: MapCpuToPpuRegister(cpuAddress), value: value)
-        
         m_ppuStatusReg.reload()
         m_ppuControlReg1.reload()
         m_ppuControlReg2.reload()
@@ -148,19 +136,7 @@ class Ppu:IPpu{
     
     
     func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
-        //assert(cpuAddress >= CpuMemory::kPpuRegistersBase && cpuAddress < CpuMemory::kPpuRegistersEnd);
-
-        if(cpuAddress < CpuMemory.kPpuRegistersBase || cpuAddress >= CpuMemory.kPpuRegistersEnd)
-        {
-            //NSLog("error")
-        }
-        // If debugger is reading, we don't want any register side-effects, so just return the value
-        /*
-        if ( Debugger::IsExecuting() )
-        {
-            return ReadPpuRegister(cpuAddress);
-        }
-        */
+        assert(cpuAddress >= CpuMemory.kPpuRegistersBase && cpuAddress < CpuMemory.kPpuRegistersEnd)
         
         var result:UInt8 = 0
 
@@ -261,15 +237,7 @@ class Ppu:IPpu{
             break
         case CpuMemory.kPpuControlReg2: //$2001
             
-            /*
-            m_ppuControlReg2.SetValue(value)
             
-            var displayType = m_ppuControlReg2.Test(UInt8(PpuControl2.DisplayType))
-            if(displayType == true)
-            {
-                print("gray")
-            }
-            */
             break
         case CpuMemory.kPpuSprRamIoReg: // $2004
             // Write value to sprite ram at address in $2003 (OAMADDR) and increment address
@@ -313,10 +281,6 @@ class Ppu:IPpu{
             {
                 m_tempVRamAddress = (m_tempVRamAddress & 0xFF00) | halfAddress
                 m_vramAddress = m_tempVRamAddress; // Update v from t on second write
-                
-                let st = String(format:"%02X", m_vramAddress)
-                print(st)
-                
             }
             
             m_vramAndScrollFirstWrite = !m_vramAndScrollFirstWrite;
@@ -327,13 +291,6 @@ class Ppu:IPpu{
             // Write to palette or memory bus
             if (m_vramAddress >= PpuMemory.kPalettesBase)
             {
-                let stAddrH = String(format:"%02X", m_vramAddress)
-                if(stAddrH == "3F01")
-                {
-                    let st = String(format:"W palette 0x%02X->0x%02X", m_vramAddress,value)
-                    print(st)
-                }
-                
                 m_palette.Write(address: MapPpuToPalette(ppuAddress: m_vramAddress), value: value)
             }
             else
@@ -471,7 +428,7 @@ class Ppu:IPpu{
             }
             
             //let spriteY:UInt8 = oam[n][m]; // (3) Evaluate OAM[n][m] as a Y-coordinate (it might not be)
-            IncAndWrap(v: &m, size: 4)
+            _ = IncAndWrap(v: &m, size: 4)
             
             if (IsSpriteInRangeY(y: y, spriteY: spriteY, spriteHeight: spriteHeight)) // (3a)
             {
@@ -479,7 +436,7 @@ class Ppu:IPpu{
 
                 // PPU reads next 3 bytes from OAM. Because of the hardware bug (below), m might not be 1 here, so
                 // we carefully increment n when m overflows.
-                for i in 0...2
+                for _ in 0...2
                 {
                     if (IncAndWrap(v: &m, size: 4))
                     {
@@ -493,7 +450,7 @@ class Ppu:IPpu{
                 // The m increment is a hardware bug - if only n was incremented, the overflow flag would be set whenever more than 8
                 // sprites were present on the same scanline, as expected.
                 n = n + 1
-                IncAndWrap(v: &m, size: 4) // This increment is a hardware bug
+                _ = IncAndWrap(v: &m, size: 4) // This increment is a hardware bug
             }
         }
     }
@@ -676,11 +633,6 @@ class Ppu:IPpu{
         
         let tileIndex:UInt8 = m_ppuMemoryBus!.Read(tileIndexAddress)
         
-        if(tileIndex == 0)
-        {
-            let tileIndexA:UInt8 = m_ppuMemoryBus!.Read(tileIndexAddress)
-        }
-        
         let tileOffset:UInt16 = TO16(tileIndex) * 16
         let fineY:UInt8 = GetVRamAddressFineY(v)
         
@@ -814,8 +766,8 @@ class Ppu:IPpu{
     
     func isHitSprite(x:UInt32,spriteData:SpriteFetchData)->Bool
     {
-        var left = spriteData.x
-        var right:Int = Int(spriteData.x) + 8
+        let left = spriteData.x
+        let right:Int = Int(spriteData.x) + 8
         if(x >= left && x <= right)
         {
             return true
@@ -830,15 +782,8 @@ class Ppu:IPpu{
     {
         //NSLog("RenderPixel")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
-
-        var displayType = m_ppuControlReg2.Test(UInt8(PpuControl2.DisplayType))
         var bgRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground))
         var spriteRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderSprites))
-        
-        if(displayType == true)
-        {
-            print("gray")
-        }
         
         // Consider bg/sprites as disabled (for this pixel) if we're not supposed to render it in the left-most 8 pixels
         if ( !m_ppuControlReg2.Test(UInt8(PpuControl2.BackgroundShowLeft8)) && x < 8 )
@@ -859,13 +804,6 @@ class Ppu:IPpu{
         var bgPaletteHighBits:UInt8 = 0
         var bgPaletteLowBits:UInt8 = 0
         
-        if(y == 40)
-        {
-            if(x == 60)
-            {
-                print("")
-            }
-        }
         if (bgRenderingEnabled)
         {
             // At this point, the data for the current and next tile are in m_bgTileFetchDataPipeline
@@ -885,22 +823,6 @@ class Ppu:IPpu{
 
             bgPaletteLowBits = (TestBits01(target: muxMask,value: shiftRegHigh) << 1) | (TestBits01(target: muxMask,value: shiftRegLow))
 
-            let backgroundShowLeft8 = m_ppuControlReg2.Test(UInt8(PpuControl2.BackgroundShowLeft8))
-            var displayType = m_ppuControlReg2.Test(UInt8(PpuControl2.DisplayType))
-            if(displayType == true)
-            {
-                print("gray")
-            }
-            if(backgroundShowLeft8 == false)
-            {
-                print("hide")
-            }
-            
-            //Mio debug
-            //bgPaletteLowBits = 2
-            // Technically, the mux would index 2 8-bit registers containing replicated values for the current
-            // and next tile palette high bits (from attribute bytes), but this is faster.
-            
             if(xShift + m_fineX < 8)
             {
                 bgPaletteHighBits = currTile.paletteHighBits
@@ -1011,58 +933,29 @@ class Ppu:IPpu{
             }
         }
 
-        /*
-        if(x>88 && x<96)
-        {
-            if(y>24 && y<32)
-            {
-                let colorA = Color4.init()
-                colorA.d_r = 255
-                colorA.d_g = 0
-                colorA.d_b = 0
-                
-                m_renderer?.DrawPixel(x: x, y: y, color: colorA)
-                return
-            }
-        }*/
-        m_renderer?.DrawPixel(x: x, y: y, color: color)
+        m_renderer?.DrawPixel(x: x, y: y, color: &color)
     }
     
     var m_renderer:Renderer? = nil
     func GetPaletteColor(highBits:UInt8,lowBits:UInt8,paletteBaseAddress:UInt16,color:inout Color4)
     {
+        
         assert(lowBits != 0)
         let paletteOffset:UInt8 = (highBits << 2) | (lowBits & 0x3)
-
-        //let st = String(format:"0x%02X", paletteOffset)
-            
-        //let stTarget = String(format:"%02X", paletteBaseAddress + UInt16(paletteOffset))
-        
-        //3F04/$3F08/$3F0C
-        /*
-        if(stTarget == "3F01")
-        {
-            print("come")
-            color.d_r = 0
-            color.d_g = 0
-            color.d_b = 0
-            color.d_a = 255
-            return
-        }
-         */
         //@NOTE: lowBits is never 0, so we don't have to worry about mapping every 4th byte to 0 (bg color) here.
         // That case is handled specially in the multiplexer code.
-        let paletteIndex:UInt8 = m_palette.Read( MapPpuToPalette(ppuAddress: paletteBaseAddress + UInt16(paletteOffset)) )
-        //color = g_paletteColors[Int(paletteIndex) & (Int(kNumPaletteColors)-1)];
+        let paletteIndex:Int = Int(m_palette.Read( MapPpuToPalette(ppuAddress: paletteBaseAddress + UInt16(paletteOffset))))
+        color.d_r = g_paletteColors[paletteIndex].d_r
+        color.d_g = g_paletteColors[paletteIndex].d_g
+        color.d_b = g_paletteColors[paletteIndex].d_b
+        color.d_a = g_paletteColors[paletteIndex].d_a
         
-        
-        
-        color = g_paletteColors[Int(paletteIndex)];
     }
     
     
     func GetBackgroundColor(_ color:inout Color4)
     {
+        return
         color = g_paletteColors[Int(m_palette.Read(0))] // BG ($3F00)
     }
     
@@ -1160,17 +1053,16 @@ class Ppu:IPpu{
         {
             passRenderTime = passRenderTime-1
         }
-        let regValue = m_ppuControlReg2.Value()
         let renderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
         
         if(renderingEnabled)
         {
             //NSLog("renderingEnabled->TRUE")
         }
-        for _ in 0 ... ppuCycles-1
+        for _ in 0..<ppuCycles
         {
-            var x = m_cycle % kNumScanlineCycles // offset in current scanline
-            var y = m_cycle / kNumScanlineCycles // scanline
+            let x = m_cycle % kNumScanlineCycles // offset in current scanline
+            let y = m_cycle / kNumScanlineCycles // scanline
 
             if ( (y <= 239) || y == 261 ) // Visible and Pre-render scanlines
             {

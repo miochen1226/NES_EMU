@@ -22,10 +22,9 @@ class Bitfield8 {
         return m_field
     }
     
-    func SetValue(_ value:UInt8)->UInt8
+    func SetValue(_ value:UInt8)
     {
         m_field = value
-        return m_field
     }
 
     func  ClearAll() { m_field = 0 }

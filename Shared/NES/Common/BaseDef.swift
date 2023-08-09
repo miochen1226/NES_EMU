@@ -49,7 +49,7 @@ func BIT16(_ n:Int)->UInt16
     return UInt16(1<<n)
 }
 
-func BITS(_ bitsIn:[Int])->UInt16
+func BITS16(_ bitsIn:[Int])->UInt16
 {
     var result:UInt16 = 0
     for bit in bitsIn
@@ -60,9 +60,25 @@ func BITS(_ bitsIn:[Int])->UInt16
     return result
 }
 
+func BITS(_ bitsIn:[UInt8])->UInt8
+{
+    var result:UInt8 = 0
+    for bit in bitsIn
+    {
+        let dig = 1<<bit
+        result |= UInt8(dig)
+    }
+    return result
+}
+
 func ClearBits(target:inout UInt16, value:UInt8)
 {
     target = (target & ~UInt16(value))
+}
+
+func TestBits(target:UInt8,  value:UInt8)->Bool
+{
+    return ReadBits8(target: target, value: value) != 0
 }
 
 func TestBits(target:UInt16,  value:UInt8)->Bool
@@ -83,6 +99,11 @@ func ReadBits(target:UInt16, value:UInt16)->UInt16
 func ReadBits(target:UInt16, value:UInt8)->UInt16
 {
     return target & UInt16(value)
+}
+
+func ReadBits8(target:UInt8, value:UInt8)->UInt8
+{
+    return target & value
 }
 
 func TestBits01(target:UInt16,value:UInt8)->UInt8

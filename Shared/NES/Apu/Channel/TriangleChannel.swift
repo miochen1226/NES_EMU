@@ -47,34 +47,26 @@ class TriangleChannel:BaseChannel{
         switch (cpuAddress)
         {
         case 0x4008:
-            
-            m_lengthCounter.SetHalt(TestBits(target: UInt16(BIT(7)), value: value))
-            var test = TestBits(target: UInt16(BIT(7)),value:value)
-            //, , ReadBits(value, BITS(0, 1, 2, 3, 4, 5, 6))
-            
-            let period = ReadBits(target: 0x7f, value: value)
-            
-            //let period = ReadBits(value, BITS(0, 1, 2, 3, 4, 5, 6))
-            m_linearCounter.SetControlAndPeriod(control: test, period: period)
-            break;
+            m_lengthCounter.SetHalt(TestBits(target: BIT(7), value: value))
+            let control = TestBits(target: BIT(7),value:value)
+            let period = ReadBits8(target: 0x7f, value: value)
+            m_linearCounter.SetControlAndPeriod(control: control, period: UInt16(period))
+            break
 
         case 0x400A:
             m_timer.SetPeriodLow8(value);
-            break;
+            break
 
         case 0x400B:
-            
-            let period = ReadBits(target: 0x7, value: value)//(ta value, )
+            let period = ReadBits8(target: 0x7, value: value)
             m_timer.SetPeriodHigh3(period)
-            
-            //m_timer.SetPeriodHigh3(ReadBits(value, BITS(0, 1, 2)));
-            m_linearCounter.Restart(); // Side effect
+            m_linearCounter.Restart()
             m_lengthCounter.LoadCounterFromLUT(value >> 3)
-            break;
+            break
 
         default:
-            assert(false);
-            break;
+            assert(false)
+            break
         };
     }
     

@@ -53,12 +53,12 @@ class FrameCounter:NSObject
     {
         assert(cpuAddress == 0x4017)
 
-        let mode = ReadBits(target: UInt16(BIT(7)), value: value) >> 7
+        let mode = ReadBits8(target: BIT(7), value: value) >> 7
         SetMode(UInt8(mode))
         //SetMode(UInt8(1))
         
         
-        if (TestBits(target: UInt16(BIT(6)), value: value))
+        if (TestBits(target: BIT(6), value: value))
         {
             AllowInterrupt()
         }

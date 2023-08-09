@@ -10,7 +10,7 @@ class Memory
 {
     var memorySize:UInt = 0
     var rawMemory:[UInt8] = Array<UInt8>()
-    func initial(size:UInt)->Memory
+    func initial(size:UInt)
     {
         memorySize = size
         
@@ -18,7 +18,6 @@ class Memory
         {
             rawMemory.append(0)
         }
-        return self
     }
     
     func putValue(address:Int,value:UInt8)
@@ -121,11 +120,13 @@ class ObjectAttributeMemory2:Memory
     
     func ClearOAM2()
     {
+        /*
         for index in 0..<memorySize
         {
             let mIndex = Int(index)
             rawMemory[mIndex] = 0xFF
         }
+        */
     }
     
     func saveSprites(sprites:[SpriteData])
@@ -186,10 +187,6 @@ class NameTableMemory:Memory
     override func Write( address:UInt16,  value:UInt8)
     {
         assert(address < 2048)
-        if(address == 960)
-        {
-            print("Write 960--->"+String(value))
-        }
         rawMemory[Int(address)] = value
     }
 }

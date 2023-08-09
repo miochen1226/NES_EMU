@@ -36,6 +36,18 @@ class GameScene: SKScene,IRenderScreen {
     
     override func didMove(to view: SKView) {
         self.scaleMode = .resizeFill
+        buffer.removeAll()
+        for _ in 0..<256
+        {
+            for _ in 0..<240
+            {
+                buffer.append(0)
+                buffer.append(0)
+                buffer.append(0)
+                buffer.append(0)
+            }
+        }
+        
         nes.loadRom()
         nes.startRun(iRenderScreen: self)
         
@@ -45,33 +57,74 @@ class GameScene: SKScene,IRenderScreen {
     
     var arraySKShapeNode:[SKSpriteNode] = []
     
-    
+    /*
     func getBgPixel(pos:Int)->[UInt8]
     {
-        let y = pos/256
-        let x = pos%256
-        let dataPix:Color4 = nes.m_renderer.rawColors[x + (239-y)*256]
+        //let y = pos/256
+        //let x = pos%256
+        //let dataPix:Color4 = nes.m_renderer.GetPixel(x + (239-y)*256)
         
+        let dataPix:Color4 = nes.m_renderer.GetPixel(pos)
         return [dataPix.d_r,dataPix.d_g,dataPix.d_b,UInt8(255)]
         //return [UInt8(drand48()*255),UInt8(drand48()*255),UInt8(drand48()*255),UInt8(255)]
     }
+    */
     
     var enableDrawBG = true
     var enableDrawSprites = false
+    var buffer:[UInt8] = []// UnsafeMutablePointer<UInt8>.allocate(capacity: 256*240*4)
     
+    
+    func getPixelColor(_ pos:Int,dataArray:[Color4])->[UInt8]
+    {
+        let color4 = dataArray[pos]
+        if(color4 == nil)
+        {
+            return [0,0,0,0]
+        }
+        else
+        {
+            return dataArray[pos].getRgba()
+        }
+    }
+    
+    var m_bIsBusy = false
     func renderBG()
     {
-        //BG
-        let width = 256
-        let height = 240
-        
-        let bytes = stride(from: 0, to: (width * height), by: 1).flatMap {
-            pos in
-            return getBgPixel(pos: pos)
+        if(m_bIsBusy)
+        {
+            return
         }
         
-        let data = Data.init(bytes)
-        let bgTexture = SKTexture.init(data: data, size: CGSize(width: width, height: height))
+        m_bIsBusy = true
+        //BG
+        var dstArray2Pointer = UnsafeMutablePointer<UInt8>(&self.buffer)
+        nes.m_renderer.getFrame(dstArray2Pointer: &dstArray2Pointer)
+        
+        //let dataArray:[Color4] = Array<Color4>(UnsafeBufferPointer<UInt8>(start: buffer, count: 256*240*4))
+                   
+        /*
+        var bytesBG:[UInt8] = []
+        
+        print(dataArray.count)
+        for index in 0..<256*240-1
+        {
+            bytesBG.append(dataArray[index].d_r)
+            bytesBG.append(dataArray[index].d_g)
+            bytesBG.append(dataArray[index].d_b)
+            bytesBG.append(dataArray[index].d_a)
+        }
+        */
+        let data = Data.init(buffer)
+        
+        /*
+        let bytes = stride(from: 0, to: (width * height), by: 1).flatMap {
+            pos in
+            return getPixelColor(pos,dataArray: dataArray)
+        }
+        */
+        //let data = Data.init(bytes)
+        let bgTexture = SKTexture.init(data: data, size: CGSize(width: 256, height: 240))
         bgTexture.filteringMode = .nearest
         let bkNode = SKSpriteNode.init(texture: bgTexture)
         bkNode.position = CGPoint.init(x: 128, y: 120)
@@ -79,6 +132,8 @@ class GameScene: SKScene,IRenderScreen {
         
         arraySKShapeNode.append(bkNode)
         addChild(bkNode)
+        
+        m_bIsBusy = false
     }
     
     func renderSprites()
@@ -172,10 +227,10 @@ struct GameViewRepresentable: NSViewRepresentable {
             case "w":
                 nes.m_controllerPorts.pressU(false)
                 break
-            case "o":
+            case "p":
                 nes.m_controllerPorts.pressA(false)
                 break
-            case "p":
+            case "o":
                 nes.m_controllerPorts.pressB(false)
                 break
             case "n":

@@ -13,7 +13,8 @@ class Bitfield8WithPpuRegister//:Bitfield8
 {
     var m_field:UInt8 = 0
     var m_ppuRegisters:PpuRegisterMemory? = nil
-    var m_regAddress:UInt16 = 0
+    //var m_regAddress:UInt16 = 0
+    var m_regAddressSelf:Int = 0
     
     func MapCpuToPpuRegister(_ cpuAddress:UInt16)->UInt16
     {
@@ -27,35 +28,33 @@ class Bitfield8WithPpuRegister//:Bitfield8
     
     func reload()
     {
-        let address = Int(MapCpuToPpuRegister(m_regAddress))
-        m_field = m_ppuRegisters?.Read(UInt16(address)) ?? 0
+        m_field = m_ppuRegisters?.RawRef(address: m_regAddressSelf) ?? 0//(UInt16(address)) ?? 0
     }
     
     func initialize(ppuRegisterMemory:PpuRegisterMemory,regAddress:UInt16)
     {
-        m_regAddress = regAddress
         m_ppuRegisters = ppuRegisterMemory
         
         //load default value
-        let address = Int(MapCpuToPpuRegister(m_regAddress))
-        m_field = m_ppuRegisters?.Read(UInt16(address)) ?? 0
+        m_regAddressSelf = Int(MapCpuToPpuRegister(regAddress))
+        m_field = m_ppuRegisters?.RawRef(address: m_regAddressSelf) ?? 0//.ReadRef(address:m_regAddressSelf) ?? 0
     }
     
     func Value()->UInt8
     {
-        reload()
+        //reload()
         return m_field
     }
     
     func Read(_ bits:UInt8)->UInt8
     {
-        reload()
+        //reload()
         return m_field & bits
     }
     
     func Test(_ bits:UInt8)->Bool
     {
-        reload()
+        //reload()
         let ret = Read(bits)
         
         if(ret == 0)
@@ -115,8 +114,7 @@ class Bitfield8WithPpuRegister//:Bitfield8
     
     func writeValueToMemory()
     {
-        let address = Int(MapCpuToPpuRegister(m_regAddress))
-        m_ppuRegisters?.putValue(address: address, value: m_field)
+        m_ppuRegisters?.putValue(address: m_regAddressSelf, value: m_field)
     }
 
     func ClearAll()

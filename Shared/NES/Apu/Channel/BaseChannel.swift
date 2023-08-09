@@ -75,7 +75,7 @@ class ChannelComponent
             }
             else if (m_divider.GetCounter() > 0)
             {
-                m_divider.Clock()
+                _ = m_divider.Clock()
             }
 
             if (!m_control)
@@ -194,16 +194,16 @@ class ChannelComponent
         func SetPeriodLow8(_ value:UInt8)
         {
             var period:UInt16 = m_divider.GetPeriod()
-            period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
+            period = (period & UInt16(BITS16([8,9,10]))) | UInt16(value) // Keep high 3 bits
             SetPeriod(UInt16(value))
         }
         
-        func SetPeriodHigh3(_ value:UInt16)
+        func SetPeriodHigh3(_ value:UInt8)
         {
             assert(value < BIT(3));
             var period:UInt16 = m_divider.GetPeriod()
             //period = (value << 8) | (period & 0xFF); // Keep low 8 bits
-            period = (value << 8) | (period & 0xFF)
+            period = (UInt16(value) << 8) | (period & 0xFF)
             
             SetPeriod(UInt16(period))
             m_divider.ResetCounter()

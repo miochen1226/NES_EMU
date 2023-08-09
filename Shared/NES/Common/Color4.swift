@@ -7,14 +7,14 @@
 
 import Foundation
 
-class Color4
+class Color4:NSObject
 {
     var argb:UInt32 = 0
     
     var d_r:UInt8 = 0
     var d_g:UInt8 = 0
     var d_b:UInt8 = 0
-    var d_a:UInt8 = 0
+    var d_a:UInt8 = 255
 
     func SetRGBA( r:UInt8,  g:UInt8,  b:UInt8,  a:UInt8)
     {
@@ -25,6 +25,10 @@ class Color4
         argb = UInt32((a << 24) | (r << 16) | (g << 8) | b)
     }
 
+    func getRgba()->[UInt8]
+    {
+        return [d_r,d_g,d_b,d_a]
+    }
     
     func A()->UInt8
     {

@@ -67,7 +67,7 @@ class TimerEx
     func SetPeriodLow8(_ value:UInt8)
     {
         var period:UInt16 = m_divider.GetPeriod()
-        period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
+        period = (period & BITS16([8,9,10])) | UInt16(value) // Keep high 3 bits
         SetPeriod(UInt16(value))
     }
     
@@ -194,7 +194,7 @@ class PulseChannel:NSObject {
     var m_timerEx = TimerEx()
     var m_lengthCounterEx = LengthCounterEx()
     
-    func GetLengthCounterEx()->LengthCounterEx
+    func GetLengthCounter()->LengthCounterEx
     {
         return m_lengthCounterEx
     }
@@ -236,17 +236,17 @@ class PulseChannel:NSObject {
         //DDlc.vvvv
         //l
         //表示 envelope loop 标志
-        let l = TestBits(target: UInt16(BIT(5)), value: value)
+        let l = TestBits(target: BIT(5), value: value)
         //c
         //表示是否为常量音量
         
-        let c = TestBits(target: UInt16(BIT(4)), value: value)
+        let c = TestBits(target: BIT(4), value: value)
         
         //vvvv
         //如果 c 置位，表示音量大小，否则表示 envelope 的分频计数
-        let vvvv = ReadBits(target: BITS([0,1,2,3]), value: value)
+        let vvvv = ReadBits8(target: BITS([0,1,2,3]), value: value)
         
-        let DD = ReadBits(target: BITS([6,7]), value: value) >> 6
+        let DD = ReadBits8(target: BITS([6,7]), value: value) >> 6
         m_pulseWaveGenerator.SetDuty(UInt8(DD))
         
         m_lengthCounterEx.SetHalt(l)
@@ -254,11 +254,11 @@ class PulseChannel:NSObject {
         
         if(c)
         {
-            m_volumeEnvelope.SetConstantVolume(vvvv)
+            m_volumeEnvelope.SetConstantVolume(UInt16(vvvv))
         }
         else
         {
-            m_volumeEnvelope.SetCounter(vvvv)
+            m_volumeEnvelope.SetCounter(UInt16(vvvv))
         }
     }
     
@@ -274,16 +274,16 @@ class PulseChannel:NSObject {
         //SSS
         //位移量，用于每个 sweep 周期将 timer 右移对应的位移量得到增量
 
-        let E = TestBits(target: UInt16(BIT(7)), value: value)
+        let E = TestBits(target: BIT(7), value: value)
         m_sweepUnit.SetEnabled(E)
         
-        let PPP = ReadBits(target: BITS([4,5,6]), value: value) >> 4
-        m_sweepUnit.SetPeriod(period: PPP, timer: &m_timerEx)
+        let PPP = ReadBits8(target: BITS([4,5,6]), value: value) >> 4
+        m_sweepUnit.SetPeriod(period: UInt16(PPP), timer: &m_timerEx)
         
-        let N = TestBits(target: UInt16(BIT(3)), value: value)
+        let N = TestBits(target: BIT(3), value: value)
         m_sweepUnit.SetNegate(N)
         
-        let SSS = UInt8(ReadBits( target:BITS([0,1,2]),value:value))
+        let SSS = UInt8(ReadBits8( target:BITS([0,1,2]),value:value))
         m_sweepUnit.SetShiftCount(SSS)
         
         m_sweepUnit.Restart()
@@ -307,10 +307,10 @@ class PulseChannel:NSObject {
         //length counter 分频计数
         //HHH
         //timer 的高 3 位，和 0x4002 / 0x4006 组成完整的计数
-        let HHH = ReadBits(target: BITS([0,1,2]),value:value)
-        m_timerEx.SetPeriodHigh3(HHH)
+        let HHH = ReadBits8(target: BITS([0,1,2]),value:value)
+        m_timerEx.SetPeriodHigh3(UInt16(HHH))
         
-        let LLLL = ReadBits( target:BITS([3,4,5,6,7]),value:value) >> 3
+        let LLLL = ReadBits8( target:BITS([3,4,5,6,7]),value:value) >> 3
         m_lengthCounterEx.LoadCounterFromLUT(UInt8(LLLL))
         
         //Side effect

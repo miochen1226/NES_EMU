@@ -159,45 +159,36 @@ class Apu:NSObject{
     
     func HandleCpuRead( cpuAddress:UInt16)->UInt8
     {
-        var result:MyOptions = []
-        //result.ClearAll();
+        let bitField = Bitfield8()
 
         switch (cpuAddress)
         {
         case 0x4015:
             //@TODO: set bits 7,6,4: DMC interrupt (I), frame interrupt (F), DMC active (D)
             //@TODO: Reading this register clears the frame interrupt flag (but not the DMC interrupt flag).
-            //Current not call
-            /*
-            if(m_pulseChannel0.GetLengthCounter().GetValue() > 0)
+            
+            if(m_pulseChannel0?.GetLengthCounter().GetValue() ?? 0 > 0)
             {
-                result.insert(MyOptions.One)
+                bitField.SetPos(bitPos: 0, enabled: 1)
             }
-            if(m_pulseChannel1.GetLengthCounter().GetValue() > 0)
+            if(m_pulseChannel1?.GetLengthCounter().GetValue() ?? 0 > 0)
             {
-                result.insert(MyOptions.Two)
+                bitField.SetPos(bitPos: 1, enabled: 1)
             }
-            if(m_triangleChannel.GetLengthCounter().GetValue() > 0)
+            if(m_triangleChannel?.GetLengthCounter().GetValue() ?? 0 > 0)
             {
-                result.insert(MyOptions.Four)
+                bitField.SetPos(bitPos: 2, enabled: 1)
             }
-            if(m_noiseChannel.GetLengthCounter().GetValue() > 0)
+            if(m_noiseChannel?.GetLengthCounter().GetValue() ?? 0 > 0)
             {
-                result.insert(MyOptions.Eight)
+                bitField.SetPos(bitPos: 4, enabled: 1)
             }
-             */
-            /*
-            result.SetPos(0, m_pulseChannel0->GetLengthCounter().GetValue() > 0);
-            result.SetPos(1, m_pulseChannel1->GetLengthCounter().GetValue() > 0);
-            result.SetPos(2, m_triangleChannel->GetLengthCounter().GetValue() > 0);
-            result.SetPos(3, m_noiseChannel->GetLengthCounter().GetValue() > 0);
-            */
             break
         default:
             break
         }
         
-        return result.rawValue
+        return bitField.Value()
     }
     
     func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
@@ -225,21 +216,19 @@ class Apu:NSObject{
             /////////////////////
         case 0x4015:
             //15 =  1 2 4 8
-            
-            
-            var e1 = TestBits(target: UInt16(BIT(0)), value: value)//TestBits(value, BIT(0))
+            var e1 = TestBits(target: BIT(0), value: value)//TestBits(value, BIT(0))
             e1 = true
-            m_pulseChannel0?.GetLengthCounterEx().SetEnabled(e1)
+            m_pulseChannel0?.GetLengthCounter().SetEnabled(e1)
             
-            var e2 = TestBits(target: UInt16(BIT(1)), value: value)
+            var e2 = TestBits(target: BIT(1), value: value)
             e2 = true
-            m_pulseChannel1?.GetLengthCounterEx().SetEnabled(e2)
+            m_pulseChannel1?.GetLengthCounter().SetEnabled(e2)
             
-            var e3 = TestBits(target: UInt16(BIT(2)), value: value)
+            var e3 = TestBits(target: BIT(2), value: value)
             e3 = true
             m_triangleChannel?.GetLengthCounter().SetEnabled(e3)
             
-            var e4 = TestBits(target: UInt16(BIT(3)), value: value)
+            var e4 = TestBits(target: BIT(3), value: value)
             e4 = true
             m_noiseChannel?.GetLengthCounter().SetEnabled(e4)
             //@TODO: DMC Enable bit 4
@@ -276,16 +265,8 @@ class Apu:NSObject{
             if (m_elapsedCpuCycles >= kCpuCyclesPerSample)
             {
                 m_elapsedCpuCycles = m_elapsedCpuCycles - kCpuCyclesPerSample
-
-            //#if SAMPLE_EVERY_CPU_CYCLE
-            //    const float32 sample = m_sampleSum / m_numSamples;
-            //    m_sampleSum = m_numSamples = 0;
-            //#else
-            //    const float32 sample = SampleChannelsAndMix();
-            //#endif
-                
                 let sample:Float32 = SampleChannelsAndMix()
-                //m_audioDriver?.m_frameProvider.enqueue(input: sample)
+                m_audioDriver?.m_frameProvider.enqueue(input: sample)
             }
         }
     }

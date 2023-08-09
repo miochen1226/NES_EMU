@@ -15,9 +15,9 @@ class Cartridge:ICartridge{
     func AccessChrMem(_ ppuAddress:UInt16)->UInt8
     {
         let bankIndex:UInt = UInt(GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize))
-        let offset:UInt16 = GetBankOffset(address: ppuAddress, bankSize: kChrBankSize);
+        let offset:Int = Int(GetBankOffset(address: ppuAddress, bankSize: kChrBankSize))
         let mappedBankIndex:Int = m_mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex))
-        return m_chrBanks[mappedBankIndex].Read(offset)
+        return m_chrBanks[mappedBankIndex].RawRef(address:offset)
     }
     
     func HandlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
@@ -250,13 +250,12 @@ class Cartridge:ICartridge{
                     return
                 }
                 
-                let pgSize = globeDef.kPrgBankSize
-                
                 let numPrgBanks = prgRomSize / globeDef.kPrgBankSize
                 var readIndex = 16
-                for _ in 0...numPrgBanks-1
+                for _ in 0..<numPrgBanks
                 {
-                    let newMemory = Memory.init().initial(size: globeDef.kPrgBankSize)
+                    let newMemory = Memory.init()
+                    newMemory.initial(size: globeDef.kPrgBankSize)
                     let beginIndex:UInt = UInt(readIndex)
                     fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
                     readIndex = readIndex + Int(globeDef.kPrgBankSize)
@@ -276,7 +275,8 @@ class Cartridge:ICartridge{
 
                 for index in 0..<numChrBanks
                 {
-                    let newMemory = Memory.init().initial(size: globeDef.kChrBankSize)
+                    let newMemory = Memory.init()
+                    newMemory.initial(size: globeDef.kChrBankSize)
                     let beginIndex:UInt = UInt(readIndex)
                     
                     if(index<=8)
@@ -298,7 +298,8 @@ class Cartridge:ICartridge{
                 
                 for _ in 0...numSavBanks
                 {
-                    let newMemory = Memory.init().initial(size: globeDef.kSavBankSize)
+                    let newMemory = Memory.init()
+                    newMemory.initial(size: globeDef.kSavBankSize)
                     m_savBanks.append(newMemory)
                 }
                 //kMaxSavBanks

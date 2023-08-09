@@ -48,7 +48,7 @@ class Nes{
     let m_cpuMemoryBus = CpuMemoryBus.init()
     let m_ppuMemoryBus = PpuMemoryBus.init()
     let m_cpuInternalRam = CpuInternalRam.init()
-    let m_renderer = Renderer.init()
+    let m_renderer = Renderer.shared
     init() {
         
         m_cpu.setApu(apu: m_apu)
@@ -202,35 +202,38 @@ class Nes{
     
     func getFpsInfo()->String
     {
-        let strFps = String(totalFrame)
+        //let strFps = String(totalFrame)
         totalFrame = 0
+        
+        let strFps = String(totalCitcle/30000)
+        totalCitcle = 0
         let fpsInfo = "FPS: " + strFps
-        NSLog(fpsInfo)
         return fpsInfo
     }
     var totalFrame = 0
+    var totalCitcle:UInt32 = 0
     
     func ExecuteCpuAndPpuFrame()
     {
         var completedFrame = false
         m_cpuMemoryBus.readCount = 0
-        
-        //var t = clock()
-        //var ticks = 0
+        var clockCount:UInt32 = 0
         while (!completedFrame)
+        //while (clockCount<30000)
         {
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
             m_cpu.Execute(&cpuCycles)
             m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
             m_apu.Execute(cpuCycles)
+            
+            totalCitcle += cpuCycles
+            clockCount += cpuCycles
         }
+        self.m_renderer.pushFrame()
         
+        //print("Circle->"+String(totalCitcle))
         totalFrame += 1
-        //totalFrame += 1
-        //print(totalFrame/60)
-        //t = clock() - t
-        //print("The function takes \(t) ticks, which is \(Double(t) / Double(CLOCKS_PER_SEC)) seconds of CPU time")
     }
     
     func SignalCpuNmi()
