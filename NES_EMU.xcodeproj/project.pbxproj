@@ -124,6 +124,8 @@
 		35CC2F472A6EB8FD00832AE2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35CC2F432A6EB8C100832AE2 /* AVFoundation.framework */; platformFilters = (maccatalyst, macos, ); };
 		35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
 		35DA36FA26C3C10F005B2BC1 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
+		35DEF54D2A84FF9D00AE8149 /* OAM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DEF54C2A84FF9D00AE8149 /* OAM.swift */; };
+		35DEF54E2A84FF9D00AE8149 /* OAM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DEF54C2A84FF9D00AE8149 /* OAM.swift */; };
 		35FF346B2A6DEF970052DFBF /* IOSGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FF346A2A6DEF970052DFBF /* IOSGameView.swift */; };
 		35FF346C2A6DEF970052DFBF /* IOSGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FF346A2A6DEF970052DFBF /* IOSGameView.swift */; };
 /* End PBXBuildFile section */
@@ -208,6 +210,7 @@
 		35CC2F432A6EB8C100832AE2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		35CC2F452A6EB8D700832AE2 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		35DA36F826C3C10F005B2BC1 /* Color4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color4.swift; sourceTree = "<group>"; };
+		35DEF54C2A84FF9D00AE8149 /* OAM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAM.swift; sourceTree = "<group>"; };
 		35FF346A2A6DEF970052DFBF /* IOSGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSGameView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -383,6 +386,7 @@
 				35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */,
 				35265B3F26C566540031E1A6 /* PpuStatusReg.swift */,
 				3530B87F26C7FAC400A2858C /* IPpu.swift */,
+				35DEF54C2A84FF9D00AE8149 /* OAM.swift */,
 			);
 			path = PPU;
 			sourceTree = "<group>";
@@ -619,6 +623,7 @@
 				35FF346B2A6DEF970052DFBF /* IOSGameView.swift in Sources */,
 				3557FBAF2A7C12E90059AA50 /* AudioQueuePlayer.swift in Sources */,
 				35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */,
+				35DEF54D2A84FF9D00AE8149 /* OAM.swift in Sources */,
 				3505EAB12A6F82D700B14943 /* PulseChannel.swift in Sources */,
 				3530FA5C26BFBCA900CF18DD /* Mapper1.swift in Sources */,
 				358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
@@ -654,6 +659,7 @@
 			files = (
 				3530FA5326BF7A6B00CF18DD /* OpCodeEntry.swift in Sources */,
 				3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */,
+				35DEF54E2A84FF9D00AE8149 /* OAM.swift in Sources */,
 				3530B88126C7FAC400A2858C /* IPpu.swift in Sources */,
 				3530B89E26C8006100A2858C /* CpuRegDef.swift in Sources */,
 				3505EAB62A6F83AE00B14943 /* BaseChannel.swift in Sources */,

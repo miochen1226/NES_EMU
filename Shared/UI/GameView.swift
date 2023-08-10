@@ -212,6 +212,7 @@ struct GameViewRepresentable: NSViewRepresentable {
     class KeyView: SKView {
         override var acceptsFirstResponder: Bool { true }
         override func keyUp(with event: NSEvent) {
+            print(">> key up \(event.charactersIgnoringModifiers ?? "")")
             switch(event.charactersIgnoringModifiers)
             {
             case "a":
@@ -226,12 +227,15 @@ struct GameViewRepresentable: NSViewRepresentable {
             case "w":
                 nes.m_controllerPorts.pressU(false)
                 break
+            
             case "p":
                 nes.m_controllerPorts.pressA(false)
                 break
+                
             case "o":
                 nes.m_controllerPorts.pressB(false)
                 break
+            
             case "n":
                 nes.m_controllerPorts.pressSelect(false)
                 break
@@ -263,10 +267,10 @@ struct GameViewRepresentable: NSViewRepresentable {
             case "w":
                 nes.m_controllerPorts.pressU()
                 break
-            case "o":
+            case "p":
                 nes.m_controllerPorts.pressA()
                 break
-            case "p":
+            case "o":
                 nes.m_controllerPorts.pressB()
                 break
             case "n":

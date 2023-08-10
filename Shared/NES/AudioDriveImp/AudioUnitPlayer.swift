@@ -100,8 +100,9 @@ class AudioController:NSObject
                     {
                         empty.append(0)
                     }
+                    abl?[0].mDataByteSize = 10
                     memcpy(abl?[0].mData, &empty, Int(reqByteSize))
-                    */
+                     */
                     return 0
                 }
                 

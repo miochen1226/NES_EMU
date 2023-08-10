@@ -8,16 +8,46 @@
 import Foundation
 
 class Cartridge:ICartridge{
+    
+    var g_chrMemory:UnsafeMutablePointer<UInt8>!
+    
+    func buildChrMemory()
+    {
+        let totalSize = m_chrBanks.count * Int(globeDef.kChrBankSize)
+        g_chrMemory = UnsafeMutablePointer<UInt8>.allocate(capacity: totalSize)
+        g_chrMemory.initialize(to: 0)
+        var beginPos = 0
+        for n in 0..<m_chrBanks.count
+        {
+            let memory = m_chrBanks[n]
+            memcpy(g_chrMemory.advanced(by: beginPos), memory.rawBuffer, Int(globeDef.kChrBankSize))
+            beginPos += Int(globeDef.kChrBankSize)
+        }
+    }
+    
     func HandlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
         return AccessChrMem(ppuAddress)
     }
     
+    //魔改
     func AccessChrMem(_ ppuAddress:UInt16)->UInt8
     {
-        let bankIndex:UInt = UInt(GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize))
+        //魔改
+        //because PpuMemory.kChrRomBase == 0
+        //we use ppuAddress as chr memory address
+        //let memAddress = ppuAddress - PpuMemory.kChrRomBase
+        
+        
+        let byteValue = g_chrMemory[Int(ppuAddress)]
+        //let byteValue = UnsafeBufferPointer(start: g_chrMemory.advanced(by: Int(ppuAddress)*MemoryLayout<UInt8>.stride), count: 1)[0]
+        return byteValue
+        
+        /*
+        let bankIndex:Int = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
         let offset:Int = Int(GetBankOffset(address: ppuAddress, bankSize: kChrBankSize))
         let mappedBankIndex:Int = m_mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex))
         return m_chrBanks[mappedBankIndex].RawRef(address:offset)
+        */
     }
     
     func HandlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
@@ -293,7 +323,8 @@ class Cartridge:ICartridge{
                 readIndex = readIndex + Int(globeDef.kChrBankSize)
                 m_chrBanks.append(newMemory)
             }
-            
+            //魔改
+            self.buildChrMemory()
             
             let numSavBanks = romHeader!.GetNumPrgRamBanks();
             if(numSavBanks > kMaxSavBanks)

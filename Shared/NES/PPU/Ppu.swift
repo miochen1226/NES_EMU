@@ -203,8 +203,8 @@ class Ppu:IPpu{
         return result
     }
     
-    var m_oam = ObjectAttributeMemory.init()
-    var m_oam2 = ObjectAttributeMemory2.init()
+    //var m_oam = ObjectAttributeMemory.init()
+    //var m_oam2 = ObjectAttributeMemory2.init()
     
     func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
     {
@@ -328,8 +328,7 @@ class Ppu:IPpu{
     func ClearOAM2() // OAM2 = $FF
     {
         //@NOTE: We don't actually need this step as we track number of sprites to render per scanline
-        m_oam2.ClearOAM2()
-        //memset(m_oam2.RawPtr(), 0xFF, m_oam2.Size());
+        m_oam2.Clear()
     }
     
     func IsSpriteInRangeY( y:UInt32,  spriteY:UInt8,  spriteHeight:UInt8) -> Bool
@@ -350,11 +349,16 @@ class Ppu:IPpu{
         return false
     }
     
+    var m_oam = OAM()
+    var m_oam2 = OAM()
+    
     func PerformSpriteEvaluation(x:UInt32, y:UInt32) // OAM -> OAM2
     {
         //NSLog("PerformSpriteEvaluation")
         // See http://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
 
+        //miotest
+        
         let isSprite8x16:Bool = m_ppuControlReg1.Test(PpuControl1.SpriteSize8x16)
         
         var spriteHeight:UInt8 = 8
@@ -370,12 +374,97 @@ class Ppu:IPpu{
         var n:Int = 0; // Sprite [0-63] in OAM
         var n2 = m_numSpritesToRender // Sprite [0-7] in OAM2
 
-        let oam:[SpriteData] = getOamArray(oamMemory:m_oam)
-        var oam2:[SpriteData] = getOam2Array(oamMemory:m_oam2)
-        
-        // Attempt to find up to 8 sprites on current scanline
+        //let oam:[SpriteData] = getOamArray(oamMemory:m_oam)
+        //var oam2:[SpriteData] = getOam2Array(oamMemory:m_oam2)
         while (n2 < 8)
         {
+            let sprite = m_oam.getSprite(n)
+            let spriteY:UInt8 = sprite.bmpLow
+            
+            var sprite2 = SpriteData()
+            
+            sprite2.bmpLow = spriteY // (1)
+
+            if (IsSpriteInRangeY(y: y, spriteY: spriteY, spriteHeight: spriteHeight)) // (1a)
+            {
+                sprite2.bmpHigh = sprite.bmpHigh
+                sprite2.attributes = sprite.attributes
+                sprite2.x = sprite.x
+                m_oam2.setSprite(n2, spriteData: sprite2)
+                if (n == 0) // If we're going to render sprite 0, set flag so we can detect sprite 0 hit when we render
+                {
+                    m_renderSprite0 = true
+                }
+
+                n2 = n2 + 1
+            }
+
+            n = n + 1
+            if (n == 64) // (2a)
+            {
+                // We didn't find 8 sprites, OAM2 contains what we've found so far, so we can bail
+                m_numSpritesToRender = n2
+                return
+            }
+        }
+        
+        // We found 8 sprites above. Let's see if there are any more so we can set sprite overflow flag.
+        var m:UInt16 = 0; // Byte in sprite data [0-3]
+        
+        while (n < 64)
+        {
+            let sprite = m_oam.getSprite(n)
+            var spriteY:UInt8 = 0
+            if(m == 0)
+            {
+                spriteY = sprite.bmpHigh
+            }
+            if(m == 1)
+            {
+                spriteY = sprite.bmpLow
+            }
+            if(m == 2)
+            {
+                spriteY = sprite.attributes
+            }
+            if(m == 3)
+            {
+                spriteY = sprite.x
+            }
+            
+            //let spriteY:UInt8 = oam[n][m]; // (3) Evaluate OAM[n][m] as a Y-coordinate (it might not be)
+            _ = IncAndWrap(v: &m, size: 4)
+            
+            if (IsSpriteInRangeY(y: y, spriteY: spriteY, spriteHeight: spriteHeight)) // (3a)
+            {
+                m_ppuStatusReg.Set(PpuStatus.SpriteOverflow)
+
+                // PPU reads next 3 bytes from OAM. Because of the hardware bug (below), m might not be 1 here, so
+                // we carefully increment n when m overflows.
+                for _ in 0...2
+                {
+                    if (IncAndWrap(v: &m, size: 4))
+                    {
+                        n = n + 1
+                    }
+                }
+            }
+            else
+            {
+                // (3b) If the value is not in range, increment n and m (without carry). If n overflows to 0, go to 4; otherwise go to 3
+                // The m increment is a hardware bug - if only n was incremented, the overflow flag would be set whenever more than 8
+                // sprites were present on the same scanline, as expected.
+                n = n + 1
+                _ = IncAndWrap(v: &m, size: 4) // This increment is a hardware bug
+            }
+        }
+        
+        return
+        // Attempt to find up to 8 sprites on current scanline
+        /*
+        while (n2 < 8)
+        {
+            let sprite = m_oam.getSprite(n)
             let spriteY:UInt8 = oam[n].bmpLow
             oam2[n2].bmpLow = spriteY // (1)
 
@@ -452,7 +541,7 @@ class Ppu:IPpu{
                 n = n + 1
                 _ = IncAndWrap(v: &m, size: 4) // This increment is a hardware bug
             }
-        }
+        }*/
     }
     
     func FlipBits(_ v:UInt8) -> UInt8
@@ -470,7 +559,7 @@ class Ppu:IPpu{
               ((v & BIT(0)) << 7) | ((v & BIT(1)) << 5) | ((v & BIT(2)) << 3) | ((v & BIT(3)) << 1) | ((v & BIT(4)) >> 1) | ((v & BIT(5)) >> 3) | ((v & BIT(6)) >> 5) | ((v & BIT(7)) >> 7)
     }
     
-    func getOamArray(oamMemory:ObjectAttributeMemory)->[SpriteData]
+    func getOamArray(oamMemory:OAM)->[SpriteData]
     {
         var array:[SpriteData] = []
         for i in 0..<ObjectAttributeMemory.kMaxSprites
@@ -496,7 +585,102 @@ class Ppu:IPpu{
     {
         //NSLog("FetchSpriteData")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering#Cycles_257-320
-        
+        //miotest
+        let isSprite8x16 = m_ppuControlReg1.Test(PpuControl1.SpriteSize8x16)
+
+        if(m_numSpritesToRender == 0)
+        {
+            return
+        }
+        for n in 0..<m_numSpritesToRender
+        {
+            let sprite = m_oam2.getSprite(n)
+            let spriteY:UInt8 = sprite.bmpLow
+            let byte1:UInt8 = sprite.bmpHigh
+            let attribs:UInt8 = sprite.attributes
+            let flipHorz:Bool = TestBits(target:UInt16(attribs), value: BIT(6))
+            let flipVert:Bool = TestBits(target:UInt16(attribs), value:BIT(7))
+
+            var patternTableAddress:UInt16 = 0
+            var tileIndex:UInt8 = 0
+            if ( !isSprite8x16 ) // 8x8 sprite, oam byte 1 is tile index
+            {
+                if(m_ppuControlReg1.Test(PpuControl1.SpritePatternTableAddress8x8))
+                {
+                    patternTableAddress = 0x1000
+                }
+                else
+                {
+                    patternTableAddress = 0x0000
+                }
+                
+                tileIndex = byte1
+            }
+            else // 8x16 sprite, both address and tile index are stored in oam byte 1
+            {
+                if(TestBits(target: UInt16(byte1), value: BIT(0)))
+                {
+                    patternTableAddress = 0x1000
+                }
+                else
+                {
+                    patternTableAddress = 0x0000
+                }
+                tileIndex = UInt8(ReadBits(target: UInt16(byte1), value: ~BIT(0)))
+            }
+
+            var yOffset:UInt8 = UInt8(y) - spriteY
+            
+            if(isSprite8x16)
+            {
+                assert(yOffset < 16)
+            }
+            else
+            {
+                assert(yOffset < 8)
+            }
+            
+
+            if (isSprite8x16)
+            {
+                // In 8x16 mode, first tile is at tileIndex, second tile (underneath) is at tileIndex + 1
+                var nextTile:UInt8 = 0
+                if (yOffset >= 8)
+                {
+                    nextTile = nextTile + 1
+                    yOffset = yOffset - 8
+                }
+
+                // In 8x16 mode, vertical flip also flips the tile index order
+                if (flipVert)
+                {
+                    nextTile = (nextTile + 1) % 2
+                }
+
+                tileIndex = tileIndex + nextTile
+            }
+
+            if (flipVert)
+            {
+                yOffset = 7 - yOffset
+            }
+            assert(yOffset < 8)
+            
+            let tileOffset:UInt16 = TO16(tileIndex) * 16
+            let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(yOffset)
+            let byte2Address:UInt16 = byte1Address + 8
+            m_spriteFetchData[n].bmpLow = m_ppuMemoryBus!.Read(byte1Address)
+            m_spriteFetchData[n].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
+            m_spriteFetchData[n].attributes = sprite.attributes
+            m_spriteFetchData[n].x = sprite.x
+            
+            if (flipHorz)
+            {
+                m_spriteFetchData[n].bmpLow = FlipBits(m_spriteFetchData[n].bmpLow)
+                m_spriteFetchData[n].bmpHigh = FlipBits(m_spriteFetchData[n].bmpHigh)
+            }
+        }
+        /*
         let oam2:[SpriteData] = getOam2Array(oamMemory:m_oam2)
         let isSprite8x16 = m_ppuControlReg1.Test(PpuControl1.SpriteSize8x16)
 
@@ -608,7 +792,7 @@ class Ppu:IPpu{
             }
         }
         
-        
+        */
     }
     
     var m_spriteFetchData:[SpriteFetchData] = []
@@ -622,7 +806,6 @@ class Ppu:IPpu{
     func FetchBackgroundTileData()
     {
         // Load bg tile row data (2 bytes) at v into pipeline
-        
         let v = m_vramAddress
         let patternTableAddress:UInt16 = PpuControl1.GetBackgroundPatternTableAddress(m_ppuControlReg1.Value())
         let tileIndexAddress:UInt16 = 0x2000 | (v & 0x0FFF)
@@ -635,33 +818,51 @@ class Ppu:IPpu{
         
         let tileOffset:UInt16 = TO16(tileIndex) * 16
         let fineY:UInt8 = GetVRamAddressFineY(v)
-        
-        
         let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(fineY)
         let byte2Address:UInt16 = byte1Address + 8
 
+        
         // Load attribute byte then compute and store the high palette bits from it for this tile
         // The high palette bits are 2 consecutive bits in the attribute byte. We need to shift it right
         // by 0, 2, 4, or 6 and read the 2 low bits. The amount to shift by is can be computed from the
         // VRAM address as follows: [bit 6, bit 2, 0]
         let attribute:UInt8 = m_ppuMemoryBus!.Read(attributeAddress)
+        
+        //let bmps:[UInt8] = m_ppuMemoryBus!.Read2(byte1Address)
+        //let bmpLow:UInt8 = bmps[0]
+        //let bmpHigh:UInt8 = bmps[1]
+        
+        
+        let bmpLow = m_ppuMemoryBus!.Read(byte1Address)
+        let bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
+        
         let attributeShift:UInt8 = UInt8(((v & 0x40) >> 4) | (v & 0x2))
-        assert(attributeShift == 0 || attributeShift == 2 || attributeShift == 4 || attributeShift == 6)
         let paletteHighBits:UInt8 = (attribute >> attributeShift) & 0x3
 
         
+        m_bgTileFetchDataPipeline_0.bmpLow = m_bgTileFetchDataPipeline_1.bmpLow
+        m_bgTileFetchDataPipeline_0.bmpHigh = m_bgTileFetchDataPipeline_1.bmpHigh
+        m_bgTileFetchDataPipeline_0.paletteHighBits = m_bgTileFetchDataPipeline_1.paletteHighBits
+        
+        m_bgTileFetchDataPipeline_1.bmpLow = bmpLow
+        m_bgTileFetchDataPipeline_1.bmpHigh = bmpHigh
+        m_bgTileFetchDataPipeline_1.paletteHighBits = paletteHighBits
+        return
+        /*
         m_bgTileFetchDataPipeline[0].bmpLow = m_bgTileFetchDataPipeline[1].bmpLow // Shift pipelined data
         m_bgTileFetchDataPipeline[0].bmpHigh = m_bgTileFetchDataPipeline[1].bmpHigh
         m_bgTileFetchDataPipeline[0].paletteHighBits = m_bgTileFetchDataPipeline[1].paletteHighBits
         
         // Push results at top of pipeline
-        m_bgTileFetchDataPipeline[1].bmpLow = m_ppuMemoryBus!.ReadCard(byte1Address)
-        m_bgTileFetchDataPipeline[1].bmpHigh = m_ppuMemoryBus!.ReadCard(byte2Address)
+        m_bgTileFetchDataPipeline[1].bmpLow = m_ppuMemoryBus!.Read(byte1Address)
+        //m_bgTileFetchDataPipeline[1].bmpHigh = m_ppuMemoryBus!.Read(byte2Address)
         m_bgTileFetchDataPipeline[1].paletteHighBits = paletteHighBits
+         */
     }
     
     let kNumPaletteColors:UInt = 64
-    var g_paletteColors:[Color4] = []
+    var g_paletteColors:UnsafeMutablePointer<PixelColor>!//[Color4] = []
+    
     
     func InitPaletteColors()
     {
@@ -674,7 +875,7 @@ class Ppu:IPpu{
         //#if USE_PALETTE == 1
         // This palette seems more "accurate"
         // 2C03 and 2C05 palettes (http://wiki.nesdev.com/w/index.php/PPU_palettes#2C03_and_2C05)
-        let dac3Palette:[[Int]] =
+        let dac3Palette:[[UInt8]] =
         [
             [3,3,3],[0,1,4],[0,0,6],[3,2,6],[4,0,3],[5,0,3],[5,1,0],[4,2,0],[3,2,0],[1,2,0],[0,3,1],[0,4,0],[0,2,2],[0,0,0],[0,0,0],[0,0,0],
             [5,5,5],[0,3,6],[0,2,7],[4,0,7],[5,0,7],[7,0,4],[7,0,0],[6,3,0],[4,3,0],[1,4,0],[0,4,0],[0,5,3],[0,4,4],[0,0,0],[0,0,0],[0,0,0],
@@ -710,15 +911,16 @@ class Ppu:IPpu{
             [0x99,0xFF,0xFC], [0xDD,0xDD,0xDD], [0x11,0x11,0x11], [0x11,0x11,0x11]
         ]
          */
-        for i:UInt in 0 ... kNumPaletteColors-1
+        
+        g_paletteColors = UnsafeMutablePointer<PixelColor>.allocate(capacity: Int(kNumPaletteColors))
+        let rawBuffer = UnsafeMutableRawPointer(g_paletteColors)
+        for i:Int in 0..<Int(kNumPaletteColors)
         {
-            
             let colorItem = dac3Palette[Int(i)]
             
-            let iR:Int = colorItem[0]
-            let iG:Int = colorItem[1]
-            let iB:Int = colorItem[2]
-            
+            let iR:UInt8 = colorItem[0]
+            let iG:UInt8 = colorItem[1]
+            let iB:UInt8 = colorItem[2]
             let fr = Float(iR)
             let fg = Float(iG)
             let fb = Float(iB)
@@ -729,6 +931,26 @@ class Ppu:IPpu{
             let B = (UInt8(fb/7*255))
             let A = 0xFF
             
+            var pixelColor = PixelColor()
+            pixelColor.d_r = R
+            pixelColor.d_g = G
+            pixelColor.d_b = B
+            pixelColor.d_a = UInt8(A)
+            
+            memcpy(rawBuffer?.advanced(by: Int(i*MemoryLayout<PixelColor>.stride)), &pixelColor, MemoryLayout<PixelColor>.stride)
+            //g_paletteColors[i] = pixelColor
+            
+            /*
+            let fr = Float(iR)
+            let fg = Float(iG)
+            let fb = Float(iB)
+            
+            
+            let R = UInt8(fr/7*255)
+            let G = (UInt8(fg/7*255))
+            let B = (UInt8(fb/7*255))
+            let A = 0xFF
+            */
             /*
             let colorItem = palette[Int(i)]
             
@@ -747,11 +969,11 @@ class Ppu:IPpu{
             let B = iB
             let A = 0xFF
             */
-            let rgbItem = Color4.init()
+            //let rgbItem = Color4.init()
             //rgbItem.SetRGBA(r: R, g: G, b: B, a: UInt8(A))
-            rgbItem.SetRGBA(r: UInt8(R), g: UInt8(G), b: UInt8(B), a: UInt8(A))
+            //rgbItem.SetRGBA(r: UInt8(R), g: UInt8(G), b: UInt8(B), a: UInt8(A))
             
-            g_paletteColors.append(rgbItem)
+            //g_paletteColors.append(rgbItem)
         }
     }
     
@@ -762,7 +984,8 @@ class Ppu:IPpu{
         var paletteHighBits:UInt8 = 0
     }
     var m_bgTileFetchDataPipeline:[BgTileFetchData] = [BgTileFetchData.init(),BgTileFetchData.init()]
-    
+    var m_bgTileFetchDataPipeline_0 = BgTileFetchData.init()
+    var m_bgTileFetchDataPipeline_1 = BgTileFetchData.init()
     
     func isHitSprite(x:UInt32,spriteData:SpriteFetchData)->Bool
     {
@@ -780,6 +1003,8 @@ class Ppu:IPpu{
     
     func RenderPixel(x:UInt32, y:UInt32)
     {
+        //miotest
+        //return
         //NSLog("RenderPixel")
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
         var bgRenderingEnabled = m_ppuControlReg2.Test(UInt8(PpuControl2.RenderBackground))
@@ -796,10 +1021,6 @@ class Ppu:IPpu{
             spriteRenderingEnabled = false
         }
         
-        //spriteRenderingEnabled = false
-        //Mio disable sprite
-        //spriteRenderingEnabled = false
-        
         
         // Get the background pixel
         var bgPaletteHighBits:UInt8 = 0
@@ -808,8 +1029,8 @@ class Ppu:IPpu{
         if (bgRenderingEnabled)
         {
             // At this point, the data for the current and next tile are in m_bgTileFetchDataPipeline
-            let currTile = m_bgTileFetchDataPipeline[0]
-            let nextTile = m_bgTileFetchDataPipeline[1]
+            let currTile = m_bgTileFetchDataPipeline_0
+            let nextTile = m_bgTileFetchDataPipeline_1
 
             // Mux uses fine X to select a bit from shift registers
             
@@ -834,13 +1055,14 @@ class Ppu:IPpu{
             }
         }
         
-        
         // Get the potential sprite pixel
         var foundSprite = false
         var spriteHasBgPriority = false
         var isSprite0 = false
         var sprPaletteHighBits:UInt8 = 0
         var sprPaletteLowBits:UInt8 = 0
+        
+        
         if (spriteRenderingEnabled)
         {
             if(m_numSpritesToRender != 0)
@@ -855,8 +1077,6 @@ class Ppu:IPpu{
                         {
                             // Compose "sprite color" (0-3) from high bit in bitmap bytes
                             sprPaletteLowBits = (TestBits01(target: UInt16(spriteData.bmpHigh), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteData.bmpLow), value: 0x80))
-                            //sprPaletteLowBits = (TestBits01(target: UInt16(spriteData.bmpLow), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteData.bmpHigh), value: 0x80))
-
                             
                             // First non-transparent pixel moves on to multiplexer
                             
@@ -882,50 +1102,43 @@ class Ppu:IPpu{
                     }
                 }
             }
-            
         }
-
-        
+        //var color:Color4 = Color4.init()
+        //var color = PixelColor()
+        //return
         // Multiplexer selects background or sprite pixel (see "Priority multiplexer decision table")
-        var color:Color4 = Color4.init()
+        
         if (bgPaletteLowBits == 0)
         {
             if (!foundSprite || sprPaletteLowBits == 0)
             {
                 // Background color 0
-                GetBackgroundColor(&color)
+                //GetBackgroundColor(&color)
+                let pixelColor = GetBackgroundPixelColor()
+                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
             else
             {
                 // Sprite color
-                GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette, color: &color)
-                
-                /*
-                color.d_r = 255
-                color.d_g = 0
-                color.d_b = 0
-                color.d_a = 255
-                 */
+                let pixelColor = GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette)
+                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
         }
         else
         {
             if (foundSprite && !spriteHasBgPriority)
             {
-                
                 // Sprite color
-                GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette, color: &color)
-                /*
-                color.d_r = 255
-                color.d_g = 0
-                color.d_b = 0
-                color.d_a = 255
-                */
+                let pixelColor = GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette)
+                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
+                //GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette, color: &color)
             }
             else
             {
                 // BG color
-                GetPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette, color: &color)
+                let pixelColor = GetPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette)
+                //GetPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette, color: &color)
+                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
 
             if (isSprite0)
@@ -934,7 +1147,7 @@ class Ppu:IPpu{
             }
         }
 
-        m_renderer?.DrawPixel(x: x, y: y, color: &color)
+        
     }
     
     var m_renderer:Renderer? = nil
@@ -953,11 +1166,25 @@ class Ppu:IPpu{
         
     }
     
-    
+    /*
     func GetBackgroundColor(_ color:inout Color4)
     {
-        return
         color = g_paletteColors[Int(m_palette.Read(0))] // BG ($3F00)
+    }
+    */
+    func GetBackgroundPixelColor()->PixelColor
+    {
+        let paletteIndex = Int(m_palette.Read(0))
+        let pixelColor = g_paletteColors[paletteIndex]
+        return g_paletteColors[paletteIndex]
+    }
+    
+    func GetPaletteColor(highBits:UInt8,lowBits:UInt8,paletteBaseAddress:UInt16)->PixelColor
+    {
+        assert(lowBits != 0)
+        let paletteOffset:UInt8 = (highBits << 2) | (lowBits & 0x3)
+        let paletteIndex:Int = Int(m_palette.Read( MapPpuToPalette(ppuAddress: paletteBaseAddress + UInt16(paletteOffset))))
+        return g_paletteColors[paletteIndex]
     }
     
     

@@ -17,12 +17,13 @@ struct ContentView: View {
         
         ZStack {
             GameView(scene: scene).frame(width: 256, height: 240, alignment: .top)
-            Text(labenFps).position(x: 20, y: 20).onReceive(timer) { _ in
-                updateFps()
-            }
+            
 #if os(iOS)
             VirtualControllerView()
 #else
+            Text(labenFps).position(x: 40, y: 20).onReceive(timer) { _ in
+                updateFps()
+            }
 #endif
         }
         

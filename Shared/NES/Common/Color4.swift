@@ -7,6 +7,14 @@
 
 import Foundation
 
+struct PixelColor
+{
+    var d_r:UInt8 = 0
+    var d_g:UInt8 = 0
+    var d_b:UInt8 = 0
+    var d_a:UInt8 = 0
+}
+
 class Color4:NSObject
 {
     var argb:UInt32 = 0

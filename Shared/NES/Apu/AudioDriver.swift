@@ -55,7 +55,6 @@ class AudioDriver:NSObject
     required init(frameProvider: NesFrameProvider) {
         self.m_frameProvider = frameProvider
         super.init()
-        
         m_audioUnitPlayer = AudioUnitPlayer(frameProvider: frameProvider)
     }
 }

@@ -184,27 +184,23 @@ class Nes{
         serialQueue.async {
             while self.m_wantQuit == false
             {
-                var half = false
-                //let dateLast = Date()
-                //for _ in 0...59
-                //{
-                    self.ExecuteCpuAndPpuFrame()
-                    half = !half
-                    //half = false
-                    if(half)
-                    {
-                        DispatchQueue.main.async {
-                            self.iRenderScreen?.renderScreen()
-                        }
-                    }
-                //}
-                //DispatchQueue.main.async {
-                //    self.iRenderScreen?.renderScreen()
-                //}
-                /*
-                while dateLast.timeIntervalSinceNow > -1
+                let beginDate = Date().timeIntervalSince1970
+                
+                self.ExecuteCpuAndPpuFrame()
+                self.m_renderer.pushFrame()
+                
+                DispatchQueue.main.async {
+                    self.iRenderScreen?.renderScreen()
+                }
+                
+                let endDate = Date().timeIntervalSince1970
+                let dateDiff = endDate - beginDate
+                if(dateDiff < self.g_frameLimitTime)
                 {
-                }*/
+                    let needSleep:Double = self.g_frameLimitTime - dateDiff
+                    let needSleepMilisec = UInt32(needSleep*1000000)
+                    usleep(needSleepMilisec)
+                }
             }
             print("QUIT")
         }
@@ -212,10 +208,10 @@ class Nes{
     
     func getFpsInfo()->String
     {
-        //let strFps = String(totalFrame)
+        let strFps = String(totalFrame)
         totalFrame = 0
         
-        let strFps = String(totalCitcle/30000)
+        //let strFps = String(totalCitcle/30000)
         totalCitcle = 0
         let fpsInfo = "FPS: " + strFps
         return fpsInfo
@@ -240,11 +236,11 @@ class Nes{
             totalCitcle += cpuCycles
             clockCount += cpuCycles
         }
-        self.m_renderer.pushFrame()
         
-        //print("Circle->"+String(totalCitcle))
         totalFrame += 1
     }
+    
+    let g_frameLimitTime:Double = 1/60
     
     func SignalCpuNmi()
     {

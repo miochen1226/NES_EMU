@@ -6,38 +6,46 @@
 //
 
 import Foundation
-class Memory
+class Memory:NSObject
 {
     var memorySize:UInt = 0
-    var rawMemory:[UInt8] = Array<UInt8>()
+    var rawBuffer:UnsafeMutablePointer<UInt8>! = nil
+    
+    deinit
+    {
+        rawBuffer.deallocate()
+    }
+    //var rawMemory:[UInt8] = Array<UInt8>()
     func initial(size:UInt)
     {
         memorySize = size
         
+        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size))
+        /*
         for _ in 0..<size
         {
             rawMemory.append(0)
-        }
+        }*/
     }
     
     func putValue(address:Int,value:UInt8)
     {
-        rawMemory[address] = value
+        rawBuffer[address] = value
     }
     
     func RawRef(address:Int)->UInt8
     {
-        return rawMemory[address]
+        return rawBuffer[address]
     }
     
     func Read(_ address:UInt16)->UInt8
     {
-        return rawMemory[Int(address)]
+        return rawBuffer[Int(address)]
     }
 
     func Write( address:UInt16,  value:UInt8)
     {
-        rawMemory[Int(address)] = value
+        rawBuffer[Int(address)] = value
     }
 }
 
@@ -70,10 +78,10 @@ class ObjectAttributeMemory:Memory
     {
         let addressBegin = index*4
         var spriteData = SpriteData.init()
-        spriteData.bmpLow = rawMemory[addressBegin]
-        spriteData.bmpHigh = rawMemory[addressBegin+1]
-        spriteData.attributes = rawMemory[addressBegin+2]
-        spriteData.x = rawMemory[addressBegin+3]
+        spriteData.bmpLow = rawBuffer[addressBegin]
+        spriteData.bmpHigh = rawBuffer[addressBegin+1]
+        spriteData.attributes = rawBuffer[addressBegin+2]
+        spriteData.x = rawBuffer[addressBegin+3]
         
         return spriteData
     }
@@ -101,10 +109,10 @@ class ObjectAttributeMemory2:Memory
     {
         let addressBegin = index*4
         var spriteData = SpriteData.init()
-        spriteData.bmpLow = rawMemory[addressBegin]
-        spriteData.bmpHigh = rawMemory[addressBegin+1]
-        spriteData.attributes = rawMemory[addressBegin+2]
-        spriteData.x = rawMemory[addressBegin+3]
+        spriteData.bmpLow = rawBuffer[addressBegin]
+        spriteData.bmpHigh = rawBuffer[addressBegin+1]
+        spriteData.attributes = rawBuffer[addressBegin+2]
+        spriteData.x = rawBuffer[addressBegin+3]
         
         return spriteData
     }
@@ -134,10 +142,10 @@ class ObjectAttributeMemory2:Memory
         var index:Int = 0
         for sprite in sprites
         {
-            rawMemory[index*4] = sprite.bmpLow
-            rawMemory[index*4+1] = sprite.bmpHigh
-            rawMemory[index*4+2] = sprite.attributes
-            rawMemory[index*4+3] = sprite.x
+            rawBuffer[index*4] = sprite.bmpLow
+            rawBuffer[index*4+1] = sprite.bmpHigh
+            rawBuffer[index*4+2] = sprite.attributes
+            rawBuffer[index*4+3] = sprite.x
             index = index + 1
         }
     }
@@ -181,13 +189,13 @@ class NameTableMemory:Memory
     override func Read(_ address:UInt16)->UInt8
     {
         assert(address < 2048)
-        return rawMemory[Int(address)]
+        return rawBuffer[Int(address)]
     }
     
     override func Write( address:UInt16,  value:UInt8)
     {
         assert(address < 2048)
-        rawMemory[Int(address)] = value
+        rawBuffer[Int(address)] = value
     }
 }
 

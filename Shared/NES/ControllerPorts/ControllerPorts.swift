@@ -77,6 +77,18 @@ class ControllerPorts: NSObject {
         lock.lock()
         keyPressStatus[index] = isPress
         lock.unlock()
+        
+        
+        //print AB status
+        /*
+        if(getKeyPressStatus(0))
+        {
+            print("A is down")
+        }
+        if(getKeyPressStatus(1))
+        {
+            print("B is down")
+        }*/
     }
     
     func getKeyPressStatus(_ index:Int)->Bool

@@ -215,22 +215,10 @@ class Apu:NSObject{
             // Misc
             /////////////////////
         case 0x4015:
-            //15 =  1 2 4 8
-            var e1 = TestBits(target: BIT(0), value: value)//TestBits(value, BIT(0))
-            //e1 = true
-            m_pulseChannel0?.GetLengthCounter().SetEnabled(e1)
-            
-            var e2 = TestBits(target: BIT(1), value: value)
-            //e2 = true
-            m_pulseChannel1?.GetLengthCounter().SetEnabled(e2)
-            
-            var e3 = TestBits(target: BIT(2), value: value)
-            //e3 = true
-            m_triangleChannel?.GetLengthCounter().SetEnabled(e3)
-            
-            var e4 = TestBits(target: BIT(3), value: value)
-            //e4 = true
-            m_noiseChannel?.GetLengthCounter().SetEnabled(e4)
+            m_pulseChannel0?.GetLengthCounter().SetEnabled(TestBits(target: BIT(0), value: value))
+            m_pulseChannel1?.GetLengthCounter().SetEnabled(TestBits(target: BIT(1), value: value))
+            m_triangleChannel?.GetLengthCounter().SetEnabled(TestBits(target: BIT(2), value: value))
+            m_noiseChannel?.GetLengthCounter().SetEnabled(TestBits(target: BIT(3), value: value))
             //@TODO: DMC Enable bit 4
             
             break
