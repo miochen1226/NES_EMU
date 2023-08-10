@@ -836,6 +836,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				PROVISIONING_PROFILE_SPECIFIER = "NES-EMU-APPSTORE";
@@ -861,6 +862,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				PROVISIONING_PROFILE_SPECIFIER = "NES-EMU-APPSTORE";
@@ -889,6 +891,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				SDKROOT = macosx;
@@ -914,6 +917,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
 				SDKROOT = macosx;
