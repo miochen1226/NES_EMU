@@ -162,7 +162,12 @@ class Nes{
         return spriteObjs
     }
     
-    func GetNameTableMirroring()->RomHeader.NameTableMirroring
+    func HACK_OnScanline()
+    {
+        m_cartridge.HACK_OnScanline(nes:self)
+    }
+    
+    func GetNameTableMirroring()->NameTableMirroring
     {
         return m_cartridge.GetNameTableMirroring()
     }

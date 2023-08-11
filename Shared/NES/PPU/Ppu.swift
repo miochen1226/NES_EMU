@@ -28,7 +28,7 @@ class Ppu:IPpu{
         WritePpuRegister(CpuMemory.kPpuVRamIoReg, value: 0)
         
         m_spriteFetchData.removeAll()
-        for _ in 0...7
+        for _ in 0...64
         {
             m_spriteFetchData.append(SpriteFetchData.init())
         }
@@ -376,7 +376,7 @@ class Ppu:IPpu{
 
         //let oam:[SpriteData] = getOamArray(oamMemory:m_oam)
         //var oam2:[SpriteData] = getOam2Array(oamMemory:m_oam2)
-        while (n2 < 8)
+        while (n2 < 64)
         {
             let sprite = m_oam.getSprite(n)
             let spriteY:UInt8 = sprite.bmpLow
@@ -1166,16 +1166,9 @@ class Ppu:IPpu{
         
     }
     
-    /*
-    func GetBackgroundColor(_ color:inout Color4)
-    {
-        color = g_paletteColors[Int(m_palette.Read(0))] // BG ($3F00)
-    }
-    */
     func GetBackgroundPixelColor()->PixelColor
     {
         let paletteIndex = Int(m_palette.Read(0))
-        let pixelColor = g_paletteColors[paletteIndex]
         return g_paletteColors[paletteIndex]
     }
     
@@ -1186,13 +1179,6 @@ class Ppu:IPpu{
         let paletteIndex:Int = Int(m_palette.Read( MapPpuToPalette(ppuAddress: paletteBaseAddress + UInt16(paletteOffset))))
         return g_paletteColors[paletteIndex]
     }
-    
-    
-    //static auto GetBackgroundColor = [&] (Color4& color)
-    //{
-    //    color = g_paletteColors[m_palette.Read(0)]; // BG ($3F00)
-    //};
-
     
     func OnFrameComplete()
     {
@@ -1314,7 +1300,7 @@ class Ppu:IPpu{
                         // this mostly works.
                         
                         //TODO
-                        //m_nes->HACK_OnScanline();
+                        m_nes?.HACK_OnScanline()
                     }
                 }
 
@@ -1458,7 +1444,7 @@ class Ppu:IPpu{
         var physicalVRamAddress:UInt16 = 0
         switch (m_nes!.GetNameTableMirroring())
         {
-        case RomHeader.NameTableMirroring.Vertical:
+        case NameTableMirroring.Vertical:
             // Vertical mirroring (horizontal scrolling)
             // A B
             // A B
@@ -1466,7 +1452,7 @@ class Ppu:IPpu{
             physicalVRamAddress = virtualVRamAddress % UInt16(NameTableMemory.kSize)
             break
 
-        case RomHeader.NameTableMirroring.Horizontal:
+        case NameTableMirroring.Horizontal:
             // Horizontal mirroring (vertical scrolling)
             // A A
             // B B
@@ -1486,23 +1472,23 @@ class Ppu:IPpu{
             {
                 physicalVRamAddress = virtualVRamAddress;
             }
-            break;
+            break
 
-        case RomHeader.NameTableMirroring.OneScreenUpper:
+        case NameTableMirroring.OneScreenUpper:
             // A A
             // A A
             physicalVRamAddress = virtualVRamAddress % UInt16((NameTableMemory.kSize / 2))
-            break;
+            break
 
-        case RomHeader.NameTableMirroring.OneScreenLower:
+        case NameTableMirroring.OneScreenLower:
             // B B
             // B B
             physicalVRamAddress = (virtualVRamAddress % UInt16((NameTableMemory.kSize / 2))) + UInt16((NameTableMemory.kSize / 2))
-            break;
+            break
 
         default:
-            assert(false);
-            break;
+            assert(false)
+            break
         }
 
         return physicalVRamAddress

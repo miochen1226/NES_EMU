@@ -6,7 +6,15 @@
 //
 
 import SwiftUI
-
+#if os(iOS)
+extension UIScreen{
+   static let screenWidth = UIScreen.main.bounds.size.width
+   static let screenHeight = UIScreen.main.bounds.size.height
+   static let screenSize = UIScreen.main.bounds.size
+    static let GAP:CGFloat = 70.0
+}
+#else
+#endif
 
 struct ContentView: View {
     
@@ -16,16 +24,18 @@ struct ContentView: View {
     var body: some View {
         
         ZStack {
-            GameView(scene: scene).frame(width: 256, height: 240, alignment: .top)
+            
             
 #if os(iOS)
+            GameView(scene: scene).frame(width: UIScreen.screenWidth, height: UIScreen.screenHeight, alignment: .top)
             VirtualControllerView()
 #else
+            GameView(scene: scene).frame(width: 256, height: 240, alignment: .top)
             Text(labenFps).position(x: 40, y: 20).onReceive(timer) { _ in
                 updateFps()
             }
 #endif
-        }
+        }.background(Color.black)
         
     }
     

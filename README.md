@@ -6,6 +6,14 @@ Pracetice implement NES emu with swift ,  just for fun
 - NES 模拟器开发教程 14 - APU 方波(https://www.jianshu.com/p/43498c487ce8 )
   
 # Change log
+
+
+## 8/11/2023
+- 1.Support Mapper4.
+- 2.Add Virtual Game Controller for iOS
+- 3.[Hack] change sprite limit per line from 8 to 64 
+  > <img src="./Image/SnapShot/2023-08-11.png">
+  
 ## 7/27/2023
 -  1.correct pulseWave implementation
 	 > <a href="https://www.youtube.com/shorts/792qbxuuFA4">Demo video</a>
@@ -20,5 +28,5 @@ Pracetice implement NES emu with swift ,  just for fun
     - "m": Start
 ## 7/24/2023
 - 1.Support display for ios.
-  > <img src="./F1666584-9E5B-4A69-B5C9-2DFF10E65850.jpg">
-  > <img src="./截圖 2023-06-25 下午11.39.13.png">
+  > <img src="./Image/SnapShot/F1666584-9E5B-4A69-B5C9-2DFF10E65850.jpg">
+  > <img src="./Image/SnapShot/2023-06-25.png">

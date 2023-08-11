@@ -215,9 +215,21 @@ class Cpu:CpuRegDef,ICpu{
 
         case AddressMode.Relatv: // For conditional branch instructions
             
-            let offsetSigned = ToInt(Read8(PC+1))
-            m_operandAddress = UInt16(Int(PC) + Int(m_opCodeEntry!.numBytes) + Int(offsetSigned))
+            //let offsetSigned = ToInt(Read8(PC+1))
+            //m_operandAddress = UInt16(Int(PC) + Int(m_opCodeEntry!.numBytes) + Int(offsetSigned))
             
+            
+            let offset = ToInt(Read8(PC+1)) // Signed offset in [-128,127]
+            //m_operandAddress = UInt16( Int(PC) + Int(m_opCodeEntry.numBytes) + offset)
+            
+            if(offset>0)
+            {
+                m_operandAddress = PC + UInt16(m_opCodeEntry.numBytes) + UInt16(abs(offset))
+            }
+            else
+            {
+                m_operandAddress = PC + UInt16(m_opCodeEntry.numBytes) - UInt16(abs(offset))
+            }
             /*
             let offsetSigned = ToInt(Read8(PC+1))
             
@@ -1126,8 +1138,12 @@ class Cpu:CpuRegDef,ICpu{
         return m_operandAddress
     }
     
-    func ToInt(_ x : UInt8) -> Int16 {
-          return Int16(Int8(bitPattern: x))
+    //func ToInt(_ x : UInt8) -> Int16 {
+    //      return Int16(Int8(bitPattern: x))
+    //}
+    
+    func ToInt(_ x : UInt8) -> Int {
+          return Int(Int8(bitPattern: x))
     }
     
     func Nmi()

@@ -25,6 +25,16 @@ class Cartridge:ICartridge{
         }
     }
     
+    func HACK_OnScanline(nes:Nes)
+    {
+        m_mapper.HACK_OnScanline();
+        if (m_mapper.TestAndClearIrqPending())
+        {
+            nes.SignalCpuIrq()
+        }
+        //self.m_mapper.HACK_OnScanline()
+    }
+    
     func HandlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
         return AccessChrMem(ppuAddress)
     }
@@ -37,17 +47,21 @@ class Cartridge:ICartridge{
         //we use ppuAddress as chr memory address
         //let memAddress = ppuAddress - PpuMemory.kChrRomBase
         
-        
+        /*
         let byteValue = g_chrMemory[Int(ppuAddress)]
         //let byteValue = UnsafeBufferPointer(start: g_chrMemory.advanced(by: Int(ppuAddress)*MemoryLayout<UInt8>.stride), count: 1)[0]
         return byteValue
+        */
         
-        /*
+        //const size_t bankIndex = GetBankIndex(ppuAddress, PpuMemory::kChrRomBase, kChrBankSize);
+        //const uint16 offset = GetBankOffset(ppuAddress, kChrBankSize);
+        //const size_t mappedBankIndex = m_mapper->GetMappedChrBankIndex(bankIndex);
+        //return m_chrBanks[mappedBankIndex].RawRef(offset);
+        
         let bankIndex:Int = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
         let offset:Int = Int(GetBankOffset(address: ppuAddress, bankSize: kChrBankSize))
-        let mappedBankIndex:Int = m_mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex))
+        let mappedBankIndex:Int = Int(m_mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex)))
         return m_chrBanks[mappedBankIndex].RawRef(address:offset)
-        */
     }
     
     func HandlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
@@ -64,7 +78,7 @@ class Cartridge:ICartridge{
         let offset = GetBankOffset(address: ppuAddress, bankSize: kChrBankSize)
         
         let mappedBankIndex = m_mapper.GetMappedChrBankIndex(ppuBankIndex: bankIndex)
-        m_chrBanks[mappedBankIndex].Write(address: offset, value: value)
+        m_chrBanks[Int(mappedBankIndex)].Write(address: offset, value: value)
     }
     
     
@@ -227,7 +241,7 @@ class Cartridge:ICartridge{
         let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
         let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
         let mappedBankIndex = m_mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
-        let memory = m_savBanks[mappedBankIndex]
+        let memory = m_savBanks[Int(mappedBankIndex)]
         memory.Write(address: offset, value: value)
         //return m_savBanks[mappedBankIndex].RawRef(offset)
         
@@ -239,7 +253,7 @@ class Cartridge:ICartridge{
         let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
         let mappedBankIndex = m_mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
         //return m_savBanks[mappedBankIndex].RawRef(offset)
-        let memory = m_savBanks[mappedBankIndex]
+        let memory = m_savBanks[Int(mappedBankIndex)]
         return memory.Read(offset)
     }
     
@@ -258,10 +272,10 @@ class Cartridge:ICartridge{
         //let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         
         let bundleUrl = Bundle.main.url(forResource: "Roms", withExtension: "bundle")
-        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. (Japan, USA).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. (Japan, USA).nes")
         //let filepath = bundleUrl!.appendingPathComponent("Donkey Kong (Japan).nes")
         //let filepath = bundleUrl!.appendingPathComponent("Ice Climber (Japan).nes")
-        
+        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
@@ -309,16 +323,13 @@ class Cartridge:ICartridge{
             
             let numChrBanks = chrRomSize / globeDef.kChrBankSize;
 
-            for index in 0..<numChrBanks
+            for _ in 0..<numChrBanks
             {
                 let newMemory = Memory.init()
                 newMemory.initial(size: globeDef.kChrBankSize)
                 let beginIndex:UInt = UInt(readIndex)
                 
-                if(index<=8)
-                {
-                    fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
-                }
+                fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
                 
                 readIndex = readIndex + Int(globeDef.kChrBankSize)
                 m_chrBanks.append(newMemory)
@@ -363,12 +374,17 @@ class Cartridge:ICartridge{
             if(mN == 0)
             {
                 m_mapper = Mapper0()
-                m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+                m_mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            }
+            else if(mN == 4)
+            {
+                m_mapper = Mapper4()
+                m_mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
             }
             else
             {
                 m_mapper = Mapper1()
-                m_mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+                m_mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
             }
             
             m_cartNameTableMirroring = romHeader!.GetNameTableMirroring()
@@ -376,13 +392,13 @@ class Cartridge:ICartridge{
         }
     }
     
-    func GetNameTableMirroring()->RomHeader.NameTableMirroring
+    func GetNameTableMirroring()->NameTableMirroring
     {
         return m_cartNameTableMirroring
     }
     
     var m_hasSRAM = false
-    var m_cartNameTableMirroring:RomHeader.NameTableMirroring = .Undefined
+    var m_cartNameTableMirroring:NameTableMirroring = .Undefined
     
     func fillMemory( srcMem:[UInt8],begin:UInt,size:Int,memory:Memory)
     {

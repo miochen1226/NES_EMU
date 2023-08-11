@@ -18,17 +18,7 @@ let nes = Nes.sharedInstance
 
 class GameScene: SKScene,IRenderScreen {
     
-    /*
-    func initScene()->GameScene
-    {
-        nes.loadRom()
-        nes.startRun(iRenderScreen: self)
-        
-        backgroundColor = .black
-        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        return self
-    }*/
-    
+
     func getFpsInfo()->String
     {
         return nes.getFpsInfo()
@@ -36,57 +26,32 @@ class GameScene: SKScene,IRenderScreen {
     
     override func didMove(to view: SKView) {
         self.scaleMode = .resizeFill
-        buffer.removeAll()
-        for _ in 0..<256
-        {
-            for _ in 0..<240
-            {
-                buffer.append(0)
-                buffer.append(0)
-                buffer.append(0)
-                buffer.append(0)
-            }
-        }
+#if os(iOS)
+        self.CX = Int(W/2 + (Int(UIScreen.screenWidth) - W)/2)
+        self.CY = Int(UIScreen.GAP)/2+Int(H/2)
+#else
+#endif
         
+        
+        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 256*240*4)
         nes.loadRom()
         nes.startRun(iRenderScreen: self)
         
         backgroundColor = .black
-        //physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
     }
     
     var arraySKShapeNode:[SKSpriteNode] = []
     
-    /*
-    func getBgPixel(pos:Int)->[UInt8]
-    {
-        //let y = pos/256
-        //let x = pos%256
-        //let dataPix:Color4 = nes.m_renderer.GetPixel(x + (239-y)*256)
-        
-        let dataPix:Color4 = nes.m_renderer.GetPixel(pos)
-        return [dataPix.d_r,dataPix.d_g,dataPix.d_b,UInt8(255)]
-        //return [UInt8(drand48()*255),UInt8(drand48()*255),UInt8(drand48()*255),UInt8(255)]
-    }
-    */
-    
     var enableDrawBG = true
     var enableDrawSprites = false
-    var buffer:[UInt8] = []
-    
-    func getPixelColor(_ pos:Int,dataArray:[Color4])->[UInt8]
-    {
-        let color4 = dataArray[pos]
-        if(color4 == nil)
-        {
-            return [0,0,0,0]
-        }
-        else
-        {
-            return dataArray[pos].getRgba()
-        }
-    }
-    
+    var rawBuffer:UnsafeMutablePointer<UInt8>!
+#if os(iOS)
+    let W = Int((UIScreen.screenHeight-UIScreen.GAP)*256/240)
+    let H = Int((UIScreen.screenHeight-UIScreen.GAP))
+#else
+#endif
+    var CX = 0
+    var CY = 0
     var m_bIsBusy = false
     func renderBG()
     {
@@ -97,37 +62,31 @@ class GameScene: SKScene,IRenderScreen {
         
         m_bIsBusy = true
         //BG
-        var dstArray2Pointer = UnsafeMutablePointer<UInt8>(&self.buffer)
-        nes.m_renderer.getFrame(dstArray2Pointer: &dstArray2Pointer)
+        //var dstArray2Pointer = UnsafeMutableRawPointer(&self.rawBuffer)
+        nes.m_renderer.getFrame(dstArray2Pointer: &self.rawBuffer)
         
-        //let dataArray:[Color4] = Array<Color4>(UnsafeBufferPointer<UInt8>(start: buffer, count: 256*240*4))
-                   
-        /*
-        var bytesBG:[UInt8] = []
         
-        print(dataArray.count)
-        for index in 0..<256*240-1
-        {
-            bytesBG.append(dataArray[index].d_r)
-            bytesBG.append(dataArray[index].d_g)
-            bytesBG.append(dataArray[index].d_b)
-            bytesBG.append(dataArray[index].d_a)
-        }
-        */
-        let data = Data.init(buffer)
         
-        /*
-        let bytes = stride(from: 0, to: (width * height), by: 1).flatMap {
-            pos in
-            return getPixelColor(pos,dataArray: dataArray)
-        }
-        */
-        //let data = Data.init(bytes)
+        let data = Data(bytes: self.rawBuffer, count: 256*240*4)//Data.init(self.rawBuffer)
         let bgTexture = SKTexture.init(data: data, size: CGSize(width: 256, height: 240))
         bgTexture.filteringMode = .nearest
         let bkNode = SKSpriteNode.init(texture: bgTexture)
-        bkNode.position = CGPoint.init(x: 128, y: 120)
+        
+        //bkNode.size = CGSize(width: 256, height: 240)
+        
+#if os(iOS)
+        bkNode.position = CGPoint.init(x: self.CX, y: self.CY)
+        bkNode.size = CGSize(width: W, height: H)
+#else
+        bkNode.position = CGPoint.init(x: 256/2, y: 240/2)
         bkNode.size = CGSize(width: 256, height: 240)
+#endif
+        
+        
+        
+        
+        //print("W+" + String(W))
+        //print("H+" + String(H))
         
         arraySKShapeNode.append(bkNode)
         addChild(bkNode)
@@ -178,7 +137,7 @@ struct GameView: View {
     let scene: GameScene
     var body: some View {
         SpriteView(scene: scene)
-                    .frame(width: 256, height: 240)
+                    .frame(width: UIScreen.screenWidth, height: UIScreen.screenHeight)
                     .ignoresSafeArea()
         //Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/).position(x: 0, y: 0)
     }
@@ -212,7 +171,7 @@ struct GameViewRepresentable: NSViewRepresentable {
     class KeyView: SKView {
         override var acceptsFirstResponder: Bool { true }
         override func keyUp(with event: NSEvent) {
-            print(">> key up \(event.charactersIgnoringModifiers ?? "")")
+            //print(">> key up \(event.charactersIgnoringModifiers ?? "")")
             switch(event.charactersIgnoringModifiers)
             {
             case "a":
@@ -243,15 +202,15 @@ struct GameViewRepresentable: NSViewRepresentable {
                 nes.m_controllerPorts.pressStart(false)
                 break
             case .none:
-                print("none")
+                //print("none")
                 break
             case .some(_):
-                print("some")
+                //print("some")
                 break
             }
         }
         override func keyDown(with event: NSEvent) {
-            print(">> key \(event.charactersIgnoringModifiers ?? "")")
+            //print(">> key \(event.charactersIgnoringModifiers ?? "")")
             
             switch(event.charactersIgnoringModifiers)
             {
@@ -280,10 +239,10 @@ struct GameViewRepresentable: NSViewRepresentable {
                 nes.m_controllerPorts.pressStart()
                 break
             case .none:
-                print("none")
+                //print("none")
                 break
             case .some(_):
-                print("some")
+                //print("some")
                 break
             }
         }

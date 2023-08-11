@@ -6,6 +6,18 @@
 //
 
 import Foundation
+
+enum NameTableMirroring
+{
+    case Horizontal
+    case Vertical
+    case FourScreen
+    case OneScreenUpper
+    case OneScreenLower
+
+    case Undefined
+}
+
 class RomHeader{
     
     func BIT(_ n:UInt8)->UInt8
@@ -83,16 +95,7 @@ class RomHeader{
         return m_hasSaveRam
     }
     
-    enum NameTableMirroring
-    {
-        case Horizontal
-        case Vertical
-        case FourScreen
-        case OneScreenUpper
-        case OneScreenLower
-
-        case Undefined
-    }
+    
     //NameTableMirroring GetNameTableMirroring() const { return m_mirroring; }
     
     var m_mirroring:NameTableMirroring = .Undefined
