@@ -8,6 +8,7 @@
 import SwiftUI
 
 import SpriteKit
+import GameController
 
 protocol IRenderScreen
 {
@@ -15,16 +16,214 @@ protocol IRenderScreen
 }
 
 let nes = Nes.sharedInstance
-
+var m_controller: GCController = GCController()
 class GameScene: SKScene,IRenderScreen {
     
-
+    private(set) var controllers = Set<GCController>()
+    
+    @objc func didConnectController(_ notification: Notification) {
+            //writeToLog(newLine: "didConnectController")
+            
+            //guard controllers.count < maximumControllerCount else { return }
+            let controller = notification.object as! GCController
+            controllers.insert(controller)
+            m_controller = controller
+            self.updatePad()
+            //delegate?.inputManager(self, didConnect: controller)
+            /*
+            controller.extendedGamepad?.dpad.left.pressedChangedHandler =      { (button, value, pressed) in self.buttonChangedHandler("←", pressed, self.overlayLeft) }
+            controller.extendedGamepad?.dpad.right.pressedChangedHandler =     { (button, value, pressed) in self.buttonChangedHandler("→", pressed, self.overlayRight) }
+            controller.extendedGamepad?.dpad.up.pressedChangedHandler =        { (button, value, pressed) in self.buttonChangedHandler("↑", pressed, self.overlayUp) }
+            controller.extendedGamepad?.dpad.down.pressedChangedHandler =      { (button, value, pressed) in self.buttonChangedHandler("↓", pressed, self.overlayDown) }
+            
+            // buttonA is labeled "X" (blue) on PS4 controller
+            controller.extendedGamepad?.buttonA.pressedChangedHandler =        { (button, value, pressed) in self.buttonChangedHandler("⨯", pressed, self.overlayA) }
+            // buttonB is labeled "circle" (red) on PS4 controller
+            controller.extendedGamepad?.buttonB.pressedChangedHandler =        { (button, value, pressed) in self.buttonChangedHandler("●", pressed, self.overlayB) }
+            // buttonX is labeled "square" (pink) on PS4 controller
+            controller.extendedGamepad?.buttonX.pressedChangedHandler =        { (button, value, pressed) in self.buttonChangedHandler("■", pressed, self.overlayX) }
+            // buttonY is labeled "triangle" (green) on PS4 controller
+            controller.extendedGamepad?.buttonY.pressedChangedHandler =        { (button, value, pressed) in self.buttonChangedHandler("▲", pressed, self.overlayY) }
+            
+            // buttonOptions is labeled "SHARE" on PS4 controller
+            controller.extendedGamepad?.buttonOptions?.pressedChangedHandler = { (button, value, pressed) in self.buttonChangedHandler("SHARE", pressed, self.overlayOptions) }
+            // buttonMenu is labeled "OPTIONS" on PS4 controller
+            controller.extendedGamepad?.buttonMenu.pressedChangedHandler =     { (button, value, pressed) in self.buttonChangedHandler("OPTIONS", pressed, self.overlayMenu) }
+            
+            controller.extendedGamepad?.leftShoulder.pressedChangedHandler =   { (button, value, pressed) in self.buttonChangedHandler("L1", pressed, self.overlayLeftShoulder) }
+            controller.extendedGamepad?.rightShoulder.pressedChangedHandler =  { (button, value, pressed) in self.buttonChangedHandler("R1", pressed, self.overlayRightShoulder) }
+            
+            controller.extendedGamepad?.leftTrigger.pressedChangedHandler =    { (button, value, pressed) in self.buttonChangedHandler("L2", pressed, self.overlayLeftShoulder) }
+            controller.extendedGamepad?.leftTrigger.valueChangedHandler =      { (button, value, pressed) in self.triggerChangedHandler("L2", value, pressed) }
+            controller.extendedGamepad?.rightTrigger.pressedChangedHandler =   { (button, value, pressed) in self.buttonChangedHandler("R2", pressed, self.overlayRightShoulder) }
+            controller.extendedGamepad?.rightTrigger.valueChangedHandler =     { (button, value, pressed) in self.triggerChangedHandler("R2", value, pressed) }
+            
+            controller.extendedGamepad?.leftThumbstick.valueChangedHandler =   { (button, xvalue, yvalue) in self.thumbstickChangedHandler("THUMB-LEFT", xvalue, yvalue) }
+            controller.extendedGamepad?.rightThumbstick.valueChangedHandler =  { (button, xvalue, yvalue) in self.thumbstickChangedHandler("THUMB-RIGHT", xvalue, yvalue) }
+            
+            controller.extendedGamepad?.leftThumbstickButton?.pressedChangedHandler =  { (button, value, pressed) in self.buttonChangedHandler("THUMB-LEFT", pressed, self.overlayLeftThumb) }
+            controller.extendedGamepad?.rightThumbstickButton?.pressedChangedHandler = { (button, value, pressed) in self.buttonChangedHandler("THUMB-RIGHT", pressed, self.overlayRightThumb) }
+             */
+        }
+        
+        @objc func didDisconnectController(_ notification: Notification) {
+            //writeToLog(newLine: "didDisconnectController")
+            
+            let controller = notification.object as! GCController
+            controllers.remove(controller)
+            
+            //delegate?.inputManager(self, didDisconnect: controller)
+        }
+    
+    func scanPad()
+    {
+        NotificationCenter.default.addObserver(self,
+                                                       selector: #selector(self.didConnectController),
+                                                       name: NSNotification.Name.GCControllerDidConnect,
+                                                       object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(self.didDisconnectController),
+                                               name: NSNotification.Name.GCControllerDidDisconnect,
+                                               object: nil)
+        
+        GCController.startWirelessControllerDiscovery {}
+    }
+    
+    func updatePad()
+    {
+        if(m_controller.extendedGamepad == nil)
+        {
+            m_controller = GCController.controllers()[0]
+        }
+        else
+        {
+            //m_controller = GCController()
+        }
+        
+        setControllerInputHandler()
+    }
+    
+    func setControllerInputHandler()
+    {
+        m_controller.extendedGamepad?.valueChangedHandler =
+        {(gamepad: GCExtendedGamepad, element: GCControllerElement) in
+            if element == gamepad.dpad
+            {
+                if gamepad.dpad.up.isPressed
+                {
+                    nes.m_controllerPorts.pressU()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressU(false)
+                }
+                
+                if gamepad.dpad.down.isPressed
+                {
+                    nes.m_controllerPorts.pressD()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressD(false)
+                }
+                
+                if gamepad.dpad.left.isPressed
+                {
+                    nes.m_controllerPorts.pressL()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressL(false)
+                }
+                
+                if gamepad.dpad.right.isPressed
+                {
+                    nes.m_controllerPorts.pressR()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressR(false)
+                }
+            }
+            
+            
+            if element == gamepad.buttonA
+            {
+                if gamepad.buttonA.isPressed
+                {
+                    nes.m_controllerPorts.pressB()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressB(false)
+                }
+            }
+            
+            if element == gamepad.buttonB
+            {
+                if gamepad.buttonB.isPressed{
+                    nes.m_controllerPorts.pressA()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressA(false)
+                }
+            }
+            if element == gamepad.buttonY
+            {
+                if gamepad.buttonY.isPressed{
+                    nes.m_controllerPorts.pressStart()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressStart(false)
+                }
+            }
+            
+            if element == gamepad.buttonX
+            {
+                if gamepad.buttonX.isPressed{
+                    nes.m_controllerPorts.pressSelect()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressSelect(false)
+                }
+            }
+            
+            if element == gamepad.buttonOptions
+            {
+                if gamepad.buttonOptions!.isPressed
+                {
+                    nes.m_controllerPorts.pressSelect()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressSelect(false)
+                }
+            }
+            
+            if element == gamepad.buttonMenu
+            {
+                if gamepad.buttonMenu.isPressed
+                {
+                    nes.m_controllerPorts.pressStart()
+                }
+                else
+                {
+                    nes.m_controllerPorts.pressStart(false)
+                }
+            }
+        }
+    }
+    
     func getFpsInfo()->String
     {
         return nes.getFpsInfo()
     }
     
     override func didMove(to view: SKView) {
+        self.scanPad()
         self.scaleMode = .resizeFill
 #if os(iOS)
         self.CX = Int(W/2 + (Int(UIScreen.screenWidth) - W)/2)

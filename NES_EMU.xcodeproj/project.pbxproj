@@ -18,6 +18,7 @@
 		3505EABF2A6FC2B900B14943 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3505EABD2A6FC2B400B14943 /* AVFoundation.framework */; };
 		350858922A72261A00318C3D /* FrameCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350858912A72261900318C3D /* FrameCounter.swift */; };
 		350858932A722B4100318C3D /* FrameCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350858912A72261900318C3D /* FrameCounter.swift */; };
+		3518A3562A8688F700D16FF9 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3518A3552A8688F700D16FF9 /* GameController.framework */; };
 		351C8C7C2A83C96E00C2735D /* Roms.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 351C8C7B2A83C96E00C2735D /* Roms.bundle */; };
 		351C8C7D2A83C96E00C2735D /* Roms.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 351C8C7B2A83C96E00C2735D /* Roms.bundle */; };
 		352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352575E226BD4828005AB816 /* NES_EMUApp.swift */; };
@@ -121,6 +122,7 @@
 		3505EABA2A6F89F300B14943 /* NoiseChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseChannel.swift; sourceTree = "<group>"; };
 		3505EABD2A6FC2B400B14943 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS15.2.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		350858912A72261900318C3D /* FrameCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameCounter.swift; sourceTree = "<group>"; };
+		3518A3552A8688F700D16FF9 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS15.2.sdk/System/Library/Frameworks/GameController.framework; sourceTree = DEVELOPER_DIR; };
 		351C8C7B2A83C96E00C2735D /* Roms.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Roms.bundle; sourceTree = "<group>"; };
 		352575E226BD4828005AB816 /* NES_EMUApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NES_EMUApp.swift; sourceTree = "<group>"; };
 		352575E326BD4828005AB816 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3518A3562A8688F700D16FF9 /* GameController.framework in Frameworks */,
 				3505EABF2A6FC2B900B14943 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -335,6 +338,7 @@
 		3530B86926C6DF3600A2858C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3518A3552A8688F700D16FF9 /* GameController.framework */,
 				3505EABD2A6FC2B400B14943 /* AVFoundation.framework */,
 				35CC2F452A6EB8D700832AE2 /* AVKit.framework */,
 				35CC2F432A6EB8C100832AE2 /* AVFoundation.framework */,
@@ -751,9 +755,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-iOS";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
 				ENABLE_PREVIEWS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -766,7 +770,7 @@
 				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
-				PROVISIONING_PROFILE_SPECIFIER = "NES-EMU-APPSTORE";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -781,7 +785,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -810,7 +814,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -837,7 +841,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
