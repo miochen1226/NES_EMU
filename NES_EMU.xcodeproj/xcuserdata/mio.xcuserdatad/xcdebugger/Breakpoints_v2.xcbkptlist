@@ -46,8 +46,8 @@
             filePath = "Shared/NES/PPU/Ppu.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1480"
-            endingLineNumber = "1480"
+            startingLineNumber = "1487"
+            endingLineNumber = "1487"
             landmarkName = "MapPpuToVRam(_:)"
             landmarkType = "7">
          </BreakpointContent>

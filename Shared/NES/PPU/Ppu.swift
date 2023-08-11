@@ -662,6 +662,13 @@ class Ppu:IPpu{
 
             if (flipVert)
             {
+                if(yOffset>7)
+                {
+                    //Bug
+                    print("Err->"+String(yOffset))
+                    yOffset = yOffset%8
+                    print("Err->->"+String(yOffset))
+                }
                 yOffset = 7 - yOffset
             }
             assert(yOffset < 8)
