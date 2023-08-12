@@ -47,8 +47,7 @@ class Ppu:IPpu{
     }
     
     var m_numSpritesToRender = 0
-    func Initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer) {
-        
+    func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer) {
         m_renderer = renderer
         m_palette.Initialize()
         m_ppuMemoryBus = ppuMemoryBus
@@ -191,7 +190,7 @@ class Ppu:IPpu{
             m_vramBufferedValue = m_ppuMemoryBus!.Read(m_vramAddress)
                 
             // Advance vram pointer
-            let advanceOffset:UInt16 = PpuControl1.GetPpuAddressIncrementSize( m_ppuControlReg1.Value())
+            let advanceOffset:UInt16 = PpuControl1.getPpuAddressIncrementSize( m_ppuControlReg1.Value())
             m_vramAddress += advanceOffset
             
             break
@@ -298,7 +297,7 @@ class Ppu:IPpu{
                 m_ppuMemoryBus?.Write(m_vramAddress, value: value)
             }
 
-            let advanceOffset = PpuControl1.GetPpuAddressIncrementSize( m_ppuControlReg1.Value())
+            let advanceOffset = PpuControl1.getPpuAddressIncrementSize( m_ppuControlReg1.Value())
             m_vramAddress = m_vramAddress + advanceOffset;
             break
  
@@ -325,10 +324,9 @@ class Ppu:IPpu{
     let kScreenWidth:UInt32 = 256
     let kScreenHeight:UInt32 = 240
     
-    func ClearOAM2() // OAM2 = $FF
+    func ClearOAM2()
     {
-        //@NOTE: We don't actually need this step as we track number of sprites to render per scanline
-        m_oam2.Clear()
+        m_oam2.clear()
     }
     
     func IsSpriteInRangeY( y:UInt32,  spriteY:UInt8,  spriteHeight:UInt8) -> Bool
@@ -814,7 +812,7 @@ class Ppu:IPpu{
     {
         // Load bg tile row data (2 bytes) at v into pipeline
         let v = m_vramAddress
-        let patternTableAddress:UInt16 = PpuControl1.GetBackgroundPatternTableAddress(m_ppuControlReg1.Value())
+        let patternTableAddress:UInt16 = PpuControl1.getBackgroundPatternTableAddress(m_ppuControlReg1.Value())
         let tileIndexAddress:UInt16 = 0x2000 | (v & 0x0FFF)
         let attributeAddress:UInt16 = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
         
@@ -1110,25 +1108,20 @@ class Ppu:IPpu{
                 }
             }
         }
-        //var color:Color4 = Color4.init()
-        //var color = PixelColor()
-        //return
-        // Multiplexer selects background or sprite pixel (see "Priority multiplexer decision table")
         
         if (bgPaletteLowBits == 0)
         {
             if (!foundSprite || sprPaletteLowBits == 0)
             {
                 // Background color 0
-                //GetBackgroundColor(&color)
-                let pixelColor = GetBackgroundPixelColor()
-                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
+                let pixelColor = getBackgroundPixelColor()
+                m_renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
             else
             {
                 // Sprite color
-                let pixelColor = GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette)
-                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
+                let pixelColor = getPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette)
+                m_renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
         }
         else
@@ -1136,16 +1129,14 @@ class Ppu:IPpu{
             if (foundSprite && !spriteHasBgPriority)
             {
                 // Sprite color
-                let pixelColor = GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette)
-                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
-                //GetPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette, color: &color)
+                let pixelColor = getPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette)
+                m_renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
             else
             {
                 // BG color
-                let pixelColor = GetPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette)
-                //GetPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette, color: &color)
-                m_renderer?.DrawPixelColor(x: x, y: y, pixelColor: pixelColor)
+                let pixelColor = getPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette)
+                m_renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
 
             if (isSprite0)
@@ -1173,14 +1164,12 @@ class Ppu:IPpu{
         
     }
     
-    func GetBackgroundPixelColor()->PixelColor
-    {
+    func getBackgroundPixelColor() -> PixelColor {
         let paletteIndex = Int(m_palette.Read(0))
         return g_paletteColors[paletteIndex]
     }
     
-    func GetPaletteColor(highBits:UInt8,lowBits:UInt8,paletteBaseAddress:UInt16)->PixelColor
-    {
+    func getPaletteColor(highBits: UInt8, lowBits: UInt8, paletteBaseAddress: UInt16) -> PixelColor {
         assert(lowBits != 0)
         let paletteOffset:UInt8 = (highBits << 2) | (lowBits & 0x3)
         let paletteIndex:Int = Int(m_palette.Read( MapPpuToPalette(ppuAddress: paletteBaseAddress + UInt16(paletteOffset))))
@@ -1307,7 +1296,7 @@ class Ppu:IPpu{
                         // this mostly works.
                         
                         //TODO
-                        m_nes?.HACK_OnScanline()
+                        m_nes?.hackOnScanline()
                     }
                 }
 
@@ -1425,16 +1414,7 @@ class Ppu:IPpu{
     
     let m_nameTables = NameTableMemory.init(initSize: KB(2))
     
-    static func KB(_ n:UInt)->UInt
-    {
-        return n*1024
-    }
-    
-    func KB(_ n:UInt)->UInt
-    {
-        return n*1024
-    }
-    
+
     func HandlePpuWrite(_ ppuAddress:UInt16,  value:UInt8)
     {
         let address = MapPpuToVRam(ppuAddress)

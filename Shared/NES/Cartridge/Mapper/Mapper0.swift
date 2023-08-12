@@ -6,24 +6,13 @@
 //
 
 import Foundation
-class Mapper0:Mapper
+class Mapper0: Mapper
 {
-    override func PostInitialize()
-    {
-        if(NumPrgBanks16k() == 1 || NumPrgBanks16k() == 2)
-        {
-            //NSLog("ok")
-        }
-        
-        if(NumChrBanks8k() == 1)
-        {
-            //NSLog("ok")
-        }
+    override func postInitialize() {
         
         SetPrgBankIndex16k(cpuBankIndexIn: 0, cartBankIndexIn: 0)
 
-        if (NumPrgBanks16k() == 1)
-        {
+        if NumPrgBanks16k() == 1 {
             SetPrgBankIndex16k(cpuBankIndexIn: 1, cartBankIndexIn: 0) // Both low and high 16k banks are the same
         }
         else
@@ -38,5 +27,4 @@ class Mapper0:Mapper
     {
         // Nothing to do
     }
-    
 }

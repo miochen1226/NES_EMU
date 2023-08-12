@@ -7,119 +7,93 @@
 
 import Foundation
 
-class FrameCounter:NSObject
+class FrameCounter: NSObject
 {
-    var m_apu:Apu?
-    var m_cpuCycles:UInt32 = 0
-    var m_numSteps = 4
-    var m_inhibitInterrupt = true
-    
-    init(apu:Apu)
-    {
+    init(apu: Apu) {
         super.init()
-        
-        self.m_apu = apu
+        self.apu = apu
     }
 
-    func SetMode(_ mode:UInt8)
-    {
+    func setMode(_ mode: UInt8) {
         assert(mode < 2)
-        if (mode == 0)
-        {
-            print("PulseChannel mode 4")
-            m_numSteps = 4
+        if mode == 0 {
+            numSteps = 4
         }
-        else
-        {
-            print("PulseChannel mode 5")
-            m_numSteps = 5
-
+        else {
+            numSteps = 5
             //@TODO: This should happen in 3 or 4 CPU cycles
-            ClockQuarterFrameChips()
-            ClockHalfFrameChips()
+            clockQuarterFrameChips()
+            clockHalfFrameChips()
         }
 
         // Always restart sequence
         //@TODO: This should happen in 3 or 4 CPU cycles
-        m_cpuCycles = 0
+        cpuCycles = 0
     }
 
     func AllowInterrupt()
     {
-        m_inhibitInterrupt = false
+        inhibitInterrupt = false
     }
 
-    func HandleCpuWrite( cpuAddress:UInt16, value:UInt8)
-    {
+    func handleCpuWrite( cpuAddress: UInt16, value: UInt8) {
         assert(cpuAddress == 0x4017)
 
         let mode = ReadBits8(target: BIT(7), value: value) >> 7
-        SetMode(UInt8(mode))
-        //SetMode(UInt8(1))
+        setMode(UInt8(mode))
         
-        
-        if (TestBits(target: BIT(6), value: value))
-        {
+        if TestBits(target: BIT(6), value: value) {
             AllowInterrupt()
         }
     }
     
-    // Clock every CPU cycle
-    func Clock()
-    {
+    func Clock() {
         var resetCycles = false
 
-        switch (m_cpuCycles)
-        {
+        switch cpuCycles {
         case APU_TO_CPU_CYCLE(3728.5):
-            ClockQuarterFrameChips()
+            clockQuarterFrameChips()
             break
 
         case APU_TO_CPU_CYCLE(7456.5):
-            ClockQuarterFrameChips()
-            ClockHalfFrameChips()
+            clockQuarterFrameChips()
+            clockHalfFrameChips()
             break
 
         case APU_TO_CPU_CYCLE(11185.5):
-            ClockQuarterFrameChips()
+            clockQuarterFrameChips()
             break
 
         case APU_TO_CPU_CYCLE(14914):
-            if (m_numSteps == 4)
-            {
+            if numSteps == 4 {
                 //@TODO: set interrupt flag if !inhibit
             }
             break
 
         case APU_TO_CPU_CYCLE(14914.5):
-            if (m_numSteps == 4)
-            {
+            if numSteps == 4 {
                 //@TODO: set interrupt flag if !inhibit
-                ClockQuarterFrameChips()
-                ClockHalfFrameChips()
+                clockQuarterFrameChips()
+                clockHalfFrameChips()
             }
             break
 
         case APU_TO_CPU_CYCLE(14915):
-            if (m_numSteps == 4)
-            {
+            if numSteps == 4 {
                 //@TODO: set interrupt flag if !inhibit
-
                 resetCycles = true
             }
             break
 
         case APU_TO_CPU_CYCLE(18640.5):
-            if(m_numSteps == 5)
-            {
-                ClockQuarterFrameChips()
-                ClockHalfFrameChips()
+            if numSteps == 5 {
+                clockQuarterFrameChips()
+                clockHalfFrameChips()
             }
             break
 
         case APU_TO_CPU_CYCLE(18641):
-            if(m_numSteps == 5)
-            {
+            if numSteps == 5 {
                 resetCycles = true
             }
             break
@@ -127,14 +101,12 @@ class FrameCounter:NSObject
             break
         }
 
-        if(resetCycles)
-        {
-            //print("PulseChannel mode 4 m_cpuCycles->" + String(m_cpuCycles))
-            m_cpuCycles = 0
+        if resetCycles {
+            cpuCycles = 0
         }
         else
         {
-            m_cpuCycles += 1
+            cpuCycles += 1
         }
     }
 
@@ -143,13 +115,18 @@ class FrameCounter:NSObject
         return UInt32(cpuCycle*2)
     }
     
-    func ClockQuarterFrameChips()
+    func clockQuarterFrameChips()
     {
-        m_apu?.ClockQuarterFrameChips()
+        apu?.clockQuarterFrameChips()
     }
 
-    func ClockHalfFrameChips()
+    func clockHalfFrameChips()
     {
-        m_apu?.ClockHalfFrameChips()
+        apu?.clockHalfFrameChips()
     }
+    
+    var apu:Apu?
+    var cpuCycles:UInt32 = 0
+    var numSteps = 4
+    var inhibitInterrupt = true
 }

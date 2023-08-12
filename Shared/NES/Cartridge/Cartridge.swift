@@ -7,88 +7,228 @@
 
 import Foundation
 
-class Cartridge:ICartridge{
-    
-    var g_chrMemory:UnsafeMutablePointer<UInt8>!
-    
-    func buildChrMemory()
-    {
-        let totalSize = m_chrBanks.count * Int(globeDef.kChrBankSize)
-        g_chrMemory = UnsafeMutablePointer<UInt8>.allocate(capacity: totalSize)
-        g_chrMemory.initialize(to: 0)
-        var beginPos = 0
-        for n in 0..<m_chrBanks.count
-        {
-            let memory = m_chrBanks[n]
-            memcpy(g_chrMemory.advanced(by: beginPos), memory.rawBuffer, Int(globeDef.kChrBankSize))
-            beginPos += Int(globeDef.kChrBankSize)
-        }
-    }
-    
-    func HACK_OnScanline(nes:Nes)
-    {
-        m_mapper.HACK_OnScanline();
-        if (m_mapper.TestAndClearIrqPending())
-        {
+class Cartridge: ICartridge {
+    func hackOnScanline(nes:Nes) {
+        mapper.hackOnScanline()
+        if mapper.TestAndClearIrqPending() {
             nes.SignalCpuIrq()
         }
-        //self.m_mapper.HACK_OnScanline()
     }
     
     func HandlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
         return AccessChrMem(ppuAddress)
     }
     
-    //魔改
-    func AccessChrMem(_ ppuAddress:UInt16)->UInt8
-    {
-        //魔改
-        //because PpuMemory.kChrRomBase == 0
-        //we use ppuAddress as chr memory address
-        //let memAddress = ppuAddress - PpuMemory.kChrRomBase
-        
-        /*
-        let byteValue = g_chrMemory[Int(ppuAddress)]
-        //let byteValue = UnsafeBufferPointer(start: g_chrMemory.advanced(by: Int(ppuAddress)*MemoryLayout<UInt8>.stride), count: 1)[0]
-        return byteValue
-        */
-        
-        //const size_t bankIndex = GetBankIndex(ppuAddress, PpuMemory::kChrRomBase, kChrBankSize);
-        //const uint16 offset = GetBankOffset(ppuAddress, kChrBankSize);
-        //const size_t mappedBankIndex = m_mapper->GetMappedChrBankIndex(bankIndex);
-        //return m_chrBanks[mappedBankIndex].RawRef(offset);
-        
+    func AccessChrMem(_ ppuAddress: UInt16) -> UInt8 {
         let bankIndex:Int = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
         let offset:Int = Int(GetBankOffset(address: ppuAddress, bankSize: kChrBankSize))
-        let mappedBankIndex:Int = Int(m_mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex)))
-        return m_chrBanks[mappedBankIndex].RawRef(address:offset)
+        let mappedBankIndex:Int = Int(mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex)))
+        return chrBanks[mappedBankIndex].RawRef(address:offset)
     }
     
     func HandlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
-        if (m_mapper.CanWriteChrMemory())
-        {
+        if mapper.CanWriteChrMemory() {
             AccessChrMem(ppuAddress:ppuAddress,value:value)
         }
     }
     
-    func AccessChrMem( ppuAddress:UInt16,value:UInt8)
-    {
+    func AccessChrMem( ppuAddress: UInt16, value: UInt8) {
         let bankIndex = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
-        
         let offset = GetBankOffset(address: ppuAddress, bankSize: kChrBankSize)
-        
-        let mappedBankIndex = m_mapper.GetMappedChrBankIndex(ppuBankIndex: bankIndex)
-        m_chrBanks[Int(mappedBankIndex)].Write(address: offset, value: value)
+        let mappedBankIndex = mapper.GetMappedChrBankIndex(ppuBankIndex: bankIndex)
+        chrBanks[Int(mappedBankIndex)].Write(address: offset, value: value)
     }
     
+    func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
+        if cpuAddress >= CpuMemory.kPrgRomBase {
+            return AccessPrgMem(cpuAddress)
+        }
+        else if cpuAddress >= CpuMemory.kSaveRamBase {
+            return AccessSavMem(cpuAddress)
+        }
+
+        return 0
+    }
     
-    static func KB(_ n:UInt)->UInt
-    {
+    func HandleCpuWrite(_ cpuAddress: UInt16, value: UInt8) {
+        mapper.OnCpuWrite(cpuAddress: cpuAddress, value: value)
+        if cpuAddress >= CpuMemory.kPrgRomBase {
+            if mapper.CanWritePrgMemory() {
+                AccessPrgMem(cpuAddress,value: value)
+            }
+        }
+        else if cpuAddress >= CpuMemory.kSaveRamBase {
+            if mapper.CanWriteSavMemory() {
+                AccessSavMem(cpuAddress,value: value)
+            }
+        }
+        else {
+            print("Unhandled by mapper - write: $%04X\n", cpuAddress)
+        }
+    }
+    
+    func GetBankIndex(address: UInt16, baseAddress: UInt16, bankSize: UInt16) -> Int {
+        let firstBankIndex = baseAddress / bankSize
+        return Int((address / bankSize) - firstBankIndex)
+    }
+    
+    func GetBankOffset(address: UInt16, bankSize: UInt16) -> UInt16 {
+        return address & (bankSize - 1)
+    }
+    
+    func AccessPrgMemEx(_ cpuAddress: UInt16, readValue:inout UInt8) {
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+        let mappedBankIndex = mapper.GetMappedPrgBankIndex(Int(bankIndex))
+        let memory = prgBanks[mappedBankIndex]
+        readValue = memory.RawRef(address: Int(offset))
+    }
+    
+    func AccessPrgMem(_ cpuAddress: UInt16) -> UInt8 {
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+        let mappedBankIndex = mapper.GetMappedPrgBankIndex(Int(bankIndex))
+        let memory = prgBanks[mappedBankIndex]
+        return memory.RawRef(address: Int(offset))
+    }
+    
+    func AccessPrgMem(_ cpuAddress: UInt16, value: UInt8) {
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+        let mappedBankIndex = mapper.GetMappedPrgBankIndex(Int(bankIndex))
+        let memory = prgBanks[mappedBankIndex]
+        memory.Write(address: offset, value: value)
+    }
+    
+    func AccessSavMem(_ cpuAddress: UInt16,value: UInt8) {
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
+        let mappedBankIndex = mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
+        let memory = savBanks[Int(mappedBankIndex)]
+        memory.Write(address: offset, value: value)
+    }
+    
+    func AccessSavMem(_ cpuAddress: UInt16) -> UInt8 {
+        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
+        let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
+        let mappedBankIndex = mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
+        let memory = savBanks[Int(mappedBankIndex)]
+        return memory.Read(offset)
+    }
+    
+    func loadFile() {
+        loadRom()
+    }
+    
+    func loadRom() {
+        //let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        
+        let bundleUrl = Bundle.main.url(forResource: "Roms", withExtension: "bundle")
+        //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. (Japan, USA).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Donkey Kong (Japan).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Ice Climber (Japan).nes")
+        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
+        //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
+        //if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
+        
+        if let data = NSData(contentsOf: filepath) {
+            let arrayData = [UInt8](data)
+            romHeader = RomHeader.init().Initialize(bytes: arrayData)
+            
+            if romHeader == nil {
+                NSLog("Rom header incorrect")
+                return
+            }
+            
+            //PRG_ROM
+            let prgRomSize = romHeader!.GetPrgRomSizeBytes()
+            if prgRomSize % globeDef.kPrgBankSize != 0 {
+                NSLog("prgRomSize incorrect")
+                return
+            }
+            
+            let numPrgBanks = prgRomSize / globeDef.kPrgBankSize
+            var readIndex = 16
+            for _ in 0..<numPrgBanks {
+                let newMemory = Memory.init()
+                newMemory.initial(size: globeDef.kPrgBankSize)
+                let beginIndex:UInt = UInt(readIndex)
+                fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
+                readIndex = readIndex + Int(globeDef.kPrgBankSize)
+                prgBanks.append(newMemory)
+            }
+            
+            // CHR-ROM data
+            let chrRomSize = romHeader!.GetChrRomSizeBytes()
+            if chrRomSize % globeDef.kChrBankSize != 0 {
+                NSLog("chrRomSize incorrect")
+                return
+            }
+            
+            let numChrBanks = chrRomSize / globeDef.kChrBankSize
+            for _ in 0..<numChrBanks {
+                let newMemory = Memory.init()
+                newMemory.initial(size: globeDef.kChrBankSize)
+                let beginIndex:UInt = UInt(readIndex)
+                
+                fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
+                
+                readIndex = readIndex + Int(globeDef.kChrBankSize)
+                chrBanks.append(newMemory)
+            }
+            
+            let numSavBanks = romHeader!.GetNumPrgRamBanks();
+            if numSavBanks > kMaxSavBanks {
+                NSLog("numSavBanks incorrect")
+                return
+            }
+            
+            for _ in 0..<numSavBanks {
+                let newMemory = Memory.init()
+                newMemory.initial(size: globeDef.kSavBankSize)
+                savBanks.append(newMemory)
+            }
+            
+            let mN = romHeader!.GetMapperNumber()
+            if mN == 0 {
+                mapper = Mapper0()
+                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            }
+            else if mN == 4 {
+                mapper = Mapper4()
+                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            }
+            else {
+                mapper = Mapper1()
+                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            }
+            
+            cartNameTableMirroring = romHeader!.GetNameTableMirroring()
+            hasSRAM = romHeader!.HasSRAM();
+        }
+    }
+    
+    func GetNameTableMirroring() -> NameTableMirroring {
+        return cartNameTableMirroring
+    }
+    
+    func fillMemory( srcMem: [UInt8],begin: UInt,size: Int,memory: Memory) {
+        var beginIndex:UInt = begin
+        for index in 0..<size {
+            let indexInFile = Int(beginIndex)
+            let rawValue = srcMem[indexInFile]
+            memory.putValue(address: Int(index), value: rawValue)
+            beginIndex = beginIndex + 1
+        }
+    }
+    
+    static func KB(_ n:UInt) -> UInt {
         return n*1024
     }
     
-    static func MB(_ n:UInt)->UInt
-    {
+    static func MB(_ n:UInt) -> UInt {
         return n*1024*1024
     }
     
@@ -102,313 +242,12 @@ class Cartridge:ICartridge{
     let kSavBankCount:UInt16 = 1
     let kSavBankSize:UInt16 = UInt16(KB(8))
     
-    func HandleCpuReadEx(_ cpuAddress: UInt16,readValue:inout UInt8)
-    {
-        if (cpuAddress >= CpuMemory.kPrgRomBase)
-        {
-            AccessPrgMemEx(cpuAddress,readValue:&readValue)
-        }
-        else if (cpuAddress >= CpuMemory.kSaveRamBase)
-        {
-            // We don't bother with SRAM chip disable
-            readValue = AccessSavMem(cpuAddress)
-        }
-        else
-        {
-            readValue = 0
-        }
-    }
-    
-    func HandleCpuRead(_ cpuAddress: UInt16)->UInt8 {
-        if (cpuAddress >= CpuMemory.kPrgRomBase)
-        {
-            return AccessPrgMem(cpuAddress)
-        }
-        else if (cpuAddress >= CpuMemory.kSaveRamBase)
-        {
-            // We don't bother with SRAM chip disable
-            return AccessSavMem(cpuAddress)
-        }
-
-        return 0;
-    }
-    
-    func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
-    {
-        m_mapper.OnCpuWrite(cpuAddress: cpuAddress, value: value)
-
-        if (cpuAddress >= CpuMemory.kPrgRomBase)
-        {
-            if (m_mapper.CanWritePrgMemory())
-            {
-                AccessPrgMem(cpuAddress,value: value)
-            }
-        }
-        else if (cpuAddress >= CpuMemory.kSaveRamBase)
-        {
-            if (m_mapper.CanWriteSavMemory())
-            {
-                AccessSavMem(cpuAddress,value: value)
-            }
-        }
-        else
-        {
-            print("Unhandled by mapper - write: $%04X\n", cpuAddress)
-    //#if CONFIG_DEBUG
-            //if (!Debugger::IsExecuting())
-             //   printf("Unhandled by mapper - write: $%04X\n", cpuAddress);
-            
-            
-    //#endif
-        }
-        
-    }
-    
-    func GetBankIndex(address:UInt16,baseAddress:UInt16,bankSize:UInt16)->Int
-    {
-        let firstBankIndex = baseAddress / bankSize
-        return Int((address / bankSize) - firstBankIndex)
-    }
-    
-    func GetBankOffset(address:UInt16,bankSize:UInt16)->UInt16
-    {
-        return address & (bankSize - 1)
-    }
-    
-    func AccessPrgMemEx(_ cpuAddress:UInt16,readValue:inout UInt8)
-    {
-        //Mio speed up
-        let bankIndexCache = cache[cpuAddress]
-        if(bankIndexCache != nil)
-        {
-            let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-            let memory = m_prgBanks[bankIndexCache!]
-            readValue = memory.RawRef(address: Int(offset))
-        }
-        
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-        let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
-        
-        //Mio speed up
-        cache[cpuAddress] = mappedBankIndex
-        
-        let memory = m_prgBanks[mappedBankIndex]
-        readValue = memory.RawRef(address: Int(offset))
-    }
-    
-    var m_mapper:Mapper = Mapper.init()
-    var cache:[UInt16:Int] = [:]
-    func AccessPrgMem(_ cpuAddress:UInt16)->UInt8
-    {
-        //Mio speed up
-        //let bankIndexCache = cache[cpuAddress]
-        /*
-        if(bankIndexCache != nil)
-        {
-            let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-            let memory = m_prgBanks[bankIndexCache!]
-            return memory.RawRef(address: Int(offset))
-        }
-        */
-        
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-        let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
-        
-        if(bankIndex >= 8)
-        {
-            print("TEST")
-        }
-        //Mio speed up
-        //cache[cpuAddress] = mappedBankIndex
-        
-        let memory = m_prgBanks[mappedBankIndex]
-        return memory.RawRef(address: Int(offset))
-    }
-    
-    func AccessPrgMem(_ cpuAddress:UInt16,value:UInt8)
-    {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-        let mappedBankIndex = m_mapper.GetMappedPrgBankIndex(Int(bankIndex))
-        let memory = m_prgBanks[mappedBankIndex]
-        memory.Write(address: offset, value: value)
-    }
-    
-    func AccessSavMem(_ cpuAddress:UInt16,value:UInt8)
-    {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
-        let mappedBankIndex = m_mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
-        let memory = m_savBanks[Int(mappedBankIndex)]
-        memory.Write(address: offset, value: value)
-        //return m_savBanks[mappedBankIndex].RawRef(offset)
-        
-    }
-    
-    func AccessSavMem(_ cpuAddress:UInt16)->UInt8
-    {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
-        let mappedBankIndex = m_mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
-        //return m_savBanks[mappedBankIndex].RawRef(offset)
-        let memory = m_savBanks[Int(mappedBankIndex)]
-        return memory.Read(offset)
-    }
-    
-    func loadFile()
-    {
-        loadRom()
-    }
-    
     var romHeader:RomHeader?
+    var prgBanks:[Memory] = []
+    var chrBanks:[Memory] = []
+    var savBanks:[Memory] = []
+    var mapper:Mapper = Mapper.init()
     
-    var m_prgBanks:[Memory] = []
-    var m_chrBanks:[Memory] = []
-    var m_savBanks:[Memory] = []
-    func loadRom()
-    {
-        //let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
-        
-        let bundleUrl = Bundle.main.url(forResource: "Roms", withExtension: "bundle")
-        //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. (Japan, USA).nes")
-        //let filepath = bundleUrl!.appendingPathComponent("Donkey Kong (Japan).nes")
-        //let filepath = bundleUrl!.appendingPathComponent("Ice Climber (Japan).nes")
-        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
-        //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
-        //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
-        //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
-        //if let filepath = Bundle.main.path(forResource: "Donkey Kong Jr. (USA) (GameCube Edition)", ofType: "nes")
-        
-        if let data = NSData(contentsOf: filepath)
-        {
-            let arrayData = [UInt8](data)
-            romHeader = RomHeader.init().Initialize(bytes: arrayData)
-            
-            if(romHeader == nil)
-            {
-                NSLog("Rom header incorrect")
-                return
-            }
-            
-            //PRG_ROM
-            let prgRomSize = romHeader!.GetPrgRomSizeBytes();
-            if(prgRomSize % globeDef.kPrgBankSize != 0)
-            {
-                NSLog("prgRomSize incorrect")
-                return
-            }
-            
-            let numPrgBanks = prgRomSize / globeDef.kPrgBankSize
-            var readIndex = 16
-            for _ in 0..<numPrgBanks
-            {
-                let newMemory = Memory.init()
-                newMemory.initial(size: globeDef.kPrgBankSize)
-                let beginIndex:UInt = UInt(readIndex)
-                fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
-                readIndex = readIndex + Int(globeDef.kPrgBankSize)
-                m_prgBanks.append(newMemory)
-            }
-            
-            // CHR-ROM data
-            let chrRomSize = romHeader!.GetChrRomSizeBytes();
-            
-            if(chrRomSize % globeDef.kChrBankSize != 0)
-            {
-                NSLog("chrRomSize incorrect")
-                return
-            }
-            
-            let numChrBanks = chrRomSize / globeDef.kChrBankSize;
-
-            for _ in 0..<numChrBanks
-            {
-                let newMemory = Memory.init()
-                newMemory.initial(size: globeDef.kChrBankSize)
-                let beginIndex:UInt = UInt(readIndex)
-                
-                fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
-                
-                readIndex = readIndex + Int(globeDef.kChrBankSize)
-                m_chrBanks.append(newMemory)
-            }
-            //魔改
-            self.buildChrMemory()
-            
-            let numSavBanks = romHeader!.GetNumPrgRamBanks();
-            if(numSavBanks > kMaxSavBanks)
-            {
-                NSLog("numSavBanks incorrect")
-                return
-            }
-            
-            for _ in 0...numSavBanks
-            {
-                let newMemory = Memory.init()
-                newMemory.initial(size: globeDef.kSavBankSize)
-                m_savBanks.append(newMemory)
-            }
-            //kMaxSavBanks
-
-            let mN = romHeader!.GetMapperNumber()
-            
-            /*
-            switch (romHeader!.GetMapperNumber())
-            {
-                case 0: m_mapperHolder.reset(new Mapper0()); break;
-                case 1: m_mapperHolder.reset(new Mapper1()); break;
-                case 2: m_mapperHolder.reset(new Mapper2()); break;
-                case 3: m_mapperHolder.reset(new Mapper3()); break;
-                case 4: m_mapperHolder.reset(new Mapper4()); break;
-                case 7: m_mapperHolder.reset(new Mapper7()); break;
-            default:
-                NSLog("Unsupported mapper")
-                //FAIL("Unsupported mapper: %d", romHeader.GetMapperNumber());
-            }
-            */
-            
-            //m_mapper = m_mapperHolder.get();
-            
-            if(mN == 0)
-            {
-                m_mapper = Mapper0()
-                m_mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
-            }
-            else if(mN == 4)
-            {
-                m_mapper = Mapper4()
-                m_mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
-            }
-            else
-            {
-                m_mapper = Mapper1()
-                m_mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
-            }
-            
-            m_cartNameTableMirroring = romHeader!.GetNameTableMirroring()
-            m_hasSRAM = romHeader!.HasSRAM();
-        }
-    }
-    
-    func GetNameTableMirroring()->NameTableMirroring
-    {
-        return m_cartNameTableMirroring
-    }
-    
-    var m_hasSRAM = false
-    var m_cartNameTableMirroring:NameTableMirroring = .Undefined
-    
-    func fillMemory( srcMem:[UInt8],begin:UInt,size:Int,memory:Memory)
-    {
-        var beginIndex:UInt = begin
-        for index in 0...size-1
-        {
-            let indexInFile = Int(beginIndex)
-            let rawValue = srcMem[indexInFile]
-            memory.putValue(address: Int(index), value: rawValue)
-            beginIndex = beginIndex + 1
-        }
-    }
+    var hasSRAM = false
+    var cartNameTableMirroring:NameTableMirroring = .Undefined
 }

@@ -6,52 +6,43 @@
 //
 
 import Foundation
-class PpuMemoryBus
-{
-    var m_ppu:IPpu?
-    var m_cartridge:ICartridge?
+
+class PpuMemoryBus {
     
-
-    func Initialize(ppu:IPpu, cartridge:ICartridge)
-    {
-        m_ppu = ppu
-        m_cartridge = cartridge
+    func Initialize(ppu:IPpu, cartridge: ICartridge) {
+        self.ppu = ppu
+        self.cartridge = cartridge
     }
 
-    func Read(_ ppuAddressIn:UInt16)->UInt8
-    {
+    func Read(_ ppuAddressIn: UInt16) -> UInt8 {
         var ppuAddress = ppuAddressIn
         ppuAddress = ppuAddress % PpuMemory.kPpuMemorySize // Handle mirroring above 16K to 64K
 
-        if (ppuAddress >= PpuMemory.kVRamBase)
-        {
-            return m_ppu!.HandlePpuRead(ppuAddress)
+        if ppuAddress >= PpuMemory.kVRamBase {
+            return ppu!.HandlePpuRead(ppuAddress)
         }
-
-        return m_cartridge!.HandlePpuRead(ppuAddress)
+        return cartridge!.HandlePpuRead(ppuAddress)
     }
 
-    func ReadCard(_ ppuAddressIn:UInt16)->UInt8
-    {
+    func ReadCard(_ ppuAddressIn: UInt16) -> UInt8 {
         var ppuAddress = ppuAddressIn
         ppuAddress = ppuAddress % PpuMemory.kPpuMemorySize // Handle mirroring above 16K to 64K
-        if (ppuAddress >= PpuMemory.kVRamBase)
-        {
-            return m_ppu!.HandlePpuRead(ppuAddress)
+        if ppuAddress >= PpuMemory.kVRamBase {
+            return ppu!.HandlePpuRead(ppuAddress)
         }
-        return m_cartridge!.HandlePpuRead(ppuAddress)
+        return cartridge!.HandlePpuRead(ppuAddress)
     }
     
-    func Write(_ ppuAddressIn:UInt16,  value:UInt8)
-    {
+    func Write(_ ppuAddressIn: UInt16, value: UInt8) {
         var ppuAddress = ppuAddressIn
         ppuAddress = ppuAddress % PpuMemory.kPpuMemorySize // Handle mirroring above 16K to 64K
 
-        if (ppuAddress >= PpuMemory.kVRamBase)
-        {
-            return m_ppu!.HandlePpuWrite(ppuAddress, value: value)
+        if ppuAddress >= PpuMemory.kVRamBase {
+            return ppu!.HandlePpuWrite(ppuAddress, value: value)
         }
-
-        return m_cartridge!.HandlePpuWrite(ppuAddress, value: value)
+        return cartridge!.HandlePpuWrite(ppuAddress, value: value)
     }
+    
+    var ppu:IPpu?
+    var cartridge:ICartridge?
 }

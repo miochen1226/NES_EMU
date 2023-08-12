@@ -97,7 +97,7 @@ class Cpu:CpuRegDef,ICpu{
     }
     
     var m_cpuMemoryBus:CpuMemoryBus?
-    func Initialize(cpuMemoryBus:CpuMemoryBus)
+    func initialize(cpuMemoryBus:CpuMemoryBus)
     {
         m_cpuMemoryBus = cpuMemoryBus
         
@@ -179,12 +179,12 @@ class Cpu:CpuRegDef,ICpu{
             m_pendingIrq = false
         }
     }
-    
+    /*
     func Read8Ex(_ address:UInt16,readValue:inout UInt8)
     {
         return m_cpuMemoryBus!.ReadEx(address,readValue:&readValue)
     }
-    
+    */
     func Read8(_ address:UInt16)->UInt8
     {
         return m_cpuMemoryBus!.Read(address)

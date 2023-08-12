@@ -8,310 +8,214 @@
 import Foundation
 
 
-
-
-class ChannelComponent
-{
-    class Divider
-    {
-        var m_period:UInt16 = 0
-        var m_counter:UInt16 = 0
-        func SetPeriod(_ period:UInt16)
-        {
-            m_period  = period
+class ChannelComponent {
+    class Divider {
+        func setPeriod(_ period: UInt16){
+            self.period  = period
         }
         
-        func GetPeriod()->UInt16
-        {
-            return m_period
+        func getPeriod() -> UInt16 {
+            return period
         }
         
-        func GetCounter()->UInt16
-        {
-            return m_counter
+        func getCounter() -> UInt16 {
+            return counter
         }
         
-        func ResetCounter()
-        {
-            m_counter = m_period
+        func resetCounter() {
+            counter = period
         }
         
-        func Clock()->Bool
-        {
-            if (m_counter == 0)
-            {
-                ResetCounter()
+        func clock()->Bool {
+            if counter == 0 {
+                resetCounter()
                 return true
             }
-            m_counter -= 1
+            counter -= 1
             return false
         }
+        
+        var period:UInt16 = 0
+        var counter:UInt16 = 0
     }
 
-    class LinearCounter
-    {
-        let m_divider = Divider()
-        
-        var m_reload = true
-        var m_control = true
-        
-        func Restart()
-        {
-            m_reload = true
+    class Timer {
+        func reset() {
+            divider.resetCounter()
         }
         
-        func  SetControlAndPeriod(control:Bool, period:UInt16)
-        {
-            m_control = control;
-            assert(period < BIT(7))
-            m_divider.SetPeriod(period)
+        func getPeriod() -> UInt16 {
+            return divider.getPeriod()
         }
         
-        func Clock()
-        {
-            if (m_reload)
-            {
-                m_divider.ResetCounter()
-            }
-            else if (m_divider.GetCounter() > 0)
-            {
-                _ = m_divider.Clock()
-            }
-
-            if (!m_control)
-            {
-                m_reload = false
-            }
+        func setPeriod(_ period: UInt16) {
+            divider.setPeriod(period)
         }
         
-        func GetValue()->UInt16
-        {
-            return m_divider.GetCounter()
-        }
-
-        func SilenceChannel()->Bool
-        {
-            if(GetValue() == 0)
-            {
-                return true
-            }
-            else
-            {
-                return false
-            }
-        }
-    }
-    
-    class LengthCounter
-    {
-        var m_enabled = false
-        var m_halt = false
-        var m_counter:UInt16 = 0
-        let lut:[UInt8] =
-        [
-            10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,
-            12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
-        ]
-        
-        func SetEnabled(_ value:Bool)
-        {
-            m_enabled = value
-            if (!m_enabled)
-            {
-                m_counter = 0
-            }
+        func setPeriodLow8(_ value: UInt8) {
+            var period:UInt16 = divider.getPeriod()
+            period = (period & BITS16([8,9,10])) | UInt16(value)
+            setPeriod(UInt16(value))
         }
         
-        func SetHalt(_ halt:Bool)
-        {
-            m_halt = halt
-        }
-        
-        func LoadCounterFromLUT(_ index:UInt8)
-        {
-            if (!m_enabled)
-            {
-                return
-            }
-            
-            //print("LoadCounterFromLUT" + String(index))
-            //static_assert(ARRAYSIZE(lut) == 32, "Invalid");
-            //assert(index < ARRAYSIZE(lut));
-            m_counter = UInt16(lut[Int(index)])
-        }
-        
-        func Clock()
-        {
-            if (m_halt)
-            {
-                return
-            }
-            
-            if (m_counter > 0) // Once it reaches 0, it stops, and channel is silenced
-            {
-                m_counter = m_counter-1
-            }
-        }
-        
-        func GetValue()->UInt16
-        {
-            return m_counter
-        }
-        
-        func SilenceChannel()->Bool
-        {
-            if(m_counter == 0)
-            {
-                return true
-            }
-            else
-            {
-                return false
-            }
-        }
-    }
-
-    class Timer
-    {
-        let m_divider = DividerEx()
-        var m_minPeriod = 0
-        
-        func Reset()
-        {
-            m_divider.ResetCounter()
-        }
-        
-        func GetPeriod()->UInt16
-        {
-            return m_divider.GetPeriod()
-        }
-        
-        func SetPeriod(_ period:UInt16)
-        {
-            m_divider.SetPeriod(period)
-        }
-        
-        func SetPeriodLow8(_ value:UInt8)
-        {
-            var period:UInt16 = m_divider.GetPeriod()
-            period = (period & BITS16([8,9,10])) | UInt16(value) // Keep high 3 bits
-            SetPeriod(UInt16(value))
-        }
-        
-        func SetPeriodHigh3(_ value:UInt16)
-        {
-            assert(value < BIT(3));
-            var period:UInt16 = m_divider.GetPeriod()
-            //period = (value << 8) | (period & 0xFF); // Keep low 8 bits
+        func setPeriodHigh3(_ value: UInt16) {
+            assert(value < BIT(3))
+            var period:UInt16 = divider.getPeriod()
             period = (value << 8) | (period & 0xFF)
             
-            SetPeriod(UInt16(period))
-            m_divider.ResetCounter()
+            setPeriod(UInt16(period))
+            divider.resetCounter()
         }
         
-        func SetMinPeriod(_ minPeriod:Int)
-        {
-            m_minPeriod = minPeriod;
+        func setMinPeriod(_ minPeriod: Int){
+            self.minPeriod = minPeriod
         }
 
         // Clocked by CPU clock every cycle (triangle channel) or second cycle (pulse/noise channels)
         // Returns true when output chip should be clocked
-        func Clock()->Bool
-        {
+        func clock()-> Bool {
             // Avoid popping and weird noises from ultra sonic frequencies
             //if (m_divider.GetPeriod() < m_minPeriod)
             //{
             //    return false
             //}
                 
-            if (m_divider.Clock())
-            {
+            if divider.clock() {
                 return true
             }
             
             return false
         }
-        /*
-        let m_divider = Divider()
-        var m_minPeriod = 0
         
-        func Reset()
-        {
-            m_divider.ResetCounter()
-        }
-        
-        func GetPeriod()->UInt16
-        {
-            return m_divider.GetPeriod()
-        }
-        
-        func SetPeriod(_ period:UInt16)
-        {
-            m_divider.SetPeriod(period)
-        }
-        
-        func SetPeriodLow8(_ value:UInt8)
-        {
-            var period:UInt16 = m_divider.GetPeriod()
-            period = (period & BITS([8,9,10])) | UInt16(value) // Keep high 3 bits
-            SetPeriod(period)
-        }
-        
-        func SetPeriodHigh3(_ value:UInt16)
-        {
-            //assert(value < BIT(3));
-            var period:UInt16 = m_divider.GetPeriod()
-            //period = (value << 8) | (period & 0xFF); // Keep low 8 bits
-            period = (value << 8) | (period & 0xFF)
-            m_divider.SetPeriod(period)
-            m_divider.ResetCounter()
-        }
-        
-        func SetMinPeriod(_ minPeriod:Int)
-        {
-            m_minPeriod = minPeriod;
-        }
+        let divider = Divider()
+        var minPeriod = 0
+    }
 
-        // Clocked by CPU clock every cycle (triangle channel) or second cycle (pulse/noise channels)
-        // Returns true when output chip should be clocked
-        func Clock()->Bool
-        {
-            // Avoid popping and weird noises from ultra sonic frequencies
-            if (m_divider.GetPeriod() < m_minPeriod)
+    class LengthCounter {
+        func setEnabled(_ enabled: Bool) {
+            self.enabled = enabled
+            if !enabled {
+                counter = 0
+            }
+        }
+        
+        func setHalt(_ halt: Bool) {
+            self.halt = halt
+        }
+        
+        func loadCounterFromLUT(_ index: UInt8) {
+            if !enabled
+            {
+                return
+            }
+            counter = UInt16(lut[Int(index)])
+            
+        }
+        
+        func clock() {
+            if halt {
+                return
+            }
+            
+            if counter > 0 {
+                counter = counter-1
+            }
+        }
+        
+        func getValue() -> UInt16 {
+            return counter
+        }
+        
+        func silenceChannel() -> Bool {
+            /*
+            if (!m_enabled)
             {
                 return false
             }
-                
-            if (m_divider.Clock())
+             */
+            
+            if counter == 0 {
+                return true
+            }
+            else {
+                return false
+            }
+        }
+        
+        var enabled = false
+        var halt = false
+        var counter:UInt16 = 0
+        let lut:[UInt8] =
+        [
+            10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,
+            12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
+        ]
+    }
+    
+    class LinearCounter
+    {
+        func restart() {
+            reload = true
+        }
+        
+        func setControlAndPeriod(control: Bool, period: UInt16) {
+            self.control = control
+            assert(period < BIT(7))
+            divider.setPeriod(period)
+        }
+        
+        func clock() {
+            if (reload)
+            {
+                divider.resetCounter()
+            }
+            else if (divider.getCounter() > 0)
+            {
+                _ = divider.clock()
+            }
+
+            if (!control)
+            {
+                reload = false
+            }
+        }
+        
+        func getValue() -> UInt16 {
+            return divider.getCounter()
+        }
+
+        func silenceChannel() -> Bool {
+            if(getValue() == 0)
             {
                 return true
             }
-            
-            return false
-        }*/
+            else
+            {
+                return false
+            }
+        }
+        
+        let divider = Divider()
+        var reload: Bool = true
+        var control: Bool = true
     }
 }
 
-
-class BaseChannel
-{
-    let m_timer = ChannelComponent.Timer()
-    let m_linearCounter = ChannelComponent.LinearCounter()
-    var m_lengthCounter = ChannelComponent.LengthCounter()
-    
-    func GetLengthCounter()->ChannelComponent.LengthCounter
-    {
-        return m_lengthCounter;
+class BaseChannel {
+    func getLengthCounter() -> ChannelComponent.LengthCounter {
+        return lengthCounter
     }
     
-    func GetValue()->Float32
-    {
+    func getValue() -> Float32 {
         assert(false)
         return 1.0
     }
     
-    func HandleCpuWrite(cpuAddress:UInt16, value:UInt8)
-    {
+    func handleCpuWrite(cpuAddress: UInt16, value: UInt8) {
         assert(false)
     }
+    
+    var timer = ChannelComponent.Timer()
+    let linearCounter = ChannelComponent.LinearCounter()
+    var lengthCounter = ChannelComponent.LengthCounter()
 }

@@ -8,25 +8,15 @@
 import Foundation
 import SpriteKit
 
-class SpriteObj{
-    var width:Int = 8
-    var height:Int = 8
-    var isTransParent = false
-    var x = 0
-    var y = 0
-    var rawColors:[Color4] = []
-    
-    func getPixel(pos:Int)->[UInt8]
-    {
+class SpriteObj {
+    func getPixel(pos:Int) -> [UInt8] {
         let y = pos/8
         let x = pos%8
         let dataPix:Color4 = rawColors[x + (7-y)*8]
         return [dataPix.d_r,dataPix.d_g,dataPix.d_b,dataPix.d_a]
-        //return [UInt8(0),UInt8(255),UInt8(0),UInt8(255)]
     }
     
-    func getTexture()->SKTexture
-    {
+    func getTexture() -> SKTexture {
         let bytes = stride(from: 0, to: (8 * 8), by: 1).flatMap {
             pos in
             return getPixel(pos: pos)
@@ -35,73 +25,63 @@ class SpriteObj{
         let bgTexture = SKTexture.init(data: data, size: CGSize(width: 8, height: 8))
         return bgTexture
     }
+    
+    var width:Int = 8
+    var height:Int = 8
+    var isTransParent = false
+    var x = 0
+    var y = 0
+    var rawColors:[Color4] = []
 }
 
 class Nes{
-    static let sharedInstance = Nes()
     
-    let m_cartridge = Cartridge.init()
-    
-    let m_ppu = Ppu.init()
-    let m_apu = Apu.init()
-    let m_cpu = Cpu.init()
-    let m_controllerPorts = ControllerPorts.init()
-    let m_cpuMemoryBus = CpuMemoryBus.init()
-    let m_ppuMemoryBus = PpuMemoryBus.init()
-    let m_cpuInternalRam = CpuInternalRam.init()
-    let m_renderer = Renderer.shared
     init() {
+        cpu.setApu(apu: apu)
+        cpu.setControllerPorts(controllerPorts: controllerPorts)
         
-        m_cpu.setApu(apu: m_apu)
-        m_cpu.setControllerPorts(controllerPorts: m_controllerPorts)
-        
-        m_renderer.Initialize()
-        m_cpu.Initialize(cpuMemoryBus:m_cpuMemoryBus)
-        m_ppu.Initialize(ppuMemoryBus: m_ppuMemoryBus, nes: self,renderer:m_renderer)
-        m_cpuMemoryBus.Initialize(cpu:m_cpu, ppu:m_ppu, cartridge:m_cartridge,cpuInternalRam: m_cpuInternalRam)
-        m_ppuMemoryBus.Initialize(ppu: m_ppu, cartridge: m_cartridge)
+        renderer.initialize()
+        cpu.initialize(cpuMemoryBus: cpuMemoryBus)
+        ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
+        cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
+        ppuMemoryBus.Initialize(ppu: ppu, cartridge: cartridge)
     }
     
-    func loadRom()
-    {
-        m_cartridge.loadFile()
-        m_cpu.Reset()
-        m_ppu.Reset()
+    deinit {
+        self.stop()
     }
     
-    func step()
-    {
-        ExecuteCpuAndPpuFrame()
+    func loadRom() {
+        cartridge.loadFile()
+        cpu.Reset()
+        ppu.Reset()
     }
     
-    func getSpriteObjs()->[SpriteObj]
-    {
+    func step() {
+        executeCpuAndPpuFrame()
+    }
+    
+    func getSpriteObjs() -> [SpriteObj] {
         var spriteObjs:[SpriteObj] = []
-        
-        let oam1:[SpriteData] = m_ppu.getOamArray(oamMemory:m_ppu.m_oam)
+        let oam1:[SpriteData] = ppu.getOamArray(oamMemory:ppu.m_oam)
         
         var sprPaletteHighBits:UInt8 = 0
         var sprPaletteLowBits:UInt8 = 0
-        for spriteData in oam1
-        {
-            if(spriteData.bmpLow == 255)
-            {
+        for spriteData in oam1 {
+            if spriteData.bmpLow == 255 {
                 continue
             }
             
-            if(spriteData.x == 0)
-            {
+            if spriteData.x == 0 {
                 continue
             }
+            
             let spriteObj = SpriteObj()
             spriteObj.x = Int(spriteData.x)
             spriteObj.y = 239 - Int(spriteData.bmpLow)
             
             let attribs:UInt8 = spriteData.attributes
             let flipHorz:Bool = TestBits(target:UInt16(attribs), value: BIT(6))
-            //let flipVert:Bool = m_ppu.TestBits(target:UInt16(attribs), value:m_ppu.BIT(7))
-            //let spriteHasBgPriority:Bool = m_ppu.TestBits(target: UInt16(attribs), value: m_ppu.BIT(5))
-           
             let tileIndex:UInt8 = spriteData.bmpHigh
             let tileOffset:UInt16 = TO16(tileIndex) * 16
             
@@ -109,44 +89,35 @@ class Nes{
             
             var spriteFetchData = SpriteFetchData()
             
-            for spY in 0...7
-            {
+            for spY in 0..<8 {
                 let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(spY)
                 let byte2Address:UInt16 = byte1Address + 8
-                spriteFetchData.bmpLow = m_ppu.m_ppuMemoryBus!.Read(byte1Address)
-                spriteFetchData.bmpHigh = m_ppu.m_ppuMemoryBus!.Read(byte2Address)
-                
-                
-                if (flipHorz)
-                {
-                    spriteFetchData.bmpLow = m_ppu.FlipBits(spriteFetchData.bmpLow)
-                    spriteFetchData.bmpHigh = m_ppu.FlipBits(spriteFetchData.bmpHigh)
+                spriteFetchData.bmpLow = ppu.m_ppuMemoryBus!.Read(byte1Address)
+                spriteFetchData.bmpHigh = ppu.m_ppuMemoryBus!.Read(byte2Address)
+                if flipHorz {
+                    spriteFetchData.bmpLow = ppu.FlipBits(spriteFetchData.bmpLow)
+                    spriteFetchData.bmpHigh = ppu.FlipBits(spriteFetchData.bmpHigh)
                 }
                 
-                for _ in 0...7
-                {
+                for _ in 0..<8 {
                     sprPaletteLowBits = (TestBits01(target: UInt16(spriteFetchData.bmpHigh), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteFetchData.bmpLow), value: 0x80))
                     
-                    if (sprPaletteLowBits != 0)
-                    {
+                    if sprPaletteLowBits != 0 {
                         sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: UInt8(0x3)))
-
                     }
                           
                     var color:Color4 = Color4.init()
-                    m_ppu.GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette, color: &color)
+                    ppu.GetPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette, color: &color)
                     
                     spriteFetchData.bmpLow = spriteFetchData.bmpLow << 1
                     spriteFetchData.bmpHigh = spriteFetchData.bmpHigh << 1
                     
-                    if(color.d_b == 0 && color.d_r == 0 && color.d_g == 0)
-                    {
+                    if color.d_b == 0 && color.d_r == 0 && color.d_g == 0 {
                         color.d_a = 0
                     }
                     
                     //Transparent pixel
-                    if(sprPaletteLowBits == 0)
-                    {
+                    if sprPaletteLowBits == 0 {
                         color.d_r = 0
                         color.d_g = 0
                         color.d_b = 0
@@ -162,37 +133,40 @@ class Nes{
         return spriteObjs
     }
     
-    func HACK_OnScanline()
-    {
-        m_cartridge.HACK_OnScanline(nes:self)
+    func hackOnScanline() {
+        cartridge.hackOnScanline(nes:self)
     }
     
-    func GetNameTableMirroring()->NameTableMirroring
-    {
-        return m_cartridge.GetNameTableMirroring()
+    func GetNameTableMirroring() -> NameTableMirroring {
+        return cartridge.GetNameTableMirroring()
     }
     
-    let serialQueue = DispatchQueue(label: "SerialQueue")
-    var iRenderScreen:IRenderScreen?
-    
-    var m_wantQuit = false
-   
-    func stop()
-    {
-        m_wantQuit = true
-        //m_apu.m_audioDriver?.stop()
+    func stop() {
+        apu.audioDriver?.audioUnitPlayer.stop()
+        wantQuit = true
+        while isRunning {
+            usleep(1000)
+        }
+        wantQuit = false
     }
     
-    func startRun(iRenderScreen:IRenderScreen)
-    {
+    func setRenderScreen(iRenderScreen: IRenderScreen) {
         self.iRenderScreen = iRenderScreen
+    }
+    
+    func start() {
+        
+        stop()
+        
+        apu.audioDriver?.audioUnitPlayer.start()
         serialQueue.async {
-            while self.m_wantQuit == false
-            {
+            self.isRunning = true
+            while self.wantQuit == false {
+                
                 let beginDate = Date().timeIntervalSince1970
                 
-                self.ExecuteCpuAndPpuFrame()
-                self.m_renderer.pushFrame()
+                self.executeCpuAndPpuFrame()
+                self.renderer.pushFrame()
                 
                 DispatchQueue.main.async {
                     self.iRenderScreen?.renderScreen()
@@ -200,60 +174,66 @@ class Nes{
                 
                 let endDate = Date().timeIntervalSince1970
                 let dateDiff = endDate - beginDate
-                if(dateDiff < self.g_frameLimitTime)
-                {
-                    let needSleep:Double = self.g_frameLimitTime - dateDiff
+                if dateDiff < self.frameLimitTime {
+                    let needSleep:Double = self.frameLimitTime - dateDiff
                     let needSleepMilisec = UInt32(needSleep*1000000)
                     usleep(needSleepMilisec)
                 }
             }
-            print("QUIT")
+            self.isRunning = false
+            self.wantQuit = false
         }
     }
     
-    func getFpsInfo()->String
-    {
+    func getFpsInfo() -> String {
         let strFps = String(totalFrame)
         totalFrame = 0
-        
-        //let strFps = String(totalCitcle/30000)
-        totalCitcle = 0
         let fpsInfo = "FPS: " + strFps
         return fpsInfo
     }
-    var totalFrame = 0
-    var totalCitcle:UInt32 = 0
     
-    func ExecuteCpuAndPpuFrame()
+    func executeCpuAndPpuFrame()
     {
         var completedFrame = false
-        m_cpuMemoryBus.readCount = 0
+        cpuMemoryBus.readCount = 0
         var clockCount:UInt32 = 0
         while (!completedFrame)
-        //while (clockCount<30000)
         {
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
-            m_cpu.Execute(&cpuCycles)
-            m_ppu.Execute(cpuCycles, completedFrame: &completedFrame)
-            m_apu.Execute(cpuCycles)
-            
-            totalCitcle += cpuCycles
+            cpu.Execute(&cpuCycles)
+            ppu.Execute(cpuCycles, completedFrame: &completedFrame)
+            apu.Execute(cpuCycles)
             clockCount += cpuCycles
         }
         
         totalFrame += 1
     }
     
-    let g_frameLimitTime:Double = 1/60
-    
-    func SignalCpuNmi()
-    {
-        m_cpu.Nmi()
+    func SignalCpuNmi() {
+        cpu.Nmi()
     }
     
-    func SignalCpuIrq()
-    {
-        m_cpu.Irq()
+    func SignalCpuIrq() {
+        cpu.Irq()
     }
+    
+    static let sharedInstance = Nes()
+    
+    let cartridge = Cartridge.init()
+    let ppu = Ppu.init()
+    let apu = Apu.init()
+    let cpu = Cpu.init()
+    let controllerPorts = ControllerPorts.init()
+    let cpuMemoryBus = CpuMemoryBus.init()
+    let ppuMemoryBus = PpuMemoryBus.init()
+    let cpuInternalRam = CpuInternalRam.init()
+    let renderer = Renderer.shared
+    var wantQuit = false
+    var isRunning = false
+    var totalFrame = 0
+    let serialQueue = DispatchQueue(label: "SerialQueue")
+    var iRenderScreen:IRenderScreen?
+    let frameLimitTime:Double = 1/60
+    
 }

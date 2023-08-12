@@ -10,42 +10,35 @@ import SwiftUI
 @main
 struct NES_EMUApp: App {
     
-    func onBackground()
-    {
-        nes.stop()
-    }
-    //let nes = Nes.init()
-    init() {
-        //nes.loadRom()
-        //Cartridge.init().loadFile()
-        
-        
-        
-        //NotificationCenter.default.addObserver()
-        //    .onReceive(NotificationCenter.default.publisher(for:  NSApplication.willTerminateNotification), perform: { output in
-        //    nes.stop()
-        //})
-        
-    }
-    
     var body: some Scene {
         WindowGroup
         {
-            
 #if os(iOS)
             ContentView()
 #else
-            ContentView().onReceive(NotificationCenter.default.publisher(for:  NSApplication.willTerminateNotification/*willTerminateNotification*/), perform: { output in
-                
-                handleQuit()
+            ContentView().frame(minWidth: 256, minHeight: 240).onReceive(NotificationCenter.default.publisher(for:  NSApplication.willTerminateNotification), perform: { output in
+                handleStop()
+            }).onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification), perform: { newValue in
+                handleStop()
+            }).onReceive(NotificationCenter.default.publisher(for: NSWindow.didExitFullScreenNotification), perform:  { newValue in
+                handleResume()
+            }).onReceive(NotificationCenter.default.publisher(for: NSWindow.didMiniaturizeNotification), perform:  { newValue in
+                handleStop()
+            })
+            .onReceive(NotificationCenter.default.publisher(for: NSWindow.didDeminiaturizeNotification), perform:  { newValue in
+                handleResume()
             })
 #endif
-            
         }
     }
-    
-    func handleQuit()
+ 
+    func handleStop()
     {
         nes.stop()
+    }
+    
+    func handleResume()
+    {
+        nes.start()
     }
 }

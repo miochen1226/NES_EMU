@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct SpriteData
-{
+struct SpriteData {
+    
     // Fetched from VRAM
     var bmpLow:UInt8 = 0
     var bmpHigh:UInt8 = 0
@@ -18,8 +18,8 @@ struct SpriteData
     var x:UInt8 = 0
 }
 
-struct SpriteFetchData
-{
+struct SpriteFetchData {
+    
     // Fetched from VRAM
     var bmpLow:UInt8 = 0
     var bmpHigh:UInt8 = 0

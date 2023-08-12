@@ -7,17 +7,7 @@
 
 import Foundation
 
-struct CpuMemory
-{
-    static func KB(_ n:UInt)->UInt
-    {
-        return n*1024
-    }
-    
-    static func MB(_ n:UInt)->UInt
-    {
-        return n*1024*1024
-    }
+struct CpuMemory {
     
     static let kInternalRamBase:UInt16            = 0x0000
     static let kInternalRamSize:UInt16            = UInt16(KB(2))
@@ -65,79 +55,50 @@ struct CpuMemory
     
 }
 
-class CpuMemoryBus{
-    var m_cpu:ICpu?
-    var m_ppu:IPpu?
-    var m_cartridge:ICartridge?
-    var m_cpuInternalRam:CpuInternalRam?
+class CpuMemoryBus {
+    
+    func initialize(cpu: ICpu, ppu: IPpu, cartridge: ICartridge, cpuInternalRam: CpuInternalRam) {
+        self.cpu = cpu
+        self.ppu = ppu
+        self.cartridge = cartridge
+        self.cpuInternalRam = cpuInternalRam
+    }
+    
+    func Read(_ cpuAddress: UInt16) -> UInt8 {
+        if cpuAddress >= CpuMemory.kExpansionRomBase {
+            return cartridge!.HandleCpuRead(cpuAddress)
+        }
+        else if cpuAddress >= CpuMemory.kCpuRegistersBase {
+            return cpu!.HandleCpuRead(cpuAddress)
+        }
+        else if cpuAddress >= CpuMemory.kPpuRegistersBase {
+            return ppu!.HandleCpuRead(cpuAddress)
+        }
+
+        return cpuInternalRam!.HandleCpuRead(cpuAddress)
+    }
+    
+    func Write(cpuAddress: UInt16, value: UInt8) {
+        if cpuAddress >= CpuMemory.kExpansionRomBase {
+            cartridge!.HandleCpuWrite(cpuAddress, value: value)
+            return
+        }
+        else if cpuAddress >= CpuMemory.kCpuRegistersBase {
+            cpu!.HandleCpuWrite(cpuAddress, value: value)
+            return
+        }
+        else if cpuAddress >= CpuMemory.kPpuRegistersBase {
+            ppu!.HandleCpuWrite(cpuAddress, value: value)
+            return
+        }
+
+        cpuInternalRam!.HandleCpuWrite(cpuAddress, value: value)
+    }
+    
+    var cpu:ICpu?
+    var ppu:IPpu?
+    var cartridge:ICartridge?
+    var cpuInternalRam:CpuInternalRam?
     var readCount = 0
-    func Initialize(cpu:ICpu,ppu:IPpu,cartridge:ICartridge,cpuInternalRam:CpuInternalRam)
-    {
-        m_cpu = cpu
-        m_ppu = ppu
-        m_cartridge = cartridge
-        m_cpuInternalRam = cpuInternalRam
-    }
-    
-    
-    //func HandleCpuReadEx(_ cpuAddress: uint16,readValue:inout UInt8)
-    
-    func ReadEx(_ cpuAddress:UInt16,readValue:inout UInt8)
-    {
-        if (cpuAddress >= CpuMemory.kExpansionRomBase)
-        {
-            m_cartridge!.HandleCpuReadEx(cpuAddress,readValue:&readValue)
-        }
-        else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
-        {
-            //return m_cpu!.HandleCpuRead(cpuAddress)
-        }
-        else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
-        {
-            //Mio mark for test.
-            //return 0//m_ppu!.HandleCpuRead(cpuAddress)
-        }
-
-        //return m_cpuInternalRam!.HandleCpuRead(cpuAddress)
-    }
-    
-    func Read(_ cpuAddress:UInt16)->UInt8
-    {
-        if (cpuAddress >= CpuMemory.kExpansionRomBase)
-        {
-            return m_cartridge!.HandleCpuRead(cpuAddress)
-        }
-        else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
-        {
-            return m_cpu!.HandleCpuRead(cpuAddress)
-        }
-        else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
-        {
-            return m_ppu!.HandleCpuRead(cpuAddress)
-        }
-
-        return m_cpuInternalRam!.HandleCpuRead(cpuAddress)
-    }
-    
-    func Write(cpuAddress:UInt16, value:UInt8)
-    {
-        if (cpuAddress >= CpuMemory.kExpansionRomBase)
-        {
-            m_cartridge!.HandleCpuWrite(cpuAddress, value: value)
-            return
-        }
-        else if (cpuAddress >= CpuMemory.kCpuRegistersBase)
-        {
-            m_cpu!.HandleCpuWrite(cpuAddress, value: value)
-            return
-        }
-        else if (cpuAddress >= CpuMemory.kPpuRegistersBase)
-        {
-            m_ppu!.HandleCpuWrite(cpuAddress, value: value)
-            return
-        }
-
-        m_cpuInternalRam!.HandleCpuWrite(cpuAddress, value: value)
-    }
     
 }

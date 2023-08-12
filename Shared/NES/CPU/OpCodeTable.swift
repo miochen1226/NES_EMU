@@ -9,6 +9,24 @@ import Foundation
 
 class OpCodeTable:OpCodeDef
 {
+    static func GetOpCodeTable() -> [OpCodeEntry] {
+        var array:[OpCodeEntry] = []
+        for obj in opCodeTable
+        {
+           let opCode = obj[0] as! Int
+           let opCodeName = obj[1] as! OpCodeEntryTtype
+           let numBytes = obj[2] as! Int
+           let numCycles = obj[3] as! Int
+           let pageCrossCycles = obj[4] as! Int
+           let addrMode = obj[5] as! AddressMode
+            
+           let opCodeEntry = OpCodeEntry.init().initial(opCode:opCode,  opCodeName:opCodeName,  numBytes:numBytes,  numCycles:numCycles,  pageCrossCycles:pageCrossCycles,  addrMode:addrMode)
+           array.append(opCodeEntry)
+            
+        }
+        return array
+    }
+    
     static var opCodeTable:[[Any]] =
     [
         [ 0x69, OpCodeEntryTtype.ADC, 2, 2, 0, AddressMode.Immedt ],
@@ -194,23 +212,5 @@ class OpCodeTable:OpCodeDef
         [ 0x98, OpCodeEntryTtype.TYA, 1, 2, 0, AddressMode.Implid ]
     ]
     
-    static func GetOpCodeTable()->[OpCodeEntry]
-    {
-        var array:[OpCodeEntry] = []
-        for obj in opCodeTable
-        {
-           let opCode = obj[0] as! Int
-           let opCodeName = obj[1] as! OpCodeEntryTtype
-           let numBytes = obj[2] as! Int
-           let numCycles = obj[3] as! Int
-           let pageCrossCycles = obj[4] as! Int
-           let addrMode = obj[5] as! AddressMode
-            
-           let opCodeEntry = OpCodeEntry.init().initial(opCode:opCode,  opCodeName:opCodeName,  numBytes:numBytes,  numCycles:numCycles,  pageCrossCycles:pageCrossCycles,  addrMode:addrMode)
-           array.append(opCodeEntry)
-            
-        }
-        return array
-    }
 }
 

@@ -6,6 +6,6 @@
 //
 
 import Foundation
+
 protocol ICartridge:HandleCpuReadProtocol,HandlePpuReadProtocol {
-    func HandleCpuReadEx(_ cpuAddress: UInt16,readValue:inout UInt8)
 }
