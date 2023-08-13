@@ -38,31 +38,31 @@ struct GameViewRepresentable: NSViewRepresentable {
             switch(event.charactersIgnoringModifiers)
             {
             case "a":
-                nes.controllerPorts.pressL(false)
+                nes.pressL(false)
                 break
             case "s":
-                nes.controllerPorts.pressD(false)
+                nes.pressD(false)
                 break
             case "d":
-                nes.controllerPorts.pressR(false)
+                nes.pressR(false)
                 break
             case "w":
-                nes.controllerPorts.pressU(false)
+                nes.pressU(false)
                 break
             
             case "p":
-                nes.controllerPorts.pressA(false)
+                nes.pressA(false)
                 break
                 
             case "o":
-                nes.controllerPorts.pressB(false)
+                nes.pressB(false)
                 break
             
             case "n":
-                nes.controllerPorts.pressSelect(false)
+                nes.pressSelect(false)
                 break
             case "m":
-                nes.controllerPorts.pressStart(false)
+                nes.pressStart(false)
                 break
             case .none:
                 break
@@ -74,28 +74,28 @@ struct GameViewRepresentable: NSViewRepresentable {
             switch(event.charactersIgnoringModifiers)
             {
             case "a":
-                nes.controllerPorts.pressL()
+                nes.pressL()
                 break
             case "s":
-                nes.controllerPorts.pressD()
+                nes.pressD()
                 break
             case "d":
-                nes.controllerPorts.pressR()
+                nes.pressR()
                 break
             case "w":
-                nes.controllerPorts.pressU()
+                nes.pressU()
                 break
             case "p":
-                nes.controllerPorts.pressA()
+                nes.pressA()
                 break
             case "o":
-                nes.controllerPorts.pressB()
+                nes.pressB()
                 break
             case "n":
-                nes.controllerPorts.pressSelect()
+                nes.pressSelect()
                 break
             case "m":
-                nes.controllerPorts.pressStart()
+                nes.pressStart()
                 break
             case .none:
                 break

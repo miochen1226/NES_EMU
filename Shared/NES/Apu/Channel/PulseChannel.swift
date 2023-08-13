@@ -36,17 +36,17 @@ class PulseChannel:BaseChannel {
         //DDlc.vvvv
         //l
         //表示 envelope loop 标志
-        let l = TestBits(target: BIT(5), value: value)
+        let l = testBits(target: BIT(5), value: value)
         //c
         //表示是否为常量音量
         
-        let c = TestBits(target: BIT(4), value: value)
+        let c = testBits(target: BIT(4), value: value)
         
         //vvvv
         //如果 c 置位，表示音量大小，否则表示 envelope 的分频计数
-        let vvvv = ReadBits8(target: BITS([0,1,2,3]), value: value)
+        let vvvv = readBits8(target: BITS([0,1,2,3]), value: value)
         
-        let DD = ReadBits8(target: BITS([6,7]), value: value) >> 6
+        let DD = readBits8(target: BITS([6,7]), value: value) >> 6
         pulseWaveGenerator.setDuty(UInt8(DD))
         
         lengthCounter.setHalt(l)
@@ -71,16 +71,16 @@ class PulseChannel:BaseChannel {
         //SSS
         //位移量，用于每个 sweep 周期将 timer 右移对应的位移量得到增量
 
-        let E = TestBits(target: BIT(7), value: value)
+        let E = testBits(target: BIT(7), value: value)
         sweepUnit.setEnabled(E)
         
-        let PPP = ReadBits8(target: BITS([4,5,6]), value: value) >> 4
+        let PPP = readBits8(target: BITS([4,5,6]), value: value) >> 4
         sweepUnit.setPeriod(period: UInt16(PPP), timer: &timer)
         
-        let N = TestBits(target: BIT(3), value: value)
+        let N = testBits(target: BIT(3), value: value)
         sweepUnit.setNegate(N)
         
-        let SSS = ReadBits8( target:BITS([0,1,2]),value:value)
+        let SSS = readBits8( target:BITS([0,1,2]),value:value)
         sweepUnit.setShiftCount(SSS)
         
         sweepUnit.restart()
@@ -100,10 +100,10 @@ class PulseChannel:BaseChannel {
         //length counter 分频计数
         //HHH
         //timer 的高 3 位，和 0x4002 / 0x4006 组成完整的计数
-        let HHH = ReadBits8(target: BITS([0,1,2]),value:value)
+        let HHH = readBits8(target: BITS([0,1,2]),value:value)
         timer.setPeriodHigh3(UInt16(HHH))
         
-        let LLLL = ReadBits8( target:BITS([3,4,5,6,7]),value:value) >> 3
+        let LLLL = readBits8( target:BITS([3,4,5,6,7]),value:value) >> 3
         lengthCounter.loadCounterFromLUT(LLLL)
         
         volumeEnvelope.restart()

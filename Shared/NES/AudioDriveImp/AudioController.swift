@@ -18,14 +18,19 @@ class AudioController: NSObject
         AudioOutputUnitStop(remoteIOUnit)
     }
     
+    func getAudioUnitSubType()->UInt32
+    {
+#if os(iOS)
+        return kAudioUnitSubType_RemoteIO
+#else
+        return kAudioUnitSubType_HALOutput
+#endif
+    }
+    
     func initAudioComponent() {
         
-        let audioUnitSubType = kAudioUnitSubType_HALOutput
-#if os(iOS)
-        audioUnitSubType = kAudioUnitSubType_RemoteIO
-#else
+        var audioUnitSubType:UInt32 = getAudioUnitSubType()
 
-#endif
         
         var audioComponentDesc = AudioComponentDescription(componentType: OSType(kAudioUnitType_Output),
                                                            componentSubType: OSType(audioUnitSubType),

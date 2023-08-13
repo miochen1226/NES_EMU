@@ -15,26 +15,26 @@ class Bitfield8WithPpuRegister {
     }
     
     func reload() {
-        field = ppuRegisters?.RawRef(address: regAddressSelf) ?? 0
+        field = ppuRegisters?.rawRef(address: regAddressSelf) ?? 0
     }
     
     func initialize(ppuRegisterMemory: PpuRegisterMemory, regAddress: UInt16) {
         ppuRegisters = ppuRegisterMemory
         //load default value
         regAddressSelf = Int(MapCpuToPpuRegister(regAddress))
-        field = ppuRegisters?.RawRef(address: regAddressSelf) ?? 0
+        field = ppuRegisters?.rawRef(address: regAddressSelf) ?? 0
     }
     
-    func Value() -> UInt8 {
+    func value() -> UInt8 {
         return field
     }
     
-    func Read(_ bits:UInt8) -> UInt8 {
+    func read(_ bits:UInt8) -> UInt8 {
         return field & bits
     }
     
-    func Test(_ bits:UInt8) -> Bool {
-        let ret = Read(bits)
+    func test(_ bits:UInt8) -> Bool {
+        let ret = read(bits)
         
         if ret == 0 {
             return false
@@ -44,8 +44,8 @@ class Bitfield8WithPpuRegister {
         }
     }
     
-    func Test01(_ bits: UInt8) -> UInt8 {
-        if Read(bits) != 0 {
+    func test01(_ bits: UInt8) -> UInt8 {
+        if read(bits) != 0 {
             return 1
         }
         else {
@@ -53,30 +53,30 @@ class Bitfield8WithPpuRegister {
         }
     }
     
-    func Set(_ bits: UInt8) {
+    func set(_ bits: UInt8) {
         field |= bits
         writeValueToMemory()
     }
     
-    func SetValue(_ value: UInt8) -> UInt8 {
+    func setValue(_ value: UInt8) -> UInt8 {
         field = value
         writeValueToMemory()
         return field
     }
     
-    func Set(bits:UInt8, enabled: UInt8) {
+    func set(bits:UInt8, enabled: UInt8) {
         if ((enabled) != 0)
         {
-            Set(bits)
+            set(bits)
         }
         else {
-            Clear(bits)
+            clear(bits)
         }
         
         writeValueToMemory()
     }
     
-    func Clear(_ bits:UInt8)
+    func clear(_ bits:UInt8)
     {
         field &= ~bits
         writeValueToMemory()
@@ -87,7 +87,7 @@ class Bitfield8WithPpuRegister {
         ppuRegisters?.putValue(address: regAddressSelf, value: field)
     }
 
-    func ClearAll() {
+    func clearAll() {
         field = 0
         writeValueToMemory()
     }

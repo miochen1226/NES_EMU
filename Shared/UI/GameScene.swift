@@ -59,8 +59,8 @@ class GameScene: SKScene,IRenderScreen {
         self.scanPad()
         self.scaleMode = .resizeFill
 #if os(iOS)
-        self.CX = Int(W/2 + (Int(UIScreen.screenWidth) - W)/2)
-        self.CY = Int(UIScreen.GAP)/2+Int(H/2)
+        self.gameCanvasCenterX = Int(gameCanvasWidth/2 + (Int(UIScreen.screenWidth) - gameCanvasWidth)/2)
+        self.gameCanvasCenterY = Int(UIScreen.GAP)/2+Int(gameCanvasHeight/2)
 #else
 #endif
         
@@ -93,7 +93,7 @@ class GameScene: SKScene,IRenderScreen {
         let bkNode = SKSpriteNode.init(texture: bgTexture)
         
 #if os(iOS)
-        bkNode.position = CGPoint.init(x: self.CX, y: self.CY)
+        bkNode.position = CGPoint.init(x: gameCanvasCenterX, y: gameCanvasCenterY)
         bkNode.size = CGSize(width: gameCanvasWidth, height: gameCanvasHeight)
 #else
         bkNode.position = CGPoint.init(x: gameCanvasCenterX, y: gameCanvasCenterY)
@@ -145,6 +145,7 @@ class GameScene: SKScene,IRenderScreen {
 #else
     var gameCanvasWidth = 0
     var gameCanvasHeight = 0
+    var window: NSWindow?
 #endif
 
     var gameCanvasCenterX = 0
@@ -158,5 +159,5 @@ class GameScene: SKScene,IRenderScreen {
     
     var bIsBusy = false
     var gameController: GCController = GCController()
-    var window: NSWindow?
+    
 }

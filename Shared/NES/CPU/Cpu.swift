@@ -6,76 +6,64 @@
 //
 
 import Foundation
-class Cpu:CpuRegDef,ICpu{
-    func setApu(apu:Apu)
-    {
-        m_apu = apu
+class Cpu: CpuRegDef, ICpu {
+    
+    func setApu(apu: Apu) {
+        self.apu = apu
     }
     
-    func setControllerPorts(controllerPorts:ControllerPorts)
-    {
-        m_controllerPorts = controllerPorts
+    func setControllerPorts(controllerPorts: ControllerPorts) {
+        self.controllerPorts = controllerPorts
     }
     
-    var m_apu:Apu!
-    var m_controllerPorts:ControllerPorts!
-    
-    
-    
-    func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
+    func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         var result:UInt8 = 0
 
         switch (cpuAddress)
         {
         case CpuMemory.kSpriteDmaReg: // $4014
-            result = m_spriteDmaRegister;
+            result = spriteDmaRegister;
             break
 
         case CpuMemory.kControllerPort1: // $4016
-            result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress)
+            result = controllerPorts.handleCpuRead(cpuAddress: cpuAddress)
             break
             
         case 0x4015: // $4015
-            result = m_apu.HandleCpuRead(cpuAddress: cpuAddress)
+            result = apu.HandleCpuRead(cpuAddress: cpuAddress)
             break
             
         case CpuMemory.kControllerPort2: // $4017
-            result = m_controllerPorts.HandleCpuRead(cpuAddress: cpuAddress)
+            result = controllerPorts.handleCpuRead(cpuAddress: cpuAddress)
             break
-
         default:
-            
-            //NSLog("TODOOOO")
-            result = m_apu.HandleCpuRead(cpuAddress: cpuAddress)
+            result = apu.HandleCpuRead(cpuAddress: cpuAddress)
             break
         }
-        
         return result
     }
     
     func SpriteDmaTransfer(_ cpuAddress:UInt16)
     {
-        //for (uint16 i = 0; i < 256; ++i) //@TODO: Use constant for 256 (kSpriteMemorySize?)
-        for i in 0...255
+        for i in 0 ..< 256
         {
-            let value:UInt8 = m_cpuMemoryBus!.Read(cpuAddress + UInt16(i))
-            m_cpuMemoryBus!.Write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value);
+            let value:UInt8 = cpuMemoryBus!.read(cpuAddress + UInt16(i))
+            cpuMemoryBus!.write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value);
         }
 
         // While DMA transfer occurs, the memory bus is in use, preventing CPU from fetching memory
-        m_cycles += 512
+        cycles += 512
     }
     
-    var m_spriteDmaRegister:UInt8 = 0
-    func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
+    func handleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
     {
         switch (cpuAddress)
         {
         case CpuMemory.kSpriteDmaReg: // $4014
             
             // Initiate a DMA transfer from the input page to sprite ram.
-            m_spriteDmaRegister = value
-            let spriteDmaRegister = TO16(m_spriteDmaRegister)
+            spriteDmaRegister = value
+            let spriteDmaRegister = tO16(spriteDmaRegister)
             let srcCpuAddress:UInt16 = spriteDmaRegister * 0x100
             // Note: we perform the full DMA transfer right here instead of emulating the transfers over multiple frames.
             // If we need to do it right, see http://wiki.nesdev.com/w/index.php/PPU_programmer_reference#DMA
@@ -83,128 +71,93 @@ class Cpu:CpuRegDef,ICpu{
             break;
 
         case CpuMemory.kControllerPort1: // $4016
-            //NSLog("TODOOOO")
-            m_controllerPorts.HandleCpuWrite(cpuAddress: cpuAddress, value:value)
+            controllerPorts.handleCpuWrite(cpuAddress: cpuAddress, value:value)
             break
 
         case CpuMemory.kControllerPort2: // $4017 For writes, this address is mapped to the APU!
-            //NSLog("TODOOOO")
             break
         default:
-            m_apu.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            apu.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
             break
         }
     }
     
-    var m_cpuMemoryBus:CpuMemoryBus?
     func initialize(cpuMemoryBus:CpuMemoryBus)
     {
-        m_cpuMemoryBus = cpuMemoryBus
-        
-        
-        NSLog("===OpTables===")
+        self.cpuMemoryBus = cpuMemoryBus
         let array = OpCodeTable.GetOpCodeTable()
         for item in array
         {
             NSLog(item.getName())
-            g_opCodeTable[item.opCode] = item
-            //_opCodeTableEx[item.opCode] = item
-            
-            //g_opCodeTableEx = NSDictionary.init()
+            opCodeTable[item.opCode] = item
         }
-        
-        NSLog("===OpTables end===")
     }
     
-    
-    var m_cycles:UInt32 = 0
-    var m_totalCycles:UInt32 = 0
-    var m_opCodeEntry:OpCodeEntry!
-    
-    var g_opCodeTableEx: NSDictionary = [0:1,1:2,2:3]
-    
-    var g_opCodeTable:[UInt8:OpCodeEntry] = [:]
-    
-    func Execute(_ cpuCyclesElapsed:inout UInt32)
-    {
-        m_cycles = 0
-        ExecutePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
+    func execute(_ cpuCyclesElapsed: inout UInt32) {
+        cycles = 0
+        executePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
         
-        let opCode:UInt8 = Read8(PC)
-        m_opCodeEntry = g_opCodeTable[opCode]
+        let opCode:UInt8 = read8(PC)
+        opCodeEntry = opCodeTable[opCode]
 
-        assert((m_opCodeEntry != nil))
+        assert((opCodeEntry != nil))
         
-        UpdateOperandAddress()
+        updateOperandAddress()
 
-        ExecuteInstruction()
+        executeInstruction()
         
-        ExecutePendingInterrupts() // Handle when instruction (memory read) causes interrupt
+        executePendingInterrupts() // Handle when instruction (memory read) causes interrupt
     
-        cpuCyclesElapsed = m_cycles
+        cpuCyclesElapsed = cycles
     }
     
-    func Read16(_ address:UInt16)->UInt16
-    {
-        return TO16(m_cpuMemoryBus!.Read(address)) | (TO16(m_cpuMemoryBus!.Read(address + 1)) << 8)
+    func read16(_ address: UInt16) -> UInt16 {
+        return tO16(cpuMemoryBus!.read(address)) | (tO16(cpuMemoryBus!.read(address + 1)) << 8)
     }
     
-    func ExecutePendingInterrupts()
-    {
+    func executePendingInterrupts() {
         let kInterruptCycles = 7
-
-        if (m_pendingNmi)
-        {
-            Push16(PC)
-            PushProcessorStatus(false)
-            P.Clear(BrkExecuted)
-            P.Set(IrqDisabled)
-            PC = Read16(CpuMemory.kNmiVector)
+        if pendingNmi {
+            push16(PC)
+            pushProcessorStatus(false)
+            P.clear(BrkExecuted)
+            P.set(IrqDisabled)
+            PC = read16(CpuMemory.kNmiVector)
             
             //@HACK: *2 here fixes Battletoads not loading levels, and also Marble Madness
             // not rendering start of level text box correctly. This is likely due to discrepencies
             // in cycle timing for when PPU signals an NMI and CPU handles it.
-            m_cycles = m_cycles + UInt32((kInterruptCycles * 2))
+            cycles = cycles + UInt32((kInterruptCycles * 2))
             
-            m_pendingNmi = false
+            pendingNmi = false
         }
-        else if (m_pendingIrq)
-        {
-            Push16(PC)
-            PushProcessorStatus(false)
-            P.Clear(BrkExecuted)
-            P.Set(IrqDisabled)
-            PC = Read16(CpuMemory.kIrqVector)
-            m_cycles += UInt32(kInterruptCycles)
-            m_pendingIrq = false
+        else if pendingIrq {
+            push16(PC)
+            pushProcessorStatus(false)
+            P.clear(BrkExecuted)
+            P.set(IrqDisabled)
+            PC = read16(CpuMemory.kIrqVector)
+            cycles += UInt32(kInterruptCycles)
+            pendingIrq = false
         }
-    }
-    /*
-    func Read8Ex(_ address:UInt16,readValue:inout UInt8)
-    {
-        return m_cpuMemoryBus!.ReadEx(address,readValue:&readValue)
-    }
-    */
-    func Read8(_ address:UInt16)->UInt8
-    {
-        return m_cpuMemoryBus!.Read(address)
     }
     
-    func GetPageAddress(_ address:UInt16)->UInt16
-    {
+    func read8(_ address: UInt16) -> UInt8 {
+        return cpuMemoryBus!.read(address)
+    }
+    
+    func getPageAddress(_ address: UInt16) -> UInt16 {
         return (address & 0xFF00)
     }
     
-    var m_operandAddress:UInt16 = 0
-    var m_operandReadCrossedPage = false
-    func UpdateOperandAddress()
+    func updateOperandAddress()
     {
-        m_operandReadCrossedPage = false
+        operandReadCrossedPage = false
 
-        switch (m_opCodeEntry!.addrMode)
+        switch (opCodeEntry!.addrMode)
         {
         case AddressMode.Immedt:
-            m_operandAddress = PC + 1 // Set to address of immediate value in code segment
+            operandAddress = PC + 1 // Set to address of immediate value in code segment
             break
 
         case AddressMode.Implid:
@@ -214,412 +167,351 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case AddressMode.Relatv: // For conditional branch instructions
+            let offset = toInt(read8(PC+1)) // Signed offset in [-128,127]
             
-            //let offsetSigned = ToInt(Read8(PC+1))
-            //m_operandAddress = UInt16(Int(PC) + Int(m_opCodeEntry!.numBytes) + Int(offsetSigned))
-            
-            
-            let offset = ToInt(Read8(PC+1)) // Signed offset in [-128,127]
-            //m_operandAddress = UInt16( Int(PC) + Int(m_opCodeEntry.numBytes) + offset)
-            
-            if(offset>0)
-            {
-                m_operandAddress = PC + UInt16(m_opCodeEntry.numBytes) + UInt16(abs(offset))
+            if offset > 0 {
+                operandAddress = PC + UInt16(opCodeEntry.numBytes) + UInt16(abs(offset))
             }
-            else
-            {
-                m_operandAddress = PC + UInt16(m_opCodeEntry.numBytes) - UInt16(abs(offset))
+            else {
+                operandAddress = PC + UInt16(opCodeEntry.numBytes) - UInt16(abs(offset))
             }
-            /*
-            let offsetSigned = ToInt(Read8(PC+1))
-            
-            
-            if(offsetSigned<0)
-            {
-                let offsetAbs:UInt16 = UInt16(offsetSigned * -1)
-                m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) - offsetAbs
-            }
-            else
-            {
-                let offsetAbs:UInt16 = UInt16(offsetSigned)
-                m_operandAddress = PC + UInt16(m_opCodeEntry!.numBytes) + offsetAbs
-            }
-            */
             //Origin code
-            //const int8 offset = Read8(PC+1); // Signed offset in [-128,127]
-            //m_operandAddress = PC + m_opCodeEntry->numBytes + offset;
+            //const int8 offset = read8(PC+1); // Signed offset in [-128,127]
+            //operandAddress = PC + opCodeEntry->numBytes + offset;
             //Origin code end
-            
             break
-
         case AddressMode.ZeroPg:
-            m_operandAddress = TO16(Read8(PC+1))
+            operandAddress = tO16(read8(PC+1))
             break
-
         case AddressMode.ZPIdxX:
-            
-            let plus_result = UInt16(Read8(PC+1)) + UInt16(X)
-            m_operandAddress = plus_result & 0x00FF // Wrap around zero-page boundary
-                
-            //m_operandAddress = TO16((Read8(PC+1) + X)) & 0x00FF // Wrap around zero-page boundary
+            let plus_result = UInt16(read8(PC+1)) + UInt16(X)
+            operandAddress = plus_result & 0x00FF // Wrap around zero-page boundary
             break
 
         case AddressMode.ZPIdxY:
-            m_operandAddress = TO16((Read8(PC+1) + Y)) & 0x00FF // Wrap around zero-page boundary
+            operandAddress = tO16((read8(PC+1) + Y)) & 0x00FF // Wrap around zero-page boundary
             break
-
         case AddressMode.Absolu:
-            m_operandAddress = Read16(PC+1)
+            operandAddress = read16(PC+1)
             break
-
         case AddressMode.AbIdxX:
-            
-            let baseAddress = Read16(PC+1)
-            let basePage = GetPageAddress(baseAddress)
-            m_operandAddress = baseAddress + UInt16(X)
-            m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress)
+            let baseAddress = read16(PC+1)
+            let basePage = getPageAddress(baseAddress)
+            operandAddress = baseAddress + UInt16(X)
+            operandReadCrossedPage = basePage != getPageAddress(operandAddress)
             break
-
         case AddressMode.AbIdxY:
-            let baseAddress = Read16(PC+1)
-            let basePage = GetPageAddress(baseAddress)
-            m_operandAddress = baseAddress + UInt16(Y)
-            if(basePage != GetPageAddress(m_operandAddress))
-            {
-                m_operandReadCrossedPage = true
+            let baseAddress = read16(PC+1)
+            let basePage = getPageAddress(baseAddress)
+            operandAddress = baseAddress + UInt16(Y)
+            if basePage != getPageAddress(operandAddress) {
+                operandReadCrossedPage = true
             }
-            else
-            {
-                m_operandReadCrossedPage = false
+            else {
+                operandReadCrossedPage = false
             }
-            //m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress)
+            //operandReadCrossedPage = basePage != getPageAddress(operandAddress)
             break
 
         case AddressMode.Indrct: // for JMP only
-            let low = Read16(PC+1)
+            let low = read16(PC+1)
             // Handle the 6502 bug for when the low-byte of the effective address is FF,
             // in which case the 2nd byte read does not correctly cross page boundaries.
             // The bug is that the high byte does not change.
             let high = (low & 0xFF00) | ((low + 1) & 0x00FF)
 
-            m_operandAddress = TO16(Read8(low)) | TO16(Read8(high)) << 8
+            operandAddress = tO16(read8(low)) | tO16(read8(high)) << 8
             
             break
 
         case AddressMode.IdxInd:
-            let low:UInt16 = TO16((Read8(PC+1) + X)) & 0x00FF // Zero page low byte of operand address, wrap around zero page
-            let high:UInt16 = TO16(UInt8(low + 1)) & 0x00FF // Wrap high byte around zero page
-            m_operandAddress = TO16(Read8(low)) | TO16(Read8(high)) << 8
+            let low:UInt16 = tO16((read8(PC+1) + X)) & 0x00FF // Zero page low byte of operand address, wrap around zero page
+            let high:UInt16 = tO16(UInt8(low + 1)) & 0x00FF // Wrap high byte around zero page
+            operandAddress = tO16(read8(low)) | tO16(read8(high)) << 8
             break
 
         case AddressMode.IndIdx:
-            let low:UInt16 = TO16(Read8(PC+1)) // Zero page low byte of operand address
+            let low:UInt16 = tO16(read8(PC+1)) // Zero page low byte of operand address
             let high:UInt16 = (low + 1) & 0x00FF // Wrap high byte around zero page
-            let baseAddress:UInt16 = (TO16(Read8(low)) | TO16(Read8(high)) << 8)
-            let basePage:UInt16 = GetPageAddress(baseAddress)
-            m_operandAddress = baseAddress + UInt16(Y)
-            m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress);
+            let baseAddress:UInt16 = (tO16(read8(low)) | tO16(read8(high)) << 8)
+            let basePage:UInt16 = getPageAddress(baseAddress)
+            operandAddress = baseAddress + UInt16(Y)
+            operandReadCrossedPage = basePage != getPageAddress(operandAddress);
             
             //Original code
-            //const uint16 low = TO16(Read8(PC+1)); // Zero page low byte of operand address
-            //const uint16 high = TO16(low + 1) & 0x00FF; // Wrap high byte around zero page
-            //const uint16 baseAddress = (TO16(Read8(low)) | TO16(Read8(high)) << 8);
-            //const uint16 basePage = GetPageAddress(baseAddress);
-            //m_operandAddress = baseAddress + Y;
-            //m_operandReadCrossedPage = basePage != GetPageAddress(m_operandAddress);
+            //const uint16 low = tO16(read8(PC+1)); // Zero page low byte of operand address
+            //const uint16 high = tO16(low + 1) & 0x00FF; // Wrap high byte around zero page
+            //const uint16 baseAddress = (tO16(read8(low)) | tO16(read8(high)) << 8);
+            //const uint16 basePage = getPageAddress(baseAddress);
+            //operandAddress = baseAddress + Y;
+            //operandReadCrossedPage = basePage != getPageAddress(operandAddress);
             break
         }
         
         //let pc = PC
-        //let opa = m_operandAddress
+        //let opa = operandAddress
         //NSLog("%d,%d",pc,opa)
     }
     
-    func ExecuteInstruction()
+    func executeInstruction()
     {
         //using namespace OpCodeName;
         //using namespace StatusFlag;
 
         // By default, next instruction is after current, but can also be changed by a branch or jump
-        var nextPC = UInt16(PC + UInt16(m_opCodeEntry!.numBytes))
+        var nextPC = UInt16(PC + UInt16(opCodeEntry!.numBytes))
         
         var branchTaken = false
 
-        switch (m_opCodeEntry!.opCodeName)
+        switch (opCodeEntry!.opCodeName)
         {
         case OpCodeEntryTtype.ADC: // Add memory to accumulator with carry
             // Operation:  A + M + C -> A, C
-            let value = GetMemValue()
-            let result = TO16(A) + TO16(value) + TO16(P.Test01(Carry))
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
-            P.Set(bits: Overflow, enabled: CalcOverflowFlag(a: A, b: value, r: result))
-            A = TO8(result)
+            let value = getMemValue()
+            let result = tO16(A) + tO16(value) + tO16(P.test01(Carry))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: Overflow, enabled: calcOverflowFlag(a: A, b: value, r: result))
+            A = tO8(result)
             
             break
 
         case OpCodeEntryTtype.AND: // "AND" memory with accumulator
-            A &= GetMemValue()
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            A &= getMemValue()
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             
             
             //Original code
-            //A &= GetMemValue();
-            //P.Set(Negative, CalcNegativeFlag(A));
-            //P.Set(Zero, CalcZeroFlag(A));
+            //A &= getMemValue();
+            //P.set(Negative, calcNegativeFlag(A));
+            //P.set(Zero, calcZeroFlag(A));
             break
 
         case OpCodeEntryTtype.ASL: // Shift Left One Bit (Memory or Accumulator)
             
-            let result = TO16(GetAccumOrMemValue()) << 1
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
-            SetAccumOrMemValue(TO8(result))
+            let result = tO16(getAccumOrMemValue()) << 1
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            setAccumOrMemValue(tO8(result))
             
             break
 
         case OpCodeEntryTtype.BCC: // Branch on Carry Clear
-            if (!P.Test(Carry))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if !P.test(Carry) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break;
 
         case OpCodeEntryTtype.BCS: // Branch on Carry Set
-            if (P.Test(Carry))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if P.test(Carry) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break;
 
         case OpCodeEntryTtype.BEQ: // Branch on result zero (equal means compare difference is 0)
-            if (P.Test(Zero))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if P.test(Zero) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
-            
-            //Original code
-            //if (P.Test(Zero))
-            //{
-            //    nextPC = GetBranchOrJmpLocation();
-            //    branchTaken = true;
-            //}
-            
             break
 
         case OpCodeEntryTtype.BIT: // Test bits in memory with accumulator
             
-            let memValue = GetMemValue()
-            let result = A & GetMemValue()
-            P.SetValue( (P.Value() & 0x3F) | (memValue & 0xC0) ) // Copy bits 6 and 7 of mem value to status register
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            
+            let memValue = getMemValue()
+            let result = A & getMemValue()
+            P.setValue( (P.value() & 0x3F) | (memValue & 0xC0) ) // Copy bits 6 and 7 of mem value to status register
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
             break
-
         case OpCodeEntryTtype.BMI: // Branch on result minus
-            if (P.Test(Negative))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if P.test(Negative) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
-
         case OpCodeEntryTtype.BNE:  // Branch on result non-zero
-            
-            if (!P.Test(Zero))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if !P.test(Zero) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
-
         case OpCodeEntryTtype.BPL: // Branch on result plus
-            if (!P.Test(Negative))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if !P.test(Negative) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
-
         case OpCodeEntryTtype.BRK: // Force break (Forced Interrupt PC + 2 toS P toS) (used with RTI)
             
             // Note that BRK is weird in that the instruction is 1 byte, but the return address
             // we store is 2 bytes after the instruction, so the byte after BRK will be skipped
             // upon return (RTI). Usually an NOP is inserted after a BRK for this reason.
             let returnAddr = PC + 2
-            Push16(returnAddr)
-            PushProcessorStatus(true)
-            P.Set(IrqDisabled) // Disable hardware IRQs
-            nextPC = Read16(CpuMemory.kIrqVector)
-            
-            break;
-
+            push16(returnAddr)
+            pushProcessorStatus(true)
+            P.set(IrqDisabled) // Disable hardware IRQs
+            nextPC = read16(CpuMemory.kIrqVector)
+            break
         case OpCodeEntryTtype.BVC: // Branch on Overflow Clear
-            if (!P.Test(Overflow))
-            {
-                nextPC = GetBranchOrJmpLocation();
+            if !P.test(Overflow) {
+                nextPC = getBranchOrJmpLocation();
                 branchTaken = true
             }
             break
-
         case OpCodeEntryTtype.BVS: // Branch on Overflow Set
-            if (P.Test(Overflow))
-            {
-                nextPC = GetBranchOrJmpLocation()
+            if P.test(Overflow) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
-
         case OpCodeEntryTtype.CLC: // CLC Clear carry flag
-            P.Clear(Carry);
+            P.clear(Carry)
             break;
 
         case OpCodeEntryTtype.CLD: // CLD Clear decimal mode
-            P.Clear(Decimal);
+            P.clear(Decimal)
             break;
 
         case OpCodeEntryTtype.CLI: // CLI Clear interrupt disable bit
-            P.Clear(IrqDisabled);
+            P.clear(IrqDisabled)
             break;
 
         case OpCodeEntryTtype.CLV: // CLV Clear overflow flag
-            P.Clear(Overflow);
+            P.clear(Overflow)
             break;
 
         case OpCodeEntryTtype.CMP: // CMP Compare memory and accumulator
-            let memValue = GetMemValue()
+            let memValue = getMemValue()
             let result = Int(A) - Int(memValue)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
             break
 
         case OpCodeEntryTtype.CPX: // CPX Compare Memory and Index X
-            let memValue = GetMemValue()
+            let memValue = getMemValue()
             let result = Int(X) - Int(memValue)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
             break
 
         case OpCodeEntryTtype.CPY: // CPY Compare memory and index Y
-            let memValue = GetMemValue()
+            let memValue = getMemValue()
             let result = Int(Y) - Int(memValue)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
             break
 
         case OpCodeEntryTtype.DEC: // Decrement memory by one
-            let memValue = GetMemValue()
+            let memValue = getMemValue()
             let result = Int(memValue) - Int(1)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            let newMemValue = IntToUint(result)
-            SetMemValue(newMemValue)
-            P.Set(bits: Zero, enabled: CalcZeroFlag(newMemValue))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            let newMemValue = intToUint(result)
+            setMemValue(newMemValue)
+            P.set(bits: Zero, enabled: calcZeroFlag(newMemValue))
             break
 
         case OpCodeEntryTtype.DEX: // Decrement index X by one
             let result = Int(X) - Int(1)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            X = IntToUint(result)
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            X = intToUint(result)
+            P.set(bits: Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.DEY: // Decrement index Y by one
             let result = Int(Y) - Int(1)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            Y = IntToUint(result)
-            P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            Y = intToUint(result)
+            P.set(bits: Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.EOR: // "Exclusive-Or" memory with accumulator
-            A = A ^ GetMemValue()
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            A = A ^ getMemValue()
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.INC: // Increment memory by one
-            let memValue = GetMemValue()
+            let memValue = getMemValue()
             let result = Int(memValue) + Int(1)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            let newMemValue = IntToUint(result)
-            SetMemValue(newMemValue)
-            P.Set(bits: Zero, enabled: CalcZeroFlag(newMemValue))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            let newMemValue = intToUint(result)
+            setMemValue(newMemValue)
+            P.set(bits: Zero, enabled: calcZeroFlag(newMemValue))
             break
 
         case OpCodeEntryTtype.INX: // Increment Index X by one
             let result = Int(X) + Int(1)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            X = IntToUint(result)
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            X = intToUint(result)
+            P.set(bits: Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.INY: // Increment Index Y by one
             let result = Int(Y) + Int(1)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
             
-            Y = IntToUint(result)
-            P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
+            Y = intToUint(result)
+            P.set(bits: Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.JMP: // Jump to new location
-            nextPC = GetBranchOrJmpLocation()
+            nextPC = getBranchOrJmpLocation()
             break
 
         case OpCodeEntryTtype.JSR: // Jump to subroutine (used with RTS)
             
             // JSR actually pushes address of the next instruction - 1.
             // RTS jumps to popped value + 1.
-            let returnAddr:UInt16 = PC + UInt16(m_opCodeEntry!.numBytes) - 1
-            Push16(returnAddr)
-            nextPC = GetBranchOrJmpLocation()
+            let returnAddr:UInt16 = PC + UInt16(opCodeEntry!.numBytes) - 1
+            push16(returnAddr)
+            nextPC = getBranchOrJmpLocation()
             
             //Original Code
-            //const uint16 returnAddr = PC + m_opCodeEntry->numBytes - 1;
-            //Push16(returnAddr);
-            //nextPC = GetBranchOrJmpLocation();
+            //const uint16 returnAddr = PC + opCodeEntry->numBytes - 1;
+            //push16(returnAddr);
+            //nextPC = getBranchOrJmpLocation();
             
             break
 
         case OpCodeEntryTtype.LDA: // Load accumulator with memory
-            A = GetMemValue()
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            A = getMemValue()
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             
             
             //Original code
-            //A = GetMemValue();
-            //P.Set(Negative, CalcNegativeFlag(A));
-            //P.Set(Zero, CalcZeroFlag(A));
+            //A = getMemValue();
+            //P.set(Negative, calcNegativeFlag(A));
+            //P.set(Zero, calcZeroFlag(A));
             break
 
         case OpCodeEntryTtype.LDX: // Load index X with memory
-            X = GetMemValue()
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
+            X = getMemValue()
+            P.set(bits: Negative, enabled: calcNegativeFlag(X))
+            P.set(bits: Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.LDY: // Load index Y with memory
-            Y = GetMemValue();
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
+            Y = getMemValue();
+            P.set(bits: Negative, enabled: calcNegativeFlag(Y))
+            P.set(bits: Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.LSR: // Shift right one bit (memory or accumulator)
             
-            let value = GetAccumOrMemValue()
+            let value = getAccumOrMemValue()
             let result = value >> 1
-            P.Set(bits: Carry, enabled: value & 0x01) // Will get shifted into carry
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Clear(Negative) // 0 is shifted into sign bit position
-            SetAccumOrMemValue(result)
+            P.set(bits: Carry, enabled: value & 0x01) // Will get shifted into carry
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.clear(Negative) // 0 is shifted into sign bit position
+            setAccumOrMemValue(result)
             
             break
 
@@ -627,59 +519,57 @@ class Cpu:CpuRegDef,ICpu{
             break
 
         case OpCodeEntryTtype.ORA: // "OR" memory with accumulator
-            A |= GetMemValue()
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            A |= getMemValue()
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.PHA: // Push accumulator on stack
-            Push8(A)
+            push8(A)
             break
 
         case OpCodeEntryTtype.PHP: // Push processor status on stack
-            PushProcessorStatus(true)
+            pushProcessorStatus(true)
             break
 
         case OpCodeEntryTtype.PLA: // Pull accumulator from stack
-            A = Pop8();
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            A = pop8()
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.PLP: // Pull processor status from stack
-            PopProcessorStatus()
+            popProcessorStatus()
             break
 
         case OpCodeEntryTtype.ROL: // Rotate one bit left (memory or accumulator)
             
-            let result = (TO16(GetAccumOrMemValue()) << 1) | TO16(P.Test01(Carry))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            SetAccumOrMemValue(TO8(result))
+            let result = (tO16(getAccumOrMemValue()) << 1) | tO16(P.test01(Carry))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            setAccumOrMemValue(tO8(result))
             
             break
 
         case OpCodeEntryTtype.ROR: // Rotate one bit right (memory or accumulator)
             
-            let value = GetAccumOrMemValue()
-            let result = (value >> 1) | (P.Test01(Carry) << 7)
-            P.Set(bits: Carry, enabled: value & 0x01)
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            SetAccumOrMemValue(result)
+            let value = getAccumOrMemValue()
+            let result = (value >> 1) | (P.test01(Carry) << 7)
+            P.set(bits: Carry, enabled: value & 0x01)
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            setAccumOrMemValue(result)
             
             break
 
         case OpCodeEntryTtype.RTI: // Return from interrupt (used with BRK, Nmi or Irq)
-            PopProcessorStatus()
+            popProcessorStatus()
             nextPC = Pop16()
             break
 
         case OpCodeEntryTtype.RTS: // Return from subroutine (used with JSR)
-            
             nextPC = Pop16() + 1
-            
             break
 
         case OpCodeEntryTtype.SBC: // Subtract memory from accumulator with borrow
@@ -688,63 +578,63 @@ class Cpu:CpuRegDef,ICpu{
 
             // Can't simply negate mem value because that results in two's complement
             // and we want to perform the bitwise add ourself
-            let value = GetMemValue() ^ 0xFF
+            let value = getMemValue() ^ 0xFF
 
-            let result = TO16(A) + TO16(value) + TO16(P.Test01(Carry))
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(result))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(result))
-            P.Set(bits: Carry, enabled: CalcCarryFlag(result))
-            P.Set(bits: Overflow, enabled: CalcOverflowFlag(a: A, b: value, r: result))
-            A = TO8(result)
+            let result = tO16(A) + tO16(value) + tO16(P.test01(Carry))
+            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: Overflow, enabled: calcOverflowFlag(a: A, b: value, r: result))
+            A = tO8(result)
             
             break
 
         case OpCodeEntryTtype.SEC: // Set carry flag
-            P.Set(Carry)
+            P.set(Carry)
             break
 
         case OpCodeEntryTtype.SED: // Set decimal mode
-            P.Set(Decimal)
+            P.set(Decimal)
             break
 
         case OpCodeEntryTtype.SEI: // Set interrupt disable status
-            P.Set(IrqDisabled)
+            P.set(IrqDisabled)
             break
 
         case OpCodeEntryTtype.STA: // Store accumulator in memory
-            SetMemValue(A)
+            setMemValue(A)
             break
 
         case OpCodeEntryTtype.STX: // Store index X in memory
-            SetMemValue(X)
+            setMemValue(X)
             break
 
         case OpCodeEntryTtype.STY: // Store index Y in memory
-            SetMemValue(Y)
+            setMemValue(Y)
             break
 
         case OpCodeEntryTtype.TAX: // Transfer accumulator to index X
             X = A
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
+            P.set(bits: Negative, enabled: calcNegativeFlag(X))
+            P.set(bits: Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.TAY: // Transfer accumulator to index Y
             Y = A
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(Y))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(Y))
+            P.set(bits: Negative, enabled: calcNegativeFlag(Y))
+            P.set(bits: Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.TSX: // Transfer stack pointer to index X
             X = SP
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(X))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(X))
+            P.set(bits: Negative, enabled: calcNegativeFlag(X))
+            P.set(bits: Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.TXA: // Transfer index X to accumulator
             A = X
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.TXS: // Transfer index X to stack pointer
@@ -753,34 +643,31 @@ class Cpu:CpuRegDef,ICpu{
 
         case OpCodeEntryTtype.TYA: // Transfer index Y to accumulator
             A = Y
-            P.Set(bits: Negative, enabled: CalcNegativeFlag(A))
-            P.Set(bits: Zero, enabled: CalcZeroFlag(A))
+            P.set(bits: Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: Zero, enabled: calcZeroFlag(A))
             break
         }
 
         // Compute cycles for instruction
         
-        var cycles = m_opCodeEntry!.numCycles;
+        var cyclesOfOp = opCodeEntry!.numCycles;
 
         // Some instructions take an extra cycle when reading operand across page boundary
-        if (m_operandReadCrossedPage)
-        {
-            cycles = cycles + m_opCodeEntry!.pageCrossCycles
+        if operandReadCrossedPage {
+            cyclesOfOp = cyclesOfOp + opCodeEntry!.pageCrossCycles
         }
 
         // Extra cycle when branch is taken
-        if (branchTaken)
-        {
-            cycles = cycles + 1
+        if branchTaken {
+            cyclesOfOp = cyclesOfOp + 1
 
             // And extra cycle when branching to a different page
-            if (GetPageAddress(PC) != GetPageAddress(nextPC))
-            {
-                cycles = cycles + 1
+            if getPageAddress(PC) != getPageAddress(nextPC) {
+                cyclesOfOp = cyclesOfOp + 1
             }
         }
 
-        m_cycles += UInt32(cycles)
+        self.cycles += UInt32(cyclesOfOp)
         
         // Move to next instruction
         PC = nextPC
@@ -788,167 +675,124 @@ class Cpu:CpuRegDef,ICpu{
         //NSLog("PC->%d",PC)
     }
     
-    
-    var PC:UInt16 = 0        // Program counter
-    var SP:UInt8 = 0        // Stack pointer
-    var A:UInt8 = 0       // Accumulator
-    var X:UInt8 = 0     // X register
-    var Y:UInt8 = 0        // Y register
-    var P:Bitfield8 = Bitfield8()   // Processor status (flags) TODO
-    var m_pendingNmi = false
-    var m_pendingIrq = false
-    func Reset()
-    {
+    func reset() {
         // See http://wiki.nesdev.com/w/index.php/CPU_power_up_state
-
         A = 0
         X = 0
         Y = 0
-        SP = 0xFF; // Should be FD, but for improved compatibility set to FF
+        SP = 0xFF // Should be FD, but for improved compatibility set to FF
         
-        P.ClearAll()
-        P.Set(StatusFlag.IrqDisabled.rawValue)
+        P.clearAll()
+        P.set(StatusFlag.IrqDisabled.rawValue)
 
         // Entry point is located at the Reset interrupt location
-        PC = Read16(CpuMemory.kResetVector)
+        PC = read16(CpuMemory.kResetVector)
 
-        m_cycles = 0
-        m_pendingNmi = false
-        m_pendingIrq = false
-
+        cycles = 0
+        pendingNmi = false
+        pendingIrq = false
         //m_controllerPorts.Reset();
     }
 
     
-    func GetMemValue()->UInt8
-    {
-        let result = Read8(m_operandAddress)
+    func getMemValue() -> UInt8 {
+        let result = read8(operandAddress)
         return result
     }
     
-    func CalcNegativeFlag(_ v:UInt16)->UInt8
+    func calcNegativeFlag(_ v: UInt16) -> UInt8
     {
         // Check if bit 7 is set
-        if((v & 0x0080) != 0)
-        {
+        if (v & 0x0080) != 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
-    //ok
-    func CalcNegativeFlag(_ v:Int)->UInt8
+    func calcNegativeFlag(_ v: Int) -> UInt8
     {
         // Check if bit 7 is set
-        if((v & 0x80) != 0)
-        {
+        if (v & 0x80) != 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
-        
     }
-    func CalcNegativeFlag(_ v:UInt8)->UInt8
+    
+    func calcNegativeFlag(_ v: UInt8) -> UInt8
     {
         // Check if bit 7 is set
-        if((v & 0x80) != 0)
-        {
+        if (v & 0x80) != 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
-        
     }
     
-    //ok
-    func CalcZeroFlag(_ v:UInt16)->UInt8
-    {
+    func calcZeroFlag(_ v: UInt16) -> UInt8 {
         // Check if bit 7 is set
-        if((v & 0x00FF) == 0)
-        {
+        if (v & 0x00FF) == 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
-    //ok
-    
-    func CalcCarryFlag(_ v:Int)->UInt8
+    func calcCarryFlag(_ v: Int) -> UInt8
     {
-        if(v >= 0)
-        {
+        if v >= 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
-    func IntToUint(_ v:Int)->UInt8
-    {
+    func intToUint(_ v: Int) -> UInt8 {
         var inputValue = v
-        if(inputValue >= 256)
-        {
+        if inputValue >= 256 {
             inputValue -= 256
         }
-        if(inputValue < 0)
-        {
+        if inputValue < 0 {
             inputValue = 256 + inputValue
         }
         
         return UInt8(inputValue)
     }
     
-    func CalcZeroFlag(_ v:Int)->UInt8
-    {
-        if(v == 0)
-        {
+    func calcZeroFlag(_ v: Int) -> UInt8 {
+        if v == 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
-    func CalcZeroFlag(_ v:UInt8)->UInt8
-    {
-        if(v == 0)
-        {
+    func calcZeroFlag(_ v: UInt8) -> UInt8 {
+        if v == 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
-    //ok
-    func CalcCarryFlag(_ v:UInt16)->UInt8
-    {
-        if((v & 0xFF00) != 0)
-        {
+    func calcCarryFlag(_ v: UInt16) -> UInt8 {
+        if (v & 0xFF00) != 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
-    func CalcOverflowFlag(a:UInt8, b:UInt8, r:UInt16)->UInt8
-    {
+    func calcOverflowFlag(a: UInt8, b: UInt8, r: UInt16) -> UInt8 {
         // With r = a + b, overflow occurs if both a and b are negative and r is positive,
         // or both a and b are positive and r is negative. Looking at sign bits of a, b, r,
         // overflow occurs when 0 0 1 or 1 1 0, so we can use simple xor logic to figure it out.
@@ -959,209 +803,176 @@ class Cpu:CpuRegDef,ICpu{
         let intB = Int(b)
         let intR = Int(r)
         
-        if(intA==0 && intB==0 && intR==0)
-        {
+        if intA==0 && intB==0 && intR==0 {
             return 1
         }
         
-        if(intA==0 && intB==0 && intR==0)
-        {
+        if intA==0 && intB==0 && intR==0 {
             return 1
         }
         
         return 0
     }
     
-    func GetAccumOrMemValue()->UInt8
-    {
-        //assert(m_opCodeEntry->addrMode == AddressMode::Accumu || m_opCodeEntry->addrMode & AddressMode::MemoryValueOperand);
-
-        if (m_opCodeEntry!.addrMode == AddressMode.Accumu)
-        {
+    func getAccumOrMemValue() -> UInt8 {
+        if opCodeEntry!.addrMode == AddressMode.Accumu {
             return A
         }
         
-        let result = Read8(m_operandAddress)
+        let result = read8(operandAddress)
         return result
     }
     
-    func SetAccumOrMemValue(_ value:UInt8)
-    {
-        //assert(m_opCodeEntry->addrMode == AddressMode::Accumu || m_opCodeEntry->addrMode & AddressMode::MemoryValueOperand);
-
-        if (m_opCodeEntry!.addrMode == AddressMode.Accumu)
-        {
+    func setAccumOrMemValue(_ value: UInt8) {
+        if opCodeEntry!.addrMode == AddressMode.Accumu {
             A = value
         }
-        else
-        {
-            Write8(address: m_operandAddress, value: value);
+        else {
+            write8(address: operandAddress, value: value);
         }
     }
     
-    func Write8(address:UInt16, value:UInt8)
-    {
-        m_cpuMemoryBus!.Write(cpuAddress: address, value: value)
+    func write8(address:UInt16, value: UInt8) {
+        cpuMemoryBus!.write(cpuAddress: address, value: value)
     }
     
-    func Push16(_ value:UInt16)
-    {
-        Push8(UInt8(value >> 8))
-        Push8(UInt8(value & 0x00FF))
+    func push16(_ value: UInt16) {
+        push8(UInt8(value >> 8))
+        push8(UInt8(value & 0x00FF))
     }
     
-    func Push8(_ value:UInt8)
-    {
-        Write8(address: CpuMemory.kStackBase + UInt16(SP), value: value);
-        
+    func push8(_ value:UInt8) {
+        write8(address: CpuMemory.kStackBase + UInt16(SP), value: value);
         SP = SP - 1
-        
-        if (SP == 0xFF)
-        {
+        if SP == 0xFF {
             NSLog("Stack overflow!");
         }
     }
 
-
-    func Pop8()->UInt8
-    {
+    func pop8() -> UInt8 {
         SP = SP + 1
-
-        if (SP == 0)
-        {
+        if  SP == 0 {
             NSLog("Stack overflow!");
         }
         
-        return Read8(CpuMemory.kStackBase + UInt16(SP))
+        return read8(CpuMemory.kStackBase + UInt16(SP))
     }
 
-    func Pop16()->UInt16
-    {
-        let low = TO16(Pop8())
-        let high = TO16(Pop8())
+    func Pop16() -> UInt16 {
+        let low = tO16(pop8())
+        let high = tO16(pop8())
         return (high << 8) | low
     }
 
-    func PushProcessorStatus(_ softwareInterrupt:Bool)
-    {
-        //assert(!P.Test(StatusFlag::Unused) && !P.Test(StatusFlag::BrkExecuted) && "P should never have these set, only on stack");
+    func pushProcessorStatus(_ softwareInterrupt: Bool) {
         var brkFlag:UInt8 = 0
-        
-        if(softwareInterrupt)
-        {
+        if softwareInterrupt {
             brkFlag = BrkExecuted
         }
-        Push8(P.Value() | Unused | brkFlag)
+        push8(P.value() | Unused | brkFlag)
     }
 
-    func PopProcessorStatus()
-    {
-        P.SetValue(Pop8() & ~Unused & ~BrkExecuted)
-        //assert(!P.Test(Unused) && !P.Test(BrkExecuted) && "P should never have these set, only on stack");
+    func popProcessorStatus() {
+        P.setValue(pop8() & ~Unused & ~BrkExecuted)
+        //assert(!P.test(Unused) && !P.test(BrkExecuted) && "P should never have these set, only on stack");
     }
     
     
-    func IsMemoryValueOperand(_ v:UInt32)->Bool
-    {
+    func isMemoryValueOperand(_ v: UInt32) -> Bool {
         //Immedt | ZeroPg | ZPIdxX|ZPIdxY|Absolu|AbIdxX|AbIdxY|IdxInd|IndIdx
-        if(v == AddressMode.Immedt.rawValue)
-        {
+        if v == AddressMode.Immedt.rawValue {
             return true
         }
-        if(v == AddressMode.ZeroPg.rawValue)
-        {
+        if v == AddressMode.ZeroPg.rawValue {
             return true
         }
-        if(v == AddressMode.ZPIdxX.rawValue)
-        {
+        if v == AddressMode.ZPIdxX.rawValue {
             return true
         }
-        if(v == AddressMode.ZPIdxY.rawValue)
-        {
+        if v == AddressMode.ZPIdxY.rawValue {
             return true
         }
-        if(v == AddressMode.Absolu.rawValue)
-        {
+        if v == AddressMode.Absolu.rawValue {
             return true
         }
-        if(v == AddressMode.AbIdxX.rawValue)
-        {
+        if v == AddressMode.AbIdxX.rawValue {
             return true
         }
-        if(v == AddressMode.AbIdxY.rawValue)
-        {
+        if v == AddressMode.AbIdxY.rawValue {
             return true
         }
-        if(v == AddressMode.IdxInd.rawValue)
-        {
+        if v == AddressMode.IdxInd.rawValue {
             return true
         }
-        if(v == AddressMode.IndIdx.rawValue)
-        {
+        if v == AddressMode.IndIdx.rawValue {
             return true
         }
         
         return false
     }
     
-    func IsJmpOrBranchOperand(_ v:UInt32)->Bool
-    {
-        if(v == AddressMode.Relatv.rawValue)
-        {
+    func isJmpOrBranchOperand(_ v: UInt32) -> Bool {
+        if v == AddressMode.Relatv.rawValue {
             return true
         }
-        if(v == AddressMode.Absolu.rawValue)
-        {
+        if v == AddressMode.Absolu.rawValue {
             return true
         }
-        if(v == AddressMode.Indrct.rawValue)
-        {
+        if v == AddressMode.Indrct.rawValue {
             return true
         }
         return false
     }
     
-    func SetMemValue(_ value:UInt8)
-    {
-        assert(IsMemoryValueOperand(m_opCodeEntry!.addrMode.rawValue))
+    func setMemValue(_ value: UInt8) {
+        assert(isMemoryValueOperand(opCodeEntry!.addrMode.rawValue))
         
-        //if(!(IsMemoryValueOperand(m_opCodeEntry!.addrMode.rawValue)))
+        //if(!(IsMemoryValueOperand(opCodeEntry!.addrMode.rawValue)))
         //{
         //    return
         //}
-        Write8(address: m_operandAddress, value: value)
+        write8(address: operandAddress, value: value)
     }
     
-    func GetBranchOrJmpLocation()->UInt16
-    {
-        assert(IsJmpOrBranchOperand(m_opCodeEntry!.addrMode.rawValue))
-        return m_operandAddress
+    func getBranchOrJmpLocation() -> UInt16 {
+        assert(isJmpOrBranchOperand(opCodeEntry!.addrMode.rawValue))
+        return operandAddress
     }
     
-    //func ToInt(_ x : UInt8) -> Int16 {
-    //      return Int16(Int8(bitPattern: x))
-    //}
-    
-    func ToInt(_ x : UInt8) -> Int {
+    func toInt(_ x : UInt8) -> Int {
           return Int(Int8(bitPattern: x))
     }
     
-    func Nmi()
-    {
-        //assert(!m_pendingNmi && "Interrupt already pending");
-        //assert(!m_pendingIrq && "One interrupt at at time");
-        m_pendingNmi = true
+    func Nmi() {
+        pendingNmi = true
     }
 
-    func Irq()
-    {
-        //assert(!m_pendingIrq && "Interrupt already pending");
-        //assert(!m_pendingNmi && "One interrupt at at time");
-
-        if (!P.Test(StatusFlag.IrqDisabled.rawValue))
-        {
-            m_pendingIrq = true
+    func Irq() {
+        if !P.test(StatusFlag.IrqDisabled.rawValue) {
+            pendingIrq = true
         }
     }
 
+    var PC: UInt16 = 0        // Program counter
+    var SP: UInt8 = 0        // Stack pointer
+    var A: UInt8 = 0       // Accumulator
+    var X: UInt8 = 0     // X register
+    var Y: UInt8 = 0        // Y register
+    var P: Bitfield8 = Bitfield8()   // Processor status (flags) TODO
+    var pendingNmi = false
+    var pendingIrq = false
+    
+    var spriteDmaRegister:UInt8 = 0
+    
+    var cycles:UInt32 = 0
+    var totalCycles:UInt32 = 0
+    var opCodeEntry:OpCodeEntry!
+    var opCodeTableEx: NSDictionary = [0:1,1:2,2:3]
+    var opCodeTable:[UInt8:OpCodeEntry] = [:]
+    var cpuMemoryBus:CpuMemoryBus?
+    
+    var apu:Apu!
+    var controllerPorts:ControllerPorts!
+    var operandAddress:UInt16 = 0
+    var operandReadCrossedPage = false
 }

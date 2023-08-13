@@ -36,32 +36,32 @@ class GameViewController: UIViewController {
                         dpad.valueChangedHandler = { (dpad: GCControllerDirectionPad, xValue: Float, yValue: Float) in
                             if dpad.up.isPressed {
                                 print("↑")
-                                self.nes.m_controllerPorts.pressU()
+                                self.nes.pressU()
                             }
                             if !dpad.up.isPressed {
-                                self.nes.m_controllerPorts.pressU(false)
+                                self.nes.pressU(false)
                             }
                             if dpad.down.isPressed {
                                 print("↓")
-                                self.nes.m_controllerPorts.pressD()
+                                self.nes.pressD()
                             }
                             if !dpad.down.isPressed {
                                 print("↓")
-                                self.nes.m_controllerPorts.pressD(false)
+                                self.nes.pressD(false)
                             }
                             if dpad.left.isPressed {
                                 print("←")
-                                self.nes.m_controllerPorts.pressL()
+                                self.nes.pressL()
                             }
                             if !dpad.left.isPressed {
                                 print("←")
-                                self.nes.m_controllerPorts.pressL(false)
+                                self.nes.pressL(false)
                             }
                             if dpad.right.isPressed {
-                                self.nes.m_controllerPorts.pressR()
+                                self.nes.pressR()
                             }
                             if !dpad.right.isPressed {
-                                self.nes.m_controllerPorts.pressR(false)
+                                self.nes.pressR(false)
                             }
                         }
                     }
@@ -70,11 +70,11 @@ class GameViewController: UIViewController {
                 buttonA.valueChangedHandler = { (button: GCControllerButtonInput, value: Float, pressed: Bool) in
                     if buttonA.isPressed {
                         print("B")
-                        self.nes.m_controllerPorts.pressB()
+                        self.nes.pressB()
                     }
                     if !buttonA.isPressed {
                         print("B")
-                        self.nes.m_controllerPorts.pressB(false)
+                        self.nes.pressB(false)
                     }
                 }
             }
@@ -83,11 +83,11 @@ class GameViewController: UIViewController {
                 buttonB.valueChangedHandler = { (button: GCControllerButtonInput, value: Float, pressed: Bool) in
                     if buttonB.isPressed {
                         print("A")
-                        self.nes.m_controllerPorts.pressA()
+                        self.nes.pressA()
                     }
                     if !buttonB.isPressed {
                         print("A")
-                        self.nes.m_controllerPorts.pressA(false)
+                        self.nes.pressA(false)
                     }
                 }
             }
@@ -96,11 +96,11 @@ class GameViewController: UIViewController {
                 buttonB.valueChangedHandler = { (button: GCControllerButtonInput, value: Float, pressed: Bool) in
                     if buttonB.isPressed {
                         print("Option")
-                        self.nes.m_controllerPorts.pressSelect()
+                        self.nes.pressSelect()
                     }
                     if !buttonB.isPressed {
                         print("Option")
-                        self.nes.m_controllerPorts.pressSelect(false)
+                        self.nes.pressSelect(false)
                     }
                 }
             }
@@ -109,11 +109,11 @@ class GameViewController: UIViewController {
                 buttonB.valueChangedHandler = { (button: GCControllerButtonInput, value: Float, pressed: Bool) in
                     if buttonB.isPressed {
                         print("Start")
-                        self.nes.m_controllerPorts.pressStart()
+                        self.nes.pressStart()
                     }
                     if !buttonB.isPressed {
                         print("Start")
-                        self.nes.m_controllerPorts.pressStart(false)
+                        self.nes.pressStart(false)
                     }
                 }
             }

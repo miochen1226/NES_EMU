@@ -31,18 +31,17 @@ class FrameCounter: NSObject
         cpuCycles = 0
     }
 
-    func AllowInterrupt()
-    {
+    func AllowInterrupt() {
         inhibitInterrupt = false
     }
 
     func handleCpuWrite( cpuAddress: UInt16, value: UInt8) {
         assert(cpuAddress == 0x4017)
 
-        let mode = ReadBits8(target: BIT(7), value: value) >> 7
+        let mode = readBits8(target: BIT(7), value: value) >> 7
         setMode(UInt8(mode))
         
-        if TestBits(target: BIT(6), value: value) {
+        if testBits(target: BIT(6), value: value) {
             AllowInterrupt()
         }
     }

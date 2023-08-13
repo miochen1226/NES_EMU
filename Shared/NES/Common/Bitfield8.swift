@@ -7,129 +7,99 @@
 
 import Foundation
 class Bitfield8 {
-    var m_field:UInt8 = 0
     
-    /*
-    init()->Bitfield8
-    {
-        ClearAll()
-        return self
-    }
-    */
-
-    func Value()->UInt8
-    {
-        return m_field
+    func value() -> UInt8 {
+        return field
     }
     
-    func SetValue(_ value:UInt8)
-    {
-        m_field = value
+    func setValue(_ value: UInt8) {
+        field = value
     }
 
-    func  ClearAll() { m_field = 0 }
-    func SetAll()
-    {
-        m_field = UInt8(~0)
+    func  clearAll() {
+        field = 0
+    }
+    
+    func setAll() {
+        field = UInt8(~0)
     }
 
-    func Set(bits:UInt8, enabled:UInt8)
-    {
-        if ((enabled) != 0)
-        {
-            Set(bits)
+    func set(bits: UInt8, enabled: UInt8) {
+        if enabled != 0 {
+            set(bits)
         }
-        else
-        {
-            Clear(bits)
+        else {
+            clear(bits)
         }
     }
     
-    func Set(_ bits:UInt8)
+    func set(_ bits:UInt8)
     {
-        m_field |= bits
+        field |= bits
     }
     
-    func Clear(_ bits:UInt8)
-    {
-        m_field &= ~bits
+    func clear(_ bits:UInt8) {
+        field &= ~bits
     }
     
-    func Read(_ bits:UInt8)->UInt8
+    func read(_ bits:UInt8)->UInt8
     {
-        return m_field & bits
+        return field & bits
     }
     
-    func Test(_ bits:UInt8)->Bool
-    {
-        let ret = Read(bits)
-        
-        if(ret == 0)
-        {
+    func test(_ bits:UInt8) -> Bool {
+        let ret = read(bits)
+        if(ret == 0) {
             return false
         }
-        else
-        {
+        else {
             return true
         }
-        //return Read(bits) != 0
     }
     
-    func Test01(_ bits:UInt8)->UInt8
-    {
-        if(Read(bits) != 0)
-        {
+    func test01(_ bits:UInt8) -> UInt8 {
+        if read(bits) != 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
 
     // Bit position functions
-    func SetPos(bitPos:UInt8, enabled:UInt8)
-    {
-        if (enabled != 0)
-        {
-            SetPos(bitPos)
+    func setPos(bitPos:UInt8, enabled: UInt8) {
+        if enabled != 0 {
+            setPos(bitPos)
         }
-        else
-        {
-            ClearPos(bitPos)
+        else {
+            clearPos(bitPos)
         }
     }
     
-    func SetPos(_ bitPos:UInt8)
-    {
-        Set(1 << bitPos)
+    func setPos(_ bitPos: UInt8) {
+        set(1 << bitPos)
     }
     
-    func ClearPos(_ bitPos:UInt8)
-    {
-        Clear(1 << bitPos)
+    func clearPos(_ bitPos: UInt8) {
+        clear(1 << bitPos)
     }
     
-    func ReadPos(_ bitPos:UInt8)->UInt8
-    {
-        return Read(1 << bitPos)
+    func readPos(_ bitPos: UInt8) -> UInt8 {
+        return read(1 << bitPos)
     }
         
-    func TestPos(bitPos:UInt8)->Bool
-    {
-        return Read(1 << bitPos) != 0
+    func testPos(bitPos: UInt8) -> Bool {
+        return read(1 << bitPos) != 0
     }
         
-    func TestPos01(_ bitPos:UInt8)->UInt8
-    {
-        if(Read(1 << bitPos) != 0)
-        {
+    func testPos01(_ bitPos: UInt8) -> UInt8 {
+        if read(1 << bitPos) != 0 {
             return 1
         }
-        else
-        {
+        else {
             return 0
         }
     }
     
+    var field: UInt8 = 0
 }

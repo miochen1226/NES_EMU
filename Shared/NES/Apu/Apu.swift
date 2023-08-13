@@ -111,26 +111,26 @@ class Apu: NSObject {
             
             if(pulseChannel0?.getLengthCounter().getValue() ?? 0 > 0)
             {
-                bitField.SetPos(bitPos: 0, enabled: 1)
+                bitField.setPos(bitPos: 0, enabled: 1)
             }
             if(pulseChannel1?.getLengthCounter().getValue() ?? 0 > 0)
             {
-                bitField.SetPos(bitPos: 1, enabled: 1)
+                bitField.setPos(bitPos: 1, enabled: 1)
             }
             if(triangleChannel?.getLengthCounter().getValue() ?? 0 > 0)
             {
-                bitField.SetPos(bitPos: 2, enabled: 1)
+                bitField.setPos(bitPos: 2, enabled: 1)
             }
             if(noiseChannel?.getLengthCounter().getValue() ?? 0 > 0)
             {
-                bitField.SetPos(bitPos: 4, enabled: 1)
+                bitField.setPos(bitPos: 4, enabled: 1)
             }
             break
         default:
             break
         }
         
-        return bitField.Value()
+        return bitField.value()
     }
     
     func HandleCpuWrite(cpuAddress: UInt16, value: UInt8) {
@@ -148,10 +148,10 @@ class Apu: NSObject {
             noiseChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
             break
         case 0x4015:
-            pulseChannel0?.getLengthCounter().setEnabled(TestBits(target: BIT(0), value: value))
-            pulseChannel1?.getLengthCounter().setEnabled(TestBits(target: BIT(1), value: value))
-            triangleChannel?.getLengthCounter().setEnabled(TestBits(target: BIT(2), value: value))
-            noiseChannel?.getLengthCounter().setEnabled(TestBits(target: BIT(3), value: value))
+            pulseChannel0?.getLengthCounter().setEnabled(testBits(target: BIT(0), value: value))
+            pulseChannel1?.getLengthCounter().setEnabled(testBits(target: BIT(1), value: value))
+            triangleChannel?.getLengthCounter().setEnabled(testBits(target: BIT(2), value: value))
+            noiseChannel?.getLengthCounter().setEnabled(testBits(target: BIT(3), value: value))
             //@TODO: DMC Enable bit 4
             
             break
@@ -163,8 +163,8 @@ class Apu: NSObject {
         }
     }
     
-    func Execute(_ cpuCycles:UInt32) {
-        for _ in 0..<cpuCycles {
+    func execute(_ cpuCycles: UInt32) {
+        for _ in 0 ..< cpuCycles {
             frameCounter?.Clock()
             triangleChannel?.clockTimer()
             pulseChannel0?.clockTimer()

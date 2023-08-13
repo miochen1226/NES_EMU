@@ -44,7 +44,7 @@ class Nes{
         cpu.initialize(cpuMemoryBus: cpuMemoryBus)
         ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
         cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
-        ppuMemoryBus.Initialize(ppu: ppu, cartridge: cartridge)
+        ppuMemoryBus.initialize(ppu: ppu, cartridge: cartridge)
     }
     
     deinit {
@@ -53,8 +53,8 @@ class Nes{
     
     func loadRom() {
         cartridge.loadFile()
-        cpu.Reset()
-        ppu.Reset()
+        cpu.reset()
+        ppu.reset()
     }
     
     func step() {
@@ -63,11 +63,14 @@ class Nes{
     
     func getSpriteObjs() -> [SpriteObj] {
         var spriteObjs:[SpriteObj] = []
-        let oam1:[SpriteData] = ppu.getOamArray(oamMemory:ppu.m_oam)
+        var spriteDatas:[SpriteData] = []
+        for i in 0 ..< 64 {
+            spriteDatas.append(ppu.oam.getSprite(i))
+        }
         
         var sprPaletteHighBits:UInt8 = 0
         var sprPaletteLowBits:UInt8 = 0
-        for spriteData in oam1 {
+        for spriteData in spriteDatas {
             if spriteData.bmpLow == 255 {
                 continue
             }
@@ -81,29 +84,29 @@ class Nes{
             spriteObj.y = 239 - Int(spriteData.bmpLow)
             
             let attribs:UInt8 = spriteData.attributes
-            let flipHorz:Bool = TestBits(target:UInt16(attribs), value: BIT(6))
+            let flipHorz:Bool = testBits(target:UInt16(attribs), value: BIT(6))
             let tileIndex:UInt8 = spriteData.bmpHigh
-            let tileOffset:UInt16 = TO16(tileIndex) * 16
+            let tileOffset:UInt16 = tO16(tileIndex) * 16
             
             let patternTableAddress:UInt16 = 0x0000
             
             var spriteFetchData = SpriteFetchData()
             
-            for spY in 0..<8 {
+            for spY in 0 ..< 8 {
                 let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(spY)
                 let byte2Address:UInt16 = byte1Address + 8
-                spriteFetchData.bmpLow = ppu.m_ppuMemoryBus!.Read(byte1Address)
-                spriteFetchData.bmpHigh = ppu.m_ppuMemoryBus!.Read(byte2Address)
+                spriteFetchData.bmpLow = ppu.ppuMemoryBus!.read(byte1Address)
+                spriteFetchData.bmpHigh = ppu.ppuMemoryBus!.read(byte2Address)
                 if flipHorz {
-                    spriteFetchData.bmpLow = ppu.FlipBits(spriteFetchData.bmpLow)
-                    spriteFetchData.bmpHigh = ppu.FlipBits(spriteFetchData.bmpHigh)
+                    spriteFetchData.bmpLow = ppu.flipBits(spriteFetchData.bmpLow)
+                    spriteFetchData.bmpHigh = ppu.flipBits(spriteFetchData.bmpHigh)
                 }
                 
-                for _ in 0..<8 {
-                    sprPaletteLowBits = (TestBits01(target: UInt16(spriteFetchData.bmpHigh), value: 0x80) << 1) | (TestBits01(target: UInt16(spriteFetchData.bmpLow), value: 0x80))
+                for _ in 0 ..< 8 {
+                    sprPaletteLowBits = (testBits01(target: UInt16(spriteFetchData.bmpHigh), value: 0x80) << 1) | (testBits01(target: UInt16(spriteFetchData.bmpLow), value: 0x80))
                     
                     if sprPaletteLowBits != 0 {
-                        sprPaletteHighBits = UInt8(ReadBits(target: UInt16(spriteData.attributes), value: UInt8(0x3)))
+                        sprPaletteHighBits = UInt8(readBits(target: UInt16(spriteData.attributes), value: UInt8(0x3)))
                     }
                           
                     var color:Color4 = Color4.init()
@@ -137,8 +140,8 @@ class Nes{
         cartridge.hackOnScanline(nes:self)
     }
     
-    func GetNameTableMirroring() -> NameTableMirroring {
-        return cartridge.GetNameTableMirroring()
+    func getNameTableMirroring() -> NameTableMirroring {
+        return cartridge.getNameTableMirroring()
     }
     
     func stop() {
@@ -201,9 +204,9 @@ class Nes{
         {
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
-            cpu.Execute(&cpuCycles)
-            ppu.Execute(cpuCycles, completedFrame: &completedFrame)
-            apu.Execute(cpuCycles)
+            cpu.execute(&cpuCycles)
+            ppu.execute(cpuCycles, completedFrame: &completedFrame)
+            apu.execute(cpuCycles)
             clockCount += cpuCycles
         }
         
@@ -218,13 +221,49 @@ class Nes{
         cpu.Irq()
     }
     
+    func pressL(_ isDown: Bool = true) {
+        controllerPorts.pressL(isDown)
+    }
+    
+    func pressR(_ isDown: Bool = true)
+    {
+        controllerPorts.pressR(isDown)
+    }
+    
+    func pressU(_ isDown: Bool = true)
+    {
+        controllerPorts.pressU(isDown)
+    }
+    
+    func pressD(_ isDown: Bool = true)
+    {
+        controllerPorts.pressD(isDown)
+    }
+    
+    func pressA(_ isDown: Bool = true) {
+        controllerPorts.pressA(isDown)
+    }
+    
+    func pressB(_ isDown: Bool = true) {
+        controllerPorts.pressB(isDown)
+    }
+    
+    func pressStart(_ isDown: Bool = true) {
+        controllerPorts.pressStart(isDown)
+    }
+    
+    func pressSelect(_ isDown:Bool = true) {
+        controllerPorts.pressSelect(isDown)
+    }
+    
+    
     static let sharedInstance = Nes()
     
     let cartridge = Cartridge.init()
     let ppu = Ppu.init()
     let apu = Apu.init()
     let cpu = Cpu.init()
-    let controllerPorts = ControllerPorts.init()
+    private let controllerPorts = ControllerPorts.init()
     let cpuMemoryBus = CpuMemoryBus.init()
     let ppuMemoryBus = PpuMemoryBus.init()
     let cpuInternalRam = CpuInternalRam.init()

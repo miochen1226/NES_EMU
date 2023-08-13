@@ -9,6 +9,11 @@ import Foundation
 
 class OAM
 {
+    deinit
+    {
+        memPointer.deallocate()
+    }
+    
     func getSprite(_ index: Int) -> SpriteData {
         return memPointer[index]
     }
@@ -22,7 +27,7 @@ class OAM
         memset(memPointer, 0, MemoryLayout<SpriteData>.stride)
     }
     
-    func Write(address: UInt16, value: UInt8) {
+    func write(address: UInt16, value: UInt8) {
         var valueSet = value
         let rawMemory = UnsafeMutableRawPointer(memPointer)
         memcpy(rawMemory.advanced(by: Int(address)), &valueSet, 1)

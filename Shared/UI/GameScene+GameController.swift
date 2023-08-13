@@ -33,88 +33,35 @@ extension GameScene
         gameController.extendedGamepad?.valueChangedHandler =
         {(gamepad: GCExtendedGamepad, element: GCControllerElement) in
             if element == gamepad.dpad {
-                if gamepad.dpad.up.isPressed {
-                    nes.controllerPorts.pressU()
-                }
-                else {
-                    nes.controllerPorts.pressU(false)
-                }
-                
-                if gamepad.dpad.down.isPressed {
-                    nes.controllerPorts.pressD()
-                }
-                else {
-                    nes.controllerPorts.pressD(false)
-                }
-                
-                if gamepad.dpad.left.isPressed {
-                    nes.controllerPorts.pressL()
-                }
-                else {
-                    nes.controllerPorts.pressL(false)
-                }
-                
-                if gamepad.dpad.right.isPressed {
-                    nes.controllerPorts.pressR()
-                }
-                else {
-                    nes.controllerPorts.pressR(false)
-                }
+                nes.pressU(gamepad.dpad.up.isPressed)
+                nes.pressD(gamepad.dpad.down.isPressed)
+                nes.pressL(gamepad.dpad.left.isPressed)
+                nes.pressR(gamepad.dpad.right.isPressed)
             }
             
             
             if element == gamepad.buttonA {
-                if gamepad.buttonA.isPressed {
-                    nes.controllerPorts.pressB()
-                }
-                else {
-                    nes.controllerPorts.pressB(false)
-                }
+                nes.pressB(gamepad.buttonA.isPressed)
             }
             
             if element == gamepad.buttonB {
-                if gamepad.buttonB.isPressed {
-                    nes.controllerPorts.pressA()
-                }
-                else {
-                    nes.controllerPorts.pressA(false)
-                }
+                nes.pressA(gamepad.buttonB.isPressed)
             }
             
             if element == gamepad.buttonY {
-                if gamepad.buttonY.isPressed {
-                    nes.controllerPorts.pressStart()
-                }
-                else {
-                    nes.controllerPorts.pressStart(false)
-                }
+                nes.pressStart(gamepad.buttonY.isPressed)
             }
             
             if element == gamepad.buttonX {
-                if gamepad.buttonX.isPressed {
-                    nes.controllerPorts.pressSelect()
-                }
-                else {
-                    nes.controllerPorts.pressSelect(false)
-                }
+                nes.pressSelect(gamepad.buttonX.isPressed)
             }
             
             if element == gamepad.buttonOptions {
-                if gamepad.buttonOptions!.isPressed {
-                    nes.controllerPorts.pressSelect()
-                }
-                else {
-                    nes.controllerPorts.pressSelect(false)
-                }
+                nes.pressSelect(gamepad.buttonOptions!.isPressed)
             }
             
             if element == gamepad.buttonMenu {
-                if gamepad.buttonMenu.isPressed {
-                    nes.controllerPorts.pressStart()
-                }
-                else {
-                    nes.controllerPorts.pressStart(false)
-                }
+                nes.pressStart(gamepad.buttonMenu.isPressed)
             }
         }
     }

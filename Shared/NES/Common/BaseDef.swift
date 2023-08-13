@@ -7,18 +7,15 @@
 
 import Foundation
 
-func KB(_ n:UInt)->UInt
-{
+func KB(_ n:UInt) -> UInt {
     return n*1024
 }
 
-func MB(_ n:UInt)->UInt
-{
+func MB(_ n:UInt) -> UInt {
     return n*1024*1024
 }
 
-func BIT(_ n:UInt8)->UInt8
-{
+func BIT(_ n:UInt8) -> UInt8 {
      return (1<<n)
 }
 
@@ -34,15 +31,14 @@ struct globeDef
     static let kSavBankSize = KB(8)
 }
 
-
 protocol HandleCpuReadProtocol {
-    func HandleCpuRead(_ cpuAddress:UInt16)->UInt8
-    func HandleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
+    func handleCpuRead(_ cpuAddress: UInt16) -> UInt8
+    func handleCpuWrite(_ cpuAddress: UInt16, value: UInt8)
 }
 
 protocol HandlePpuReadProtocol {
-    func HandlePpuRead(_ ppuAddress:UInt16)->UInt8
-    func HandlePpuWrite(_ ppuAddress:UInt16, value:UInt8)
+    func handlePpuRead(_ ppuAddress: UInt16) -> UInt8
+    func handlePpuWrite(_ ppuAddress: UInt16, value: UInt8)
 }
 
 func BIT(_ n:Int)->UInt8
@@ -77,60 +73,49 @@ func BITS(_ bitsIn:[UInt8])->UInt8
     return result
 }
 
-func ClearBits(target:inout UInt16, value:UInt8)
-{
+func clearBits(target:inout UInt16, value: UInt8) {
     target = (target & ~UInt16(value))
 }
 
-func TestBits(target:UInt8,  value:UInt8)->Bool
-{
-    return ReadBits8(target: target, value: value) != 0
+func testBits(target:UInt8, value: UInt8) -> Bool {
+    return readBits8(target: target, value: value) != 0
 }
 
-func TestBits(target:UInt16,  value:UInt8)->Bool
-{
-    return ReadBits(target: target, value: value) != 0
+func testBits(target:UInt16, value: UInt8) -> Bool {
+    return readBits(target: target, value: value) != 0
 }
 
-func TestBits(target:UInt16, value:UInt16)->Bool
-{
-    return ReadBits(target: target, value: value) != 0
+func testBits(target:UInt16, value: UInt16) -> Bool {
+    return readBits(target: target, value: value) != 0
 }
 
-func ReadBits(target:UInt16, value:UInt16)->UInt16
+func readBits(target:UInt16, value:UInt16)->UInt16
 {
     return target & value
 }
 
-func ReadBits(target:UInt16, value:UInt8)->UInt16
-{
+func readBits(target:UInt16, value: UInt8) -> UInt16 {
     return target & UInt16(value)
 }
 
-func ReadBits8(target:UInt8, value:UInt8)->UInt8
-{
+func readBits8(target:UInt8, value: UInt8) -> UInt8 {
     return target & value
 }
 
-func TestBits01(target:UInt16,value:UInt8)->UInt8
-{
-    if(ReadBits(target: target, value: value) != 0)
-    {
+func testBits01(target:UInt16,value: UInt8) -> UInt8 {
+    if readBits(target: target, value: value) != 0 {
         return 1
     }
-    else
-    {
+    else {
         return 0
     }
 }
 
-func TO16(_ v8:UInt8)->UInt16
-{
+func tO16(_ v8: UInt8) -> UInt16 {
     return UInt16(v8)
 }
 
-func TO8(_ v16:UInt16)->UInt8
-{
+func tO8(_ v16: UInt16) -> UInt8 {
     let v8:UInt8 = UInt8(v16 & 0x00FF)
     return v8
 }

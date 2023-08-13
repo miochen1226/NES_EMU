@@ -26,9 +26,8 @@ class TriangleChannel: BaseChannel {
         if timer.clock() {
             let a = linearCounter.getValue()
             let b = lengthCounter.getValue()
-            if (a > 0 && b > 0)
-            {
-                triangleWaveGenerator.clock();
+            if a > 0 && b > 0 {
+                triangleWaveGenerator.clock()
             }
         }
     }
@@ -40,9 +39,9 @@ class TriangleChannel: BaseChannel {
     override func handleCpuWrite(cpuAddress: UInt16, value: UInt8) {
         switch cpuAddress {
         case 0x4008:
-            lengthCounter.setHalt(TestBits(target: BIT(7), value: value))
-            let control = TestBits(target: BIT(7),value:value)
-            let period = ReadBits8(target: 0x7f, value: value)
+            lengthCounter.setHalt(testBits(target: BIT(7), value: value))
+            let control = testBits(target: BIT(7),value:value)
+            let period = readBits8(target: 0x7f, value: value)
             linearCounter.setControlAndPeriod(control: control, period: UInt16(period))
             break
 
@@ -51,7 +50,7 @@ class TriangleChannel: BaseChannel {
             break
 
         case 0x400B:
-            let period = ReadBits8(target: 0x7, value: value)
+            let period = readBits8(target: 0x7, value: value)
             timer.setPeriodHigh3(UInt16(period))
             linearCounter.restart()
             lengthCounter.loadCounterFromLUT(value >> 3)

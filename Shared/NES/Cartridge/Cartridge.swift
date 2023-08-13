@@ -15,33 +15,33 @@ class Cartridge: ICartridge {
         }
     }
     
-    func HandlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
-        return AccessChrMem(ppuAddress)
+    func handlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
+        return accessChrMem(ppuAddress)
     }
     
-    func AccessChrMem(_ ppuAddress: UInt16) -> UInt8 {
-        let bankIndex:Int = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
-        let offset:Int = Int(GetBankOffset(address: ppuAddress, bankSize: kChrBankSize))
+    func accessChrMem(_ ppuAddress: UInt16) -> UInt8 {
+        let bankIndex:Int = getBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
+        let offset:Int = Int(getBankOffset(address: ppuAddress, bankSize: kChrBankSize))
         let mappedBankIndex:Int = Int(mapper.GetMappedChrBankIndex(ppuBankIndex: Int(bankIndex)))
-        return chrBanks[mappedBankIndex].RawRef(address:offset)
+        return chrBanks[mappedBankIndex].rawRef(address:offset)
     }
     
-    func HandlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
+    func handlePpuWrite(_ ppuAddress: UInt16, value: UInt8) {
         if mapper.CanWriteChrMemory() {
-            AccessChrMem(ppuAddress:ppuAddress,value:value)
+            accessChrMem(ppuAddress:ppuAddress,value:value)
         }
     }
     
-    func AccessChrMem( ppuAddress: UInt16, value: UInt8) {
-        let bankIndex = GetBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
-        let offset = GetBankOffset(address: ppuAddress, bankSize: kChrBankSize)
+    func accessChrMem( ppuAddress: UInt16, value: UInt8) {
+        let bankIndex = getBankIndex(address: ppuAddress, baseAddress: PpuMemory.kChrRomBase, bankSize: kChrBankSize)
+        let offset = getBankOffset(address: ppuAddress, bankSize: kChrBankSize)
         let mappedBankIndex = mapper.GetMappedChrBankIndex(ppuBankIndex: bankIndex)
-        chrBanks[Int(mappedBankIndex)].Write(address: offset, value: value)
+        chrBanks[Int(mappedBankIndex)].write(address: offset, value: value)
     }
     
-    func HandleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
+    func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         if cpuAddress >= CpuMemory.kPrgRomBase {
-            return AccessPrgMem(cpuAddress)
+            return accessPrgMem(cpuAddress)
         }
         else if cpuAddress >= CpuMemory.kSaveRamBase {
             return AccessSavMem(cpuAddress)
@@ -50,7 +50,7 @@ class Cartridge: ICartridge {
         return 0
     }
     
-    func HandleCpuWrite(_ cpuAddress: UInt16, value: UInt8) {
+    func handleCpuWrite(_ cpuAddress: UInt16, value: UInt8) {
         mapper.OnCpuWrite(cpuAddress: cpuAddress, value: value)
         if cpuAddress >= CpuMemory.kPrgRomBase {
             if mapper.CanWritePrgMemory() {
@@ -67,53 +67,45 @@ class Cartridge: ICartridge {
         }
     }
     
-    func GetBankIndex(address: UInt16, baseAddress: UInt16, bankSize: UInt16) -> Int {
+    func getBankIndex(address: UInt16, baseAddress: UInt16, bankSize: UInt16) -> Int {
         let firstBankIndex = baseAddress / bankSize
         return Int((address / bankSize) - firstBankIndex)
     }
     
-    func GetBankOffset(address: UInt16, bankSize: UInt16) -> UInt16 {
+    func getBankOffset(address: UInt16, bankSize: UInt16) -> UInt16 {
         return address & (bankSize - 1)
     }
     
-    func AccessPrgMemEx(_ cpuAddress: UInt16, readValue:inout UInt8) {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+    func accessPrgMem(_ cpuAddress: UInt16) -> UInt8 {
+        let bankIndex = getBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let offset = getBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
         let mappedBankIndex = mapper.GetMappedPrgBankIndex(Int(bankIndex))
         let memory = prgBanks[mappedBankIndex]
-        readValue = memory.RawRef(address: Int(offset))
-    }
-    
-    func AccessPrgMem(_ cpuAddress: UInt16) -> UInt8 {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
-        let mappedBankIndex = mapper.GetMappedPrgBankIndex(Int(bankIndex))
-        let memory = prgBanks[mappedBankIndex]
-        return memory.RawRef(address: Int(offset))
+        return memory.rawRef(address: Int(offset))
     }
     
     func AccessPrgMem(_ cpuAddress: UInt16, value: UInt8) {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
+        let bankIndex = getBankIndex(address: cpuAddress, baseAddress: CpuMemory.kPrgRomBase, bankSize: kPrgBankSize)
+        let offset = getBankOffset(address: cpuAddress, bankSize: kPrgBankSize)
         let mappedBankIndex = mapper.GetMappedPrgBankIndex(Int(bankIndex))
         let memory = prgBanks[mappedBankIndex]
-        memory.Write(address: offset, value: value)
+        memory.write(address: offset, value: value)
     }
     
     func AccessSavMem(_ cpuAddress: UInt16,value: UInt8) {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
+        let bankIndex = getBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
+        let offset = getBankOffset(address: cpuAddress, bankSize: kSavBankSize)
         let mappedBankIndex = mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
         let memory = savBanks[Int(mappedBankIndex)]
-        memory.Write(address: offset, value: value)
+        memory.write(address: offset, value: value)
     }
     
     func AccessSavMem(_ cpuAddress: UInt16) -> UInt8 {
-        let bankIndex = GetBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
-        let offset = GetBankOffset(address: cpuAddress, bankSize: kSavBankSize)
+        let bankIndex = getBankIndex(address: cpuAddress, baseAddress: CpuMemory.kSaveRamBase, bankSize: kSavBankSize)
+        let offset = getBankOffset(address: cpuAddress, bankSize: kSavBankSize)
         let mappedBankIndex = mapper.GetMappedSavBankIndex(cpuBankIndex: bankIndex)
         let memory = savBanks[Int(mappedBankIndex)]
-        return memory.Read(offset)
+        return memory.read(offset)
     }
     
     func loadFile() {
@@ -210,7 +202,7 @@ class Cartridge: ICartridge {
         }
     }
     
-    func GetNameTableMirroring() -> NameTableMirroring {
+    func getNameTableMirroring() -> NameTableMirroring {
         return cartNameTableMirroring
     }
     

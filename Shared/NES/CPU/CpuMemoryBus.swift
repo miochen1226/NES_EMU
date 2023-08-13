@@ -64,35 +64,35 @@ class CpuMemoryBus {
         self.cpuInternalRam = cpuInternalRam
     }
     
-    func Read(_ cpuAddress: UInt16) -> UInt8 {
+    func read(_ cpuAddress: UInt16) -> UInt8 {
         if cpuAddress >= CpuMemory.kExpansionRomBase {
-            return cartridge!.HandleCpuRead(cpuAddress)
+            return cartridge!.handleCpuRead(cpuAddress)
         }
         else if cpuAddress >= CpuMemory.kCpuRegistersBase {
-            return cpu!.HandleCpuRead(cpuAddress)
+            return cpu!.handleCpuRead(cpuAddress)
         }
         else if cpuAddress >= CpuMemory.kPpuRegistersBase {
-            return ppu!.HandleCpuRead(cpuAddress)
+            return ppu!.handleCpuRead(cpuAddress)
         }
 
-        return cpuInternalRam!.HandleCpuRead(cpuAddress)
+        return cpuInternalRam!.handleCpuRead(cpuAddress)
     }
     
-    func Write(cpuAddress: UInt16, value: UInt8) {
+    func write(cpuAddress: UInt16, value: UInt8) {
         if cpuAddress >= CpuMemory.kExpansionRomBase {
-            cartridge!.HandleCpuWrite(cpuAddress, value: value)
+            cartridge!.handleCpuWrite(cpuAddress, value: value)
             return
         }
         else if cpuAddress >= CpuMemory.kCpuRegistersBase {
-            cpu!.HandleCpuWrite(cpuAddress, value: value)
+            cpu!.handleCpuWrite(cpuAddress, value: value)
             return
         }
         else if cpuAddress >= CpuMemory.kPpuRegistersBase {
-            ppu!.HandleCpuWrite(cpuAddress, value: value)
+            ppu!.handleCpuWrite(cpuAddress, value: value)
             return
         }
 
-        cpuInternalRam!.HandleCpuWrite(cpuAddress, value: value)
+        cpuInternalRam!.handleCpuWrite(cpuAddress, value: value)
     }
     
     var cpu:ICpu?
