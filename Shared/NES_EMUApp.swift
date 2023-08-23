@@ -32,13 +32,15 @@ struct NES_EMUApp: App {
         }
     }
  
-    func handleStop()
-    {
+    func handleStop() {
         nes.stop()
     }
     
-    func handleResume()
-    {
+    func handleResume() {
         nes.start()
     }
+}
+
+func testApp() {
+    print("TEST")
 }

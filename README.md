@@ -13,10 +13,9 @@ Pracetice implement NES emu with swift ,  just for fun
 - 2.Add Virtual Game Controller for iOS
 - 3.[Hack] change sprite limit per line from 8 to 64 
   > <img src="./Image/SnapShot/2023-08-11.png">
-  
+    <a href="https://www.youtube.com/watch?v=kpTZFsyE5VQ">Demo video</a>
 ## 7/27/2023
 -  1.correct pulseWave implementation
-	 > <a href="https://www.youtube.com/shorts/792qbxuuFA4">Demo video</a>
 -  2.Add keyboard control for OSX
     - "a": Left
     - "d": Right
