@@ -51,8 +51,8 @@ class AudioDriver: NSObject {
     var audioUnitPlayer: AudioUnitPlayer!
     required override init() {
         super.init()
-        audioUnitPlayer = AudioUnitPlayer(frameProvider: nesFrameProvider)
-        audioUnitPlayer.start()
+        //audioUnitPlayer = AudioUnitPlayer(frameProvider: nesFrameProvider)
+        //audioUnitPlayer.start()
     }
     
     func enqueue(inputFrame: Float32)

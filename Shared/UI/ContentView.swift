@@ -25,11 +25,11 @@ struct ContentView: View {
             VirtualControllerView()
 #else
             GameView(scene: scene).frame(width: nil, height: nil,alignment: .top)
-            /*
+            
             Text(labenFps).position(x: 40, y: 20).onReceive(timer) { _ in
                 updateFps()
             }
-            */
+            
 #endif
         }.background(Color.black)
         

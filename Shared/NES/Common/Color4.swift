@@ -22,8 +22,19 @@ class Color4:NSObject
     var d_r:UInt8 = 0
     var d_g:UInt8 = 0
     var d_b:UInt8 = 0
-    var d_a:UInt8 = 255
+    var d_a:UInt8 = 0
 
+    override init()
+    {
+        super.init()
+    }
+    init(pixelColor: PixelColor) {
+        super.init()
+        d_r = pixelColor.d_r
+        d_g = pixelColor.d_g
+        d_b = pixelColor.d_b
+        d_a = pixelColor.d_a
+    }
     func SetRGBA( r:UInt8,  g:UInt8,  b:UInt8,  a:UInt8)
     {
         d_r = r

@@ -7,12 +7,32 @@
 
 import Foundation
 
-class Ppu: IPpu {
+class Ppu: NSObject, IPpu {
    
     func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer) {
         self.renderer = renderer
         self.ppuMemoryBus = ppuMemoryBus
         self.nes = nes
+        
+        
+        
+    }
+    
+    override init() {
+        super.init()
+        initRawBgSprite()
+    }
+    
+    func initRawBgSprite() {
+        //For SpriteKit use
+        rawBgSprite8x8 = UnsafeMutablePointer<[Sprite8x8]>.allocate(capacity: 960)
+        var array:[Sprite8x8] = []
+        
+        for _ in 0 ..< 960 {
+            let sprite8x8 = Sprite8x8()
+            array.append(sprite8x8)
+        }
+        rawBgSprite8x8.initialize(to: array)
     }
     
     func reset()
@@ -29,11 +49,22 @@ class Ppu: IPpu {
         writePpuRegister(CpuMemory.kPpuVRamAddressReg1, value: 0)
         writePpuRegister(CpuMemory.kPpuVRamIoReg, value: 0)
         
-        spriteFetchData.removeAll()
+        arraySpriteFetchData.removeAll()
         for _ in 0 ..< 64 {
-            spriteFetchData.append(SpriteFetchData.init())
+            arraySpriteFetchData.append(SpriteFetchData.init())
         }
         
+        
+        
+        
+        for _ in 0 ..< 64 {
+            rawSpriteObj.append(SpriteObj.init())
+        }
+        
+        rawTileFetchData = UnsafeMutablePointer<BGSpriteData>.allocate(capacity: 32*30*8)
+        rawTileFetchDataDisplay = UnsafeMutablePointer<BGSpriteData>.allocate(capacity: 32*30*8)
+        
+        rawTileFetchDataTemp = UnsafeMutablePointer<BGSpriteData>.allocate(capacity: 32*30*8)
         vramAndScrollFirstWrite = true
 
         // Not necessary but helps with debugging
@@ -45,6 +76,22 @@ class Ppu: IPpu {
         cycle = 0
         evenFrame = true
         vblankFlagSetThisFrame = false
+    }
+    
+    func getTileFetchDataDisplay()->UnsafeMutablePointer<BGSpriteData>
+    {
+        lock.lock()
+        memcpy(rawTileFetchDataDisplay,rawTileFetchDataTemp, MemoryLayout<BGSpriteData>.stride*32*30*8)
+        lock.unlock()
+        return rawTileFetchDataDisplay
+    }
+    
+    let lock = NSLock()
+    func saveTileFetchDataDisplay()
+    {
+        lock.lock()
+        memcpy(rawTileFetchDataTemp,rawTileFetchData, MemoryLayout<BGSpriteData>.stride*32*30*8)
+        lock.unlock()
     }
     
     func yXtoPpuCycle(y: UInt32, x: UInt32) -> UInt32 {
@@ -257,9 +304,17 @@ class Ppu: IPpu {
         let isSprite8x16:Bool = ppuControlReg1.test(PpuControl1.SpriteSize8x16)
         
         var spriteHeight: UInt8 = 8
+        
         if isSprite8x16 {
             spriteHeight = 16
         }
+        /*
+        if isSprite8x16 {
+            print("isSprite8x16->YES performSpriteEvaluation")
+        }
+        else {
+            print("isSprite8x16->NO performSpriteEvaluation")
+        }*/
         
         // Reset sprite vars for current scanline
         numSpritesToRender = 0
@@ -268,16 +323,19 @@ class Ppu: IPpu {
         var n:Int = 0; // Sprite [0-63] in OAM
         var n2 = numSpritesToRender // Sprite [0-7] in OAM2
 
-        while n2 < 64 {
+        while n2 < 8 {
             let sprite = oam.getSprite(n)
             let spriteY: UInt8 = sprite.bmpLow
-            var sprite2 = SpriteData()
+            var sprite2 = SpriteDataEX()
             sprite2.bmpLow = spriteY // (1)
             if isSpriteInRangeY(y: y, spriteY: spriteY, spriteHeight: spriteHeight) {
                 sprite2.bmpHigh = sprite.bmpHigh
                 sprite2.attributes = sprite.attributes
                 sprite2.x = sprite.x
+                sprite2.oamIndex = n
                 oam2.setSprite(n2, spriteData: sprite2)
+                
+                                
                 if n == 0 {
                     renderSprite0 = true
                 }
@@ -348,6 +406,14 @@ class Ppu: IPpu {
         
         let isSprite8x16 = ppuControlReg1.test(PpuControl1.SpriteSize8x16)
 
+        /*
+        if isSprite8x16 {
+            print("isSprite8x16->YES fetchSpriteData")
+        }
+        else {
+            print("isSprite8x16->NO fetchSpriteData")
+        }
+        */
         if numSpritesToRender == 0 {
             return
         }
@@ -435,16 +501,23 @@ class Ppu: IPpu {
             let tileOffset:UInt16 = tO16(tileIndex) * 16
             let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(yOffset)
             let byte2Address:UInt16 = byte1Address + 8
-            spriteFetchData[n].bmpLow = ppuMemoryBus!.read(byte1Address)
-            spriteFetchData[n].bmpHigh = ppuMemoryBus!.read(byte2Address)
-            spriteFetchData[n].attributes = sprite.attributes
-            spriteFetchData[n].x = sprite.x
-            
+            arraySpriteFetchData[n].bmpLow = ppuMemoryBus!.read(byte1Address)
+            arraySpriteFetchData[n].bmpHigh = ppuMemoryBus!.read(byte2Address)
+            arraySpriteFetchData[n].attributes = sprite.attributes
+            arraySpriteFetchData[n].x = sprite.x
+            arraySpriteFetchData[n].oamIndex = sprite.oamIndex
             if (flipHorz)
             {
-                spriteFetchData[n].bmpLow = flipBits(spriteFetchData[n].bmpLow)
-                spriteFetchData[n].bmpHigh = flipBits(spriteFetchData[n].bmpHigh)
+                arraySpriteFetchData[n].bmpLow = flipBits(arraySpriteFetchData[n].bmpLow)
+                arraySpriteFetchData[n].bmpHigh = flipBits(arraySpriteFetchData[n].bmpHigh)
             }
+            
+            var spriteData = SpriteData()
+            spriteData.x = sprite.x
+            spriteData.bmpLow = sprite.bmpLow
+            spriteData.bmpHigh = sprite.bmpHigh
+            spriteData.attributes = sprite.attributes
+            self.fillSpriteObj(oamIndex: sprite.oamIndex, spriteData: spriteData,isSprite8x16:isSprite8x16)
         }
     }
     
@@ -455,6 +528,70 @@ class Ppu: IPpu {
     }
     
     var mapColorUse:[UInt8:Bool] = [:]
+    
+    func FetchBackgroundTileDataToArray(x: Int, y: Int) {
+        // Load bg tile row data (2 bytes) at v into pipeline
+        let v = vramAddress
+        let patternTableAddress:UInt16 = PpuControl1.getBackgroundPatternTableAddress(ppuControlReg1.value())
+        let tileIndexAddress:UInt16 = 0x2000 | (v & 0x0FFF)
+        let attributeAddress:UInt16 = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
+        
+        
+        assert(attributeAddress >= PpuMemory.kAttributeTable0 && attributeAddress < PpuMemory.kNameTablesEnd)
+        
+        let tileIndex:UInt8 = ppuMemoryBus!.read(tileIndexAddress)
+        
+        let tileOffset:UInt16 = tO16(tileIndex) * 16
+        let fineY:UInt8 = GetVRamAddressFineY(v)
+        let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(fineY)
+        let byte2Address:UInt16 = byte1Address + 8
+
+        let attribute:UInt8 = ppuMemoryBus!.read(attributeAddress)
+        
+        let bmpLow = ppuMemoryBus!.read(byte1Address)
+        let bmpHigh = ppuMemoryBus!.read(byte2Address)
+        
+        let attributeShift:UInt8 = UInt8(((v & 0x40) >> 4) | (v & 0x2))
+        let paletteHighBits:UInt8 = (attribute >> attributeShift) & 0x3
+
+        
+        bgTileFetchDataPipeline_0.bmpLow = bgTileFetchDataPipeline_1.bmpLow
+        bgTileFetchDataPipeline_0.bmpHigh = bgTileFetchDataPipeline_1.bmpHigh
+        bgTileFetchDataPipeline_0.paletteHighBits = bgTileFetchDataPipeline_1.paletteHighBits
+        
+        bgTileFetchDataPipeline_1.bmpLow = bmpLow
+        bgTileFetchDataPipeline_1.bmpHigh = bmpHigh
+        bgTileFetchDataPipeline_1.paletteHighBits = paletteHighBits
+        
+        let realY = y
+        
+        var realX = x + 8
+        if x == 248 {
+            realX = 0
+        }
+        if x == 256 {
+            realX = 8
+        }
+        
+        if realY < 240 && realX < 256 {
+            let index = (239-realY)*32+realX/8
+            //32*30
+            //print("X:"+String(realX))
+            rawTileFetchData[index].bmpLow = bmpLow
+            rawTileFetchData[index].bmpHigh = bmpHigh
+            rawTileFetchData[index].paletteHighBits = paletteHighBits
+            rawTileFetchData[index].x = realX
+            rawTileFetchData[index].y = realY
+            rawTileFetchData[index].isValid = true
+            
+            if((x/8) == 0)
+            {
+                //rawTileFetchData[index].isValid = false
+            }
+        }
+        
+    }
+    
     func FetchBackgroundTileData()
     {
         // Load bg tile row data (2 bytes) at v into pipeline
@@ -561,7 +698,7 @@ class Ppu: IPpu {
             return false
         }
     }
-    
+    /*
     func renderPixel(x:UInt32, y: UInt32) {
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
         var bgRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground))
@@ -589,6 +726,7 @@ class Ppu: IPpu {
             // Mux uses fine X to select a bit from shift registers
             let muxMask:UInt16 = UInt16(1 << (7 - fineX))
 
+            //print(String(x) + "->" + String(fineX))
             // Instead of actually shifting every cycle, we rebuild the shift register values
             // for the current cycle (using the x value)
             //@TODO: Optimize by storing 16 bit values for low and high bitmap bytes and shifting every cycle
@@ -618,7 +756,7 @@ class Ppu: IPpu {
         {
             if numSpritesToRender != 0 {
                 for n in 0 ..< numSpritesToRender {
-                    var spriteData = spriteFetchData[n]
+                    var spriteData = arraySpriteFetchData[n]
                     if isHitSprite(x:x,spriteData: spriteData) {
                         if !foundSprite {
                             // Compose "sprite color" (0-3) from high bit in bitmap bytes
@@ -642,7 +780,7 @@ class Ppu: IPpu {
                         spriteData.bmpLow = spriteData.bmpLow << 1
                         spriteData.bmpHigh = spriteData.bmpHigh << 1
                         
-                        spriteFetchData[n] = spriteData
+                        arraySpriteFetchData[n] = spriteData
                     }
                 }
             }
@@ -678,6 +816,107 @@ class Ppu: IPpu {
                 renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
 
+            if (isSprite0)
+            {
+                ppuStatusReg.set(PpuStatus.PpuHitSprite0)
+            }
+        }
+    }*/
+    
+    func renderPixel(x:UInt32, y: UInt32) {
+        // See http://wiki.nesdev.com/w/index.php/PPU_rendering
+        var bgRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground))
+        var spriteRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderSprites))
+        
+        // Consider bg/sprites as disabled (for this pixel) if we're not supposed to render it in the left-most 8 pixels
+        if !ppuControlReg2.test(UInt8(PpuControl2.BackgroundShowLeft8)) && x < 8 {
+            bgRenderingEnabled = false
+        }
+
+        if !ppuControlReg2.test(UInt8(PpuControl2.SpritesShowLeft8)) && x < 8 {
+            spriteRenderingEnabled = false
+        }
+        
+        
+        
+        // Get the background pixel
+        var bgPaletteHighBits:UInt8 = 0
+        var bgPaletteLowBits:UInt8 = 0
+        
+        if (bgRenderingEnabled)
+        {
+            let currTile = bgTileFetchDataPipeline_0
+            let nextTile = bgTileFetchDataPipeline_1
+
+            // Mux uses fine X to select a bit from shift registers
+            let muxMask:UInt16 = UInt16(1 << (7 - fineX))
+
+            //print(String(x) + "->" + String(fineX))
+            // Instead of actually shifting every cycle, we rebuild the shift register values
+            // for the current cycle (using the x value)
+            //@TODO: Optimize by storing 16 bit values for low and high bitmap bytes and shifting every cycle
+            let xShift:UInt8 = UInt8(x % 8)
+            let shiftRegLow:UInt8 = (currTile.bmpLow << xShift) | (nextTile.bmpLow >> (8 - xShift))
+            let shiftRegHigh:UInt8 = (currTile.bmpHigh << xShift) | (nextTile.bmpHigh >> (8 - xShift));
+
+            bgPaletteLowBits = (testBits01(target: muxMask,value: shiftRegHigh) << 1) | (testBits01(target: muxMask,value: shiftRegLow))
+
+            if xShift + fineX < 8 {
+                bgPaletteHighBits = currTile.paletteHighBits
+            }
+            else
+            {
+                bgPaletteHighBits = nextTile.paletteHighBits
+            }
+        }
+        
+        // Get the potential sprite pixel
+        var foundSprite = false
+        var spriteHasBgPriority = false
+        var isSprite0 = false
+        var sprPaletteHighBits:UInt8 = 0
+        var sprPaletteLowBits:UInt8 = 0
+        
+        if spriteRenderingEnabled && numSpritesToRender != 0 {
+            for n in 0 ..< numSpritesToRender {
+                var spriteData = arraySpriteFetchData[n]
+                if isHitSprite(x:x,spriteData: spriteData) {
+                    if !foundSprite {
+                        // Compose "sprite color" (0-3) from high bit in bitmap bytes
+                        sprPaletteLowBits = (testBits01(target: UInt16(spriteData.bmpHigh), value: 0x80) << 1) | (testBits01(target: UInt16(spriteData.bmpLow), value: 0x80))
+                        
+                        // First non-transparent pixel moves on to multiplexer
+                        
+                        if sprPaletteLowBits != 0 {
+                            foundSprite = true
+                            sprPaletteHighBits = UInt8(readBits(target: UInt16(spriteData.attributes), value: UInt8(0x3))) //@TODO: cache this in spriteData
+                            spriteHasBgPriority = testBits(target: UInt16(spriteData.attributes), value: BIT(5))
+                            
+                            
+                            if renderSprite0 && n == 0 {
+                                isSprite0 = true
+                            }
+                        }
+                    }
+
+                    
+                    // Shift out high bits - do this for all (overlapping) sprites in range
+                    spriteData.bmpLow = spriteData.bmpLow << 1
+                    spriteData.bmpHigh = spriteData.bmpHigh << 1
+                    
+                    
+                    //spriteFetchData[n] = spriteData
+                    
+                }
+            }
+        }
+        
+        if (bgPaletteLowBits == 0)
+        {
+            
+        }
+        else
+        {
             if (isSprite0)
             {
                 ppuStatusReg.set(PpuStatus.PpuHitSprite0)
@@ -790,6 +1029,7 @@ class Ppu: IPpu {
                     else if x == 256 {
                         // Cycles 65-256: Sprite evaluation
                         performSpriteEvaluation(x: x, y: y)
+                        
                     }
                     else if (x == 260)
                     {
@@ -826,8 +1066,8 @@ class Ppu: IPpu {
                         let lastFetchCycle = (x >= 8) && (x % 8 == 0)
 
                         if lastFetchCycle {
-                            FetchBackgroundTileData()
-                            
+                            //FetchBackgroundTileData()
+                            FetchBackgroundTileDataToArray(x: Int(x), y: Int(y))
                             // Data for v was just fetched, so we can now increment it
                             if x != 256 {
                                 incHoriVRamAddress(&vramAddress)
@@ -852,6 +1092,8 @@ class Ppu: IPpu {
                     //@TODO: Do this on last frame of post-render line?
                     if y == 239 && x == 339 {
                         completedFrame = true
+                        saveTileFetchDataDisplay()
+                        spriteObjs = self.getSpriteObjs()
                         onFrameComplete()
                     }
                 }
@@ -963,16 +1205,184 @@ class Ppu: IPpu {
     var vblankFlagSetThisFrame: Bool = false
     var nes:Nes? = nil
     var ppuMemoryBus: PpuMemoryBus? = nil
-    var spriteFetchData: [SpriteFetchData] = []
+    var arraySpriteFetchData: [SpriteFetchData] = []
     let nameTables = NameTableMemory.init(initSize: KB(2))
     let kScreenWidth:UInt32 = 256
     let kScreenHeight:UInt32 = 240
     var renderSprite0 = false
     var oam = OAM()
-    var oam2 = OAM()
+    var oam2 = OAMEX()
     let kNumPaletteColors:UInt = 64
     var paletteColors:UnsafeMutablePointer<PixelColor>!
     var bgTileFetchDataPipeline_0 = BgTileFetchData.init()
     var bgTileFetchDataPipeline_1 = BgTileFetchData.init()
     
+    var rawSpriteObj:[SpriteObj] = []//:UnsafeMutablePointer<SpriteObj>!
+    var rawTileFetchData:UnsafeMutablePointer<BGSpriteData>!
+    var rawTileFetchDataDisplay:UnsafeMutablePointer<BGSpriteData>!
+    var rawTileFetchDataTemp:UnsafeMutablePointer<BGSpriteData>!
+    var sprLock = NSLock()
+    
+    var spriteObjs:[SpriteObj] = []
+    
+    func getSpriteObjsEx() -> [SpriteObj] {
+        return spriteObjs
+    }
+    
+    var rawBgSprite8x8:UnsafeMutablePointer<[Sprite8x8]>!
+}
+
+extension Ppu {
+    func getBgSprite8x8s(index: Int) -> Sprite8x8 {
+        return rawBgSprite8x8.pointee[index]
+    }
+}
+
+extension Ppu {
+    
+    func cleanAllSprite() {
+        sprLock.lock()
+        for i in 0 ..< 64 {
+            rawSpriteObj[i].haveData = false
+        }
+        sprLock.unlock()
+    }
+    
+    
+    func getSpriteObjs() -> [SpriteObj] {
+        
+        var array:[SpriteObj] = []
+        for i in 0 ..< 64 {
+            let spriteObj = rawSpriteObj[i]
+            if spriteObj.haveData {
+                array.append(spriteObj)
+            }
+        }
+        //print("getSpriteObjs->" + String(array.count))
+        return array
+    }
+    
+    func fillSpriteObj(oamIndex:Int, spriteData: SpriteData,isSprite8x16:Bool) {
+        if rawSpriteObj[oamIndex].haveData == false {
+            rawSpriteObj[oamIndex] = convertToSpriteObj(spriteData: spriteData,isSprite8x16:isSprite8x16)
+        }
+    }
+    
+    func convertToSpriteObj( spriteData: SpriteData, isSprite8x16: Bool) -> SpriteObj {
+        let byte1:UInt8 = spriteData.bmpHigh
+        let attribs:UInt8 = spriteData.attributes
+        let flipHorz:Bool = testBits(target: UInt16(attribs), value: BIT(6))
+        //let flipVert:Bool = testBits(target: UInt16(attribs), value: BIT(7))
+
+        var patternTableAddress:UInt16 = 0
+        var tileIndex:UInt8 = 0
+        
+        var spriteObj = SpriteObj()
+        spriteObj.x = Int(spriteData.x)
+        spriteObj.y = Int(spriteData.bmpLow)
+        
+        if isSprite8x16 {
+            spriteObj.height = 16
+            spriteObj.width = 8
+            if testBits(target: UInt16(byte1), value: BIT(0)) {
+                patternTableAddress = 0x1000
+            }
+            else {
+                patternTableAddress = 0x0000
+            }
+            tileIndex = UInt8(readBits(target: UInt16(byte1), value: ~BIT(0)))
+        }
+        else {
+            spriteObj.height = 8
+            spriteObj.width = 8
+            
+            if ppuControlReg1.test(PpuControl1.SpritePatternTableAddress8x8) {
+                patternTableAddress = 0x1000
+            }
+            else {
+                patternTableAddress = 0x0000
+            }
+            
+            tileIndex = byte1
+        }
+        
+        for y in 0 ..< 8 {
+            let yOffset:UInt8 = UInt8(y)
+            var sprPaletteLowBits:UInt8 = 0
+            var sprPaletteHighBits:UInt8 = 0
+            
+            let tileOffset:UInt16 = tO16(tileIndex) * 16
+            let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(yOffset)
+            let byte2Address:UInt16 = byte1Address + 8
+            
+            var bmpLow = ppuMemoryBus!.read(byte1Address)
+            var bmpHigh = ppuMemoryBus!.read(byte2Address)
+            let attributes = spriteData.attributes
+            if flipHorz {
+                bmpLow = flipBits(bmpLow)
+                bmpHigh = flipBits(bmpHigh)
+            }
+            
+            for _ in 0 ..< 8 {
+                var color:Color4 = Color4.init()
+                sprPaletteLowBits = (testBits01(target: UInt16(bmpHigh), value: 0x80) << 1) | (testBits01(target: UInt16(bmpLow), value: 0x80))
+                
+                if sprPaletteLowBits != 0 {
+                    sprPaletteHighBits = UInt8(readBits(target: UInt16(attributes), value: UInt8(0x3)))
+                }
+                
+                if sprPaletteLowBits != 0 {
+                    let pixelColor = getPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette)
+                    color = Color4.init(pixelColor: pixelColor)
+                    
+                }
+                
+                bmpLow = bmpLow << 1
+                bmpHigh = bmpHigh << 1
+                spriteObj.rawColors.append(color)
+            }
+        }
+        
+        //another 8x8
+        if isSprite8x16 {
+            for y in 0 ..< 8 {
+                let yOffset:UInt8 = UInt8(y)
+                var sprPaletteLowBits:UInt8 = 0
+                var sprPaletteHighBits:UInt8 = 0
+                
+                let tileOffset:UInt16 = tO16(tileIndex+1) * 16
+                let byte1Address:UInt16 = patternTableAddress + tileOffset + UInt16(yOffset)
+                let byte2Address:UInt16 = byte1Address + 8
+                
+                var bmpLow = ppuMemoryBus!.read(byte1Address)
+                var bmpHigh = ppuMemoryBus!.read(byte2Address)
+                let attributes = spriteData.attributes
+                if flipHorz {
+                    bmpLow = flipBits(bmpLow)
+                    bmpHigh = flipBits(bmpHigh)
+                }
+                for _ in 0 ..< 8 {
+                    var color:Color4 = Color4.init()
+                    sprPaletteLowBits = (testBits01(target: UInt16(bmpHigh), value: 0x80) << 1) | (testBits01(target: UInt16(bmpLow), value: 0x80))
+                    
+                    if sprPaletteLowBits != 0 {
+                        sprPaletteHighBits = UInt8(readBits(target: UInt16(attributes), value: UInt8(0x3)))
+                    }
+                    
+                    if sprPaletteLowBits != 0 {
+                        let pixelColor = getPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette)
+                        color = Color4.init(pixelColor: pixelColor)
+                    }
+                    
+                    bmpLow = bmpLow << 1
+                    bmpHigh = bmpHigh << 1
+                    
+                    spriteObj.rawColors.append(color)
+                }
+            }
+        }
+        
+        spriteObj.haveData = true
+        return spriteObj
+    }
 }
