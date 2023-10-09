@@ -1,5 +1,5 @@
 # NES_EMU
-Pracetice implement NES emu with swift ,  just for fun
+Practice implement NES emu with swift ,  just for fun
 
 # Ref
 - https://github.com/amaiorano/nes-emu
