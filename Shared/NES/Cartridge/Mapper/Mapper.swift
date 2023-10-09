@@ -80,6 +80,10 @@ class Mapper {
         nametableMirroring = value
     }
     
+    func GetNameTableMirroring() -> NameTableMirroring {
+        return nametableMirroring
+    }
+    
     func SetPrgBankIndex16k(cpuBankIndexIn:Int, cartBankIndexIn: UInt8) {
         let cpuBankIndex = cpuBankIndexIn * 4
         let cartBankIndex = cartBankIndexIn * 4
@@ -231,6 +235,10 @@ class Mapper {
         chrBankIndices[ppuBankIndex_ + 5] = cartBankIndex_ + 5;
         chrBankIndices[ppuBankIndex_ + 6] = cartBankIndex_ + 6;
         chrBankIndices[ppuBankIndex_ + 7] = cartBankIndex_ + 7;
+    }
+    
+    func PrgMemorySize() -> UInt {
+        return UInt(numPrgBanks) * Mapper.kPrgBankSize
     }
     
     static var kPrgBankCount:UInt = 8

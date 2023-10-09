@@ -119,7 +119,15 @@ class Cartridge: ICartridge {
         //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. (Japan, USA).nes")
         //let filepath = bundleUrl!.appendingPathComponent("Donkey Kong (Japan).nes")
         //let filepath = bundleUrl!.appendingPathComponent("Ice Climber (Japan).nes")
-        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
+        //Takahashi Meijin no Bouken-jima (Japan).nes
+        //let filepath = bundleUrl!.appendingPathComponent("Blaster Master (USA).nes")
+        
+        
+        let filepath = bundleUrl!.appendingPathComponent("Chou-Wakusei Senki - MetaFight (J).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
+        //Chou-Wakusei Senki - MetaFight (J)
+        
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Circus Charlie (J) [p1]", ofType: "nes")
         //if let filepath = Bundle.main.path(forResource: "Ice Climber (Japan)", ofType: "nes")
@@ -188,6 +196,10 @@ class Cartridge: ICartridge {
                 mapper = Mapper0()
                 mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
             }
+            else if mN == 1 {
+                mapper = Mapper1()
+                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            }
             else if mN == 4 {
                 mapper = Mapper4()
                 mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
@@ -203,6 +215,11 @@ class Cartridge: ICartridge {
     }
     
     func getNameTableMirroring() -> NameTableMirroring {
+        let result = mapper.GetNameTableMirroring()
+        if result != NameTableMirroring.Undefined {
+            return result
+        }
+        
         return cartNameTableMirroring
     }
     
