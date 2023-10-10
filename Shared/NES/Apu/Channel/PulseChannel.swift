@@ -55,10 +55,12 @@ class PulseChannel:BaseChannel {
         if c {
             volumeEnvelope.setConstantVolumeMode(true)
             volumeEnvelope.setConstantVolume(UInt16(vvvv))
+            //print("volumeEnvelope c true->" + String(vvvv))
         }
         else {
             volumeEnvelope.setConstantVolumeMode(false)
             volumeEnvelope.setCounter(UInt16(vvvv))
+            volumeEnvelope.restart()
         }
     }
     
@@ -85,7 +87,7 @@ class PulseChannel:BaseChannel {
         let SSS = readBits8( target:BITS([0,1,2]),value:value)
         sweepUnit.setShiftCount(SSS)
         
-        sweepUnit.restart()
+        //sweepUnit.restart()
     }
     
     func handle40024006(cpuAddress:UInt16, value:UInt8)
@@ -104,11 +106,12 @@ class PulseChannel:BaseChannel {
         //timer 的高 3 位，和 0x4002 / 0x4006 组成完整的计数
         let HHH = readBits8(target: BITS([0,1,2]),value:value)
         timer.setPeriodHigh3(UInt16(HHH))
+        timer.reset()
         
         let LLLL = readBits8( target:BITS([3,4,5,6,7]),value:value) >> 3
         lengthCounter.loadCounterFromLUT(LLLL)
         
-        volumeEnvelope.restart()
+        //volumeEnvelope.restart()
         pulseWaveGenerator.restart()
     }
     
@@ -137,6 +140,7 @@ class PulseChannel:BaseChannel {
         if sweepUnit.silenceChannel() {
             return 0
         }
+        
         if lengthCounter.silenceChannel() {
             return 0
         }
@@ -238,29 +242,15 @@ class SweepUnit {
     
     // Clocked by FrameCounter
     func clock(_ timer: inout ChannelComponent.Timer) {
-        if !enabled {
-            return
-        }
-        
         if reload {
-            if enabled {
-                timer.reset()
-                computeTargetPeriod(timer: &timer)
-                if divider.clock() {
-                    adjustTimerPeriod(timer:&timer)
-                }
-            }
-            
             divider.resetCounter()
             reload = false
         }
-        else {
-            computeTargetPeriod(timer: &timer)
-            if enabled {
-                if divider.clock() {
-                    adjustTimerPeriod(timer:&timer)
-                }
-            }
+        
+        computeTargetPeriod(timer: &timer)
+        //Counter is 0
+        if divider.clock() == true {
+            adjustTimerPeriod(timer:&timer)
         }
     }
     
@@ -268,31 +258,39 @@ class SweepUnit {
         if !enabled {
             return false
         }
-        return isSilenceChannel
+        return false//isSilenceChannel
     }
     
     func computeTargetPeriod(timer: inout ChannelComponent.Timer) {
-        if !enabled {
-            return
-        }
         assert(shiftCount < 8)
-
         let currPeriod = timer.getPeriod()
-        let shiftedPeriod = currPeriod >> shiftCount
-        if (negate) {
+        
+        if negate {
+            let changeAmount = currPeriod >> shiftCount
+            
             // Pulse 1's adder's carry is hardwired, so the subtraction adds the one's complement
             // instead of the expected two's complement (as pulse 2 does)
             //print(String(shiftedPeriod))
             
-            if shiftedPeriod > subtractExtra {
-                let del = (shiftedPeriod - subtractExtra)
-                if currPeriod > del {
-                    targetPeriod = currPeriod - (shiftedPeriod - subtractExtra)
+            if changeAmount > subtractExtra {
+                if currPeriod < changeAmount + subtractExtra {
+                    targetPeriod = 0
+                }
+                else {
+                    targetPeriod = currPeriod - changeAmount - subtractExtra
                 }
             }
         }
         else {
-            targetPeriod = currPeriod + shiftedPeriod
+            
+            let changeAmount = currPeriod >> shiftCount
+            if shiftCount == 0  && changeAmount == currPeriod {
+                    targetPeriod = currPeriod + currPeriod
+            }
+            
+            else {
+                targetPeriod = currPeriod + changeAmount
+            }
         }
         
         isSilenceChannel = (currPeriod < 8 || targetPeriod > 0x7FF)
