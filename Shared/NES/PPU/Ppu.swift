@@ -455,8 +455,10 @@ class Ppu: IPpu {
     }
     
     var mapColorUse:[UInt8:Bool] = [:]
-    func FetchBackgroundTileData()
-    {
+    func FetchBackgroundTileData() {
+        if skipRender {
+            return
+        }
         // Load bg tile row data (2 bytes) at v into pipeline
         let v = vramAddress
         let patternTableAddress:UInt16 = PpuControl1.getBackgroundPatternTableAddress(ppuControlReg1.value())
@@ -561,8 +563,11 @@ class Ppu: IPpu {
             return false
         }
     }
-    
+    var skipRender = false
     func renderPixel(x:UInt32, y: UInt32) {
+        if skipRender {
+            return
+        }
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
         var bgRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground))
         var spriteRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderSprites))

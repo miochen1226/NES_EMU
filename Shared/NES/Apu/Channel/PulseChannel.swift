@@ -53,9 +53,11 @@ class PulseChannel:BaseChannel {
         volumeEnvelope.setLoop(l)
         
         if c {
+            volumeEnvelope.setConstantVolumeMode(true)
             volumeEnvelope.setConstantVolume(UInt16(vvvv))
         }
         else {
+            volumeEnvelope.setConstantVolumeMode(false)
             volumeEnvelope.setCounter(UInt16(vvvv))
         }
     }
@@ -131,6 +133,7 @@ class PulseChannel:BaseChannel {
     }
     
     override func getValue() -> Float32 {
+        
         if sweepUnit.silenceChannel() {
             return 0
         }
@@ -157,8 +160,7 @@ class VolumeEnvelope {
         self.loop = loop
     }
     
-    func setConstantVolumeMode(_ mode: Bool)
-    {
+    func setConstantVolumeMode(_ mode: Bool) {
         constantVolumeMode = mode
     }
                 

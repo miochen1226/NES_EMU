@@ -32,17 +32,33 @@ class FrameCounter: NSObject
     }
 
     func AllowInterrupt() {
-        inhibitInterrupt = false
+        inhibitInterrupt = 0
+        enableIRQ = 1
+        
+        printInterruptStatus()
+    }
+    
+    func InhibitInterrupt() {
+        inhibitInterrupt = 1
+        enableIRQ = 0
+        
+        printInterruptStatus()
     }
 
     func handleCpuWrite( cpuAddress: UInt16, value: UInt8) {
         assert(cpuAddress == 0x4017)
 
         let mode = readBits8(target: BIT(7), value: value) >> 7
+        
+        print("0x4017 Mode->" + String(mode));
+        
         setMode(UInt8(mode))
         
-        if testBits(target: BIT(6), value: value) {
+        if testBits(target: BIT(6), value: value) == false {
             AllowInterrupt()
+        }
+        else {
+            InhibitInterrupt()
         }
     }
     
@@ -66,12 +82,21 @@ class FrameCounter: NSObject
         case APU_TO_CPU_CYCLE(14914):
             if numSteps == 4 {
                 //@TODO: set interrupt flag if !inhibit
+                if inhibitInterrupt == 0 {
+                    enableIRQ = 1
+                }
+                printInterruptStatus()
             }
             break
 
         case APU_TO_CPU_CYCLE(14914.5):
             if numSteps == 4 {
                 //@TODO: set interrupt flag if !inhibit
+                if inhibitInterrupt == 0 {
+                    enableIRQ = 1
+                }
+                printInterruptStatus()
+                
                 clockQuarterFrameChips()
                 clockHalfFrameChips()
             }
@@ -80,11 +105,18 @@ class FrameCounter: NSObject
         case APU_TO_CPU_CYCLE(14915):
             if numSteps == 4 {
                 //@TODO: set interrupt flag if !inhibit
+                if inhibitInterrupt == 0 {
+                    enableIRQ = 1
+                }
+                printInterruptStatus()
+                
                 resetCycles = true
             }
             break
 
         case APU_TO_CPU_CYCLE(18640.5):
+            assert(numSteps == 5)
+            
             if numSteps == 5 {
                 clockQuarterFrameChips()
                 clockHalfFrameChips()
@@ -92,6 +124,8 @@ class FrameCounter: NSObject
             break
 
         case APU_TO_CPU_CYCLE(18641):
+            assert(numSteps == 5)
+            
             if numSteps == 5 {
                 resetCycles = true
             }
@@ -109,6 +143,24 @@ class FrameCounter: NSObject
         }
     }
 
+    func TestIQR() -> Bool {
+        
+        if numSteps == 4 {
+            if cpuCycles%4 == 3 {
+                let testIRQ = enableIRQ
+                if testIRQ == 1 {
+                    return true
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    func printInterruptStatus() {
+        //print("interrupt ==>" + String(interrupt) + ",inhibitInterrupt ==>" + String(inhibitInterrupt))
+    }
+    
     func APU_TO_CPU_CYCLE(_ cpuCycle:Float32)->UInt32
     {
         return UInt32(cpuCycle*2)
@@ -127,5 +179,7 @@ class FrameCounter: NSObject
     var apu:Apu?
     var cpuCycles:UInt32 = 0
     var numSteps = 4
-    var inhibitInterrupt = true
+    var inhibitInterrupt:UInt8 = 1
+    var enableIRQ:UInt8 = 0
+    
 }

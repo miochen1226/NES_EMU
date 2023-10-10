@@ -43,6 +43,7 @@ class Nes{
         renderer.initialize()
         cpu.initialize(cpuMemoryBus: cpuMemoryBus)
         ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
+        apu.initialize(nes: self)
         cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
         ppuMemoryBus.initialize(ppu: ppu, cartridge: cartridge)
     }
@@ -195,8 +196,7 @@ class Nes{
         return fpsInfo
     }
     
-    func executeCpuAndPpuFrame()
-    {
+    func executeCpuAndPpuFrame() {
         var completedFrame = false
         cpuMemoryBus.readCount = 0
         var clockCount:UInt32 = 0

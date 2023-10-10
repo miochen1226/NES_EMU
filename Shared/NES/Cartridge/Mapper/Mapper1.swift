@@ -6,15 +6,12 @@
 //
 
 import Foundation
+
 class LoadRegister {
     
     init() {
         Reset()
     }
-    
-    //func LoadRegister() {
-    //    Reset()
-    //}
     
     func Reset() {
         m_value.clearAll()
@@ -32,7 +29,6 @@ class LoadRegister {
         }
         
         m_value.setPos(bitPos: m_bitsWritten, enabled: enable)
-        //m_value.SetPos(m_bitsWritten, (bit & 0x01) != 0);
         m_bitsWritten += 1
     }
     
@@ -72,12 +68,9 @@ class Mapper1: Mapper {
                         UpdatePrgBanks()
                         UpdateChrBanks()
                         UpdateMirroring()
-                    
-                        print("Load register")
                         break
 
                     case 0xA000:
-                        let value = m_loadReg.Value()
                         m_chrReg0.setValue(m_loadReg.Value())
                         
                         // Hijacks CHR reg bit 4 to select PRG 256k bank
@@ -89,13 +82,11 @@ class Mapper1: Mapper {
                         break
 
                     case 0xC000:
-                        let value = m_loadReg.Value()
                         m_chrReg1.setValue(m_loadReg.Value())
-                        //UpdateChrBanks()
+                        UpdateChrBanks()
                         break;
 
                     case 0xE000:
-                        let value = m_loadReg.Value()
                         m_prgReg.setValue(m_loadReg.Value())
                         UpdatePrgBanks()
                         break
@@ -157,7 +148,6 @@ class Mapper1: Mapper {
             if mask > 16 {
                 mask = 16
                 assert(true)
-                print("ERROR")
             }
             var cartBankIndex = m_prgReg.read(BITS([0,1,2,3])) & mask
             var firstBankIndex:UInt8 = 0
@@ -212,8 +202,6 @@ class Mapper1: Mapper {
         ]
 
         let mirroringType = m_controlReg.read(BITS([0,1]))
-        
-        print("mirroringType->"+String(mirroringType))
         SetNameTableMirroring(table[Int(mirroringType)])
     }
 }

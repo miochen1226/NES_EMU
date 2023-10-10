@@ -54,17 +54,27 @@ class ChannelComponent {
         
         func setPeriodLow8(_ value: UInt8) {
             var period:UInt16 = divider.getPeriod()
+            //period = (period & BITS16([8,9,10])) | UInt16(value)
             period = (period & BITS16([8,9,10])) | UInt16(value)
-            setPeriod(UInt16(value))
+            //periodTemp = UInt16(value)
+            setPeriod(period)
+            //print("periodTemp->" + String(periodTemp))
+            //setPeriod(UInt16(value))
+            //divider.resetCounter()
         }
         
+        //var periodTemp:UInt16 = 0
         func setPeriodHigh3(_ value: UInt16) {
             assert(value < BIT(3))
+            
             var period:UInt16 = divider.getPeriod()
             period = (value << 8) | (period & 0xFF)
             
-            setPeriod(UInt16(period))
-            divider.resetCounter()
+            //periodTemp = (value << 8) | (periodTemp & 0xFF)
+            setPeriod(period)
+            //print("periodTemp->" + String(periodTemp))
+            //setPeriod(UInt16(400))
+            //divider.resetCounter()
         }
         
         func setMinPeriod(_ minPeriod: Int){
@@ -99,17 +109,20 @@ class ChannelComponent {
             }
         }
         
+        //DMC use
+        func getEnabled() -> Bool {
+            return enabled
+        }
+        
         func setHalt(_ halt: Bool) {
             self.halt = halt
         }
         
         func loadCounterFromLUT(_ index: UInt8) {
-            if !enabled
-            {
+            if !enabled {
                 return
             }
             counter = UInt16(lut[Int(index)])
-            
         }
         
         func clock() {
@@ -127,13 +140,6 @@ class ChannelComponent {
         }
         
         func silenceChannel() -> Bool {
-            /*
-            if (!m_enabled)
-            {
-                return false
-            }
-             */
-            
             if counter == 0 {
                 return true
             }
@@ -152,8 +158,7 @@ class ChannelComponent {
         ]
     }
     
-    class LinearCounter
-    {
+    class LinearCounter {
         func restart() {
             reload = true
         }
@@ -165,17 +170,14 @@ class ChannelComponent {
         }
         
         func clock() {
-            if (reload)
-            {
+            if reload {
                 divider.resetCounter()
             }
-            else if (divider.getCounter() > 0)
-            {
+            else if divider.getCounter() > 0 {
                 _ = divider.clock()
             }
 
-            if (!control)
-            {
+            if !control {
                 reload = false
             }
         }
@@ -185,12 +187,10 @@ class ChannelComponent {
         }
 
         func silenceChannel() -> Bool {
-            if(getValue() == 0)
-            {
+            if getValue() == 0 {
                 return true
             }
-            else
-            {
+            else {
                 return false
             }
         }

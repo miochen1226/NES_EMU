@@ -29,7 +29,7 @@ class AudioController: NSObject
     
     func initAudioComponent() {
         
-        var audioUnitSubType:UInt32 = getAudioUnitSubType()
+        let audioUnitSubType:UInt32 = getAudioUnitSubType()
 
         
         var audioComponentDesc = AudioComponentDescription(componentType: OSType(kAudioUnitType_Output),

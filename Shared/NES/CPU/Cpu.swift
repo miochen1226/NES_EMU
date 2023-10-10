@@ -97,6 +97,7 @@ class Cpu: CpuRegDef, ICpu {
         cycles = 0
         executePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
         
+        //print(PC)
         let opCode:UInt8 = read8(PC)
         opCodeEntry = opCodeTable[opCode]
 
@@ -370,19 +371,19 @@ class Cpu: CpuRegDef, ICpu {
             break
         case OpCodeEntryTtype.CLC: // CLC Clear carry flag
             P.clear(Carry)
-            break;
+            break
 
         case OpCodeEntryTtype.CLD: // CLD Clear decimal mode
             P.clear(Decimal)
-            break;
+            break
 
         case OpCodeEntryTtype.CLI: // CLI Clear interrupt disable bit
             P.clear(IrqDisabled)
-            break;
+            break
 
         case OpCodeEntryTtype.CLV: // CLV Clear overflow flag
             P.clear(Overflow)
-            break;
+            break
 
         case OpCodeEntryTtype.CMP: // CMP Compare memory and accumulator
             let memValue = getMemValue()
@@ -842,8 +843,10 @@ class Cpu: CpuRegDef, ICpu {
     }
     
     func push8(_ value:UInt8) {
-        write8(address: CpuMemory.kStackBase + UInt16(SP), value: value);
+        write8(address: CpuMemory.kStackBase + UInt16(SP), value: value)
         SP = SP - 1
+        
+        
         if SP == 0xFF {
             NSLog("Stack overflow!");
         }

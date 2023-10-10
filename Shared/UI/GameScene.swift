@@ -73,15 +73,12 @@ class GameScene: SKScene,IRenderScreen {
     }
     
     
-    func renderBG()
-    {
-        if(self.rawBuffer == nil)
-        {
+    func renderBG() {
+        if self.rawBuffer == nil {
             return
         }
         
-        if(bIsBusy)
-        {
+        if bIsBusy {
             return
         }
         

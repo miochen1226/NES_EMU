@@ -96,6 +96,8 @@
 		356CF0932A87C0BF0093A24F /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0912A87C0BF0093A24F /* GameScene.swift */; };
 		356CF0952A87FF780093A24F /* PpuControl2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuControl2.swift */; };
 		356CF0962A87FF780093A24F /* PpuControl2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuControl2.swift */; };
+		35714DD22AD3E5FB004A7A3F /* DmcChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */; };
+		35714DD32AD3E5FB004A7A3F /* DmcChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */; };
 		358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		358D403626C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
 		35B78E2E2A86091100B1E42F /* Mapper4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B78E2D2A86091100B1E42F /* Mapper4.swift */; };
@@ -170,6 +172,7 @@
 		356CF08E2A87BFD70093A24F /* GameScene+GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+GameController.swift"; sourceTree = "<group>"; };
 		356CF0912A87C0BF0093A24F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		356CF0942A87FF780093A24F /* PpuControl2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PpuControl2.swift; sourceTree = "<group>"; };
+		35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DmcChannel.swift; sourceTree = "<group>"; };
 		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
 		35B78E2D2A86091100B1E42F /* Mapper4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mapper4.swift; sourceTree = "<group>"; };
 		35B9C57826C28F9A00E13D57 /* PpuControl1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl1.swift; sourceTree = "<group>"; };
@@ -212,6 +215,7 @@
 				3505EAB42A6F83AE00B14943 /* BaseChannel.swift */,
 				3505EAB72A6F85B600B14943 /* TriangleChannel.swift */,
 				3505EABA2A6F89F300B14943 /* NoiseChannel.swift */,
+				35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */,
 			);
 			path = Channel;
 			sourceTree = "<group>";
@@ -557,6 +561,7 @@
 				358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */,
 				35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5726BF880E00CF18DD /* Mapper.swift in Sources */,
+				35714DD22AD3E5FB004A7A3F /* DmcChannel.swift in Sources */,
 				3530B89426C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
 				3539627C2A83619800CF1E97 /* VirtualConteollerView.swift in Sources */,
 				3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */,
@@ -617,6 +622,7 @@
 				3530FA4726BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3505EAB92A6F85B600B14943 /* TriangleChannel.swift in Sources */,
 				3530FA3E26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
+				35714DD32AD3E5FB004A7A3F /* DmcChannel.swift in Sources */,
 				356CF0932A87C0BF0093A24F /* GameScene.swift in Sources */,
 				35265B3C26C5548F0031E1A6 /* Renderer.swift in Sources */,
 				352BF7612A7295D70093CB65 /* ControllerPorts.swift in Sources */,
@@ -755,8 +761,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-iOS";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 82Q375NBS9;
 				ENABLE_PREVIEWS = YES;
@@ -770,7 +776,7 @@
 				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mio.NES-EMU";
 				PRODUCT_NAME = NES_EMU;
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "NES-EMU-APPSTORE";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
