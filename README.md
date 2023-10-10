@@ -7,6 +7,14 @@ Practice implement NES emu with swift ,  just for fun
   
 # Change log
 
+## 10/10/2023
+- 1.Support Mapper1.
+- 2.Fix apu bugs
+  > <img src="./Image/SnapShot/IMG_8586.PNG">
+  > <img src="./Image/SnapShot/IMG_8587.PNG">
+  > <img src="./Image/SnapShot/IMG_8588.PNG">
+
+
 
 ## 8/11/2023
 - 1.Support Mapper4.
