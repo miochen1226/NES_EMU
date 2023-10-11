@@ -52,6 +52,7 @@ class TriangleChannel: BaseChannel {
         case 0x400B:
             let period = readBits8(target: 0x7, value: value)
             timer.setPeriodHigh3(UInt16(period))
+            // Side effect
             linearCounter.restart()
             lengthCounter.loadCounterFromLUT(value >> 3)
             break

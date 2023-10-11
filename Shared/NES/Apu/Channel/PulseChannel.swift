@@ -52,16 +52,9 @@ class PulseChannel:BaseChannel {
         lengthCounter.setHalt(l)
         volumeEnvelope.setLoop(l)
         
-        if c {
-            volumeEnvelope.setConstantVolumeMode(true)
-            volumeEnvelope.setConstantVolume(UInt16(vvvv))
-            //print("volumeEnvelope c true->" + String(vvvv))
-        }
-        else {
-            volumeEnvelope.setConstantVolumeMode(false)
-            volumeEnvelope.setCounter(UInt16(vvvv))
-            volumeEnvelope.restart()
-        }
+        volumeEnvelope.setConstantVolumeMode(c)
+        volumeEnvelope.setConstantVolume(UInt16(vvvv))
+        volumeEnvelope.setCounter(UInt16(vvvv))
     }
     
     func handle40014005(cpuAddress:UInt16, value: UInt8) {
@@ -87,11 +80,11 @@ class PulseChannel:BaseChannel {
         let SSS = readBits8( target:BITS([0,1,2]),value:value)
         sweepUnit.setShiftCount(SSS)
         
-        //sweepUnit.restart()
+        // Side effect
+        sweepUnit.restart()
     }
     
-    func handle40024006(cpuAddress:UInt16, value:UInt8)
-    {
+    func handle40024006(cpuAddress:UInt16, value:UInt8) {
         //LLLL.LLLL
         //LLLLLLLL
         //timer 的低 8 位（一共 11 位，用于将 cpu 二分频后的时钟继续分频）
@@ -111,7 +104,8 @@ class PulseChannel:BaseChannel {
         let LLLL = readBits8( target:BITS([3,4,5,6,7]),value:value) >> 3
         lengthCounter.loadCounterFromLUT(LLLL)
         
-        //volumeEnvelope.restart()
+        // Side effects...
+        volumeEnvelope.restart()
         pulseWaveGenerator.restart()
     }
     
