@@ -10,7 +10,7 @@ import Foundation
 class NoiseChannel: BaseChannel {
     override func getValue() -> Float32 {
         if shiftRegister.silenceChannel() || lengthCounter.silenceChannel() {
-            return 0;
+            return 0
         }
         
         return Float32(volumeEnvelope.getVolume())
@@ -36,6 +36,9 @@ class NoiseChannel: BaseChannel {
             lengthCounter.setHalt(testBits(target: UInt16(BIT(5)), value: value))
             volumeEnvelope.setConstantVolumeMode(testBits(target: UInt16(BIT(4)), value: value))
             volumeEnvelope.setConstantVolume(readBits(target: BITS16([0, 1, 2, 3]), value: value))
+            
+            //Side effect
+            volumeEnvelope.restart()
             break
 
         case 0x400E:
@@ -45,6 +48,7 @@ class NoiseChannel: BaseChannel {
 
         case 0x400F:
             lengthCounter.loadCounterFromLUT(value >> 3)
+            //Side effect
             volumeEnvelope.restart()
             break
 
@@ -60,7 +64,7 @@ class NoiseChannel: BaseChannel {
     }
     
     let ntscPeriods:[UInt16] = [ 4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068 ]
-    let volumeEnvelope = VolumeEnvelope()
+    let volumeEnvelope = ChannelComponent.VolumeEnvelope()
     let shiftRegister = LinearFeedbackShiftRegister()
 }
 

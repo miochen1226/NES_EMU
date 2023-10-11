@@ -82,13 +82,10 @@ class Cpu: CpuRegDef, ICpu {
         }
     }
     
-    func initialize(cpuMemoryBus:CpuMemoryBus)
-    {
+    func initialize(cpuMemoryBus: CpuMemoryBus) {
         self.cpuMemoryBus = cpuMemoryBus
         let array = OpCodeTable.GetOpCodeTable()
-        for item in array
-        {
-            NSLog(item.getName())
+        for item in array {
             opCodeTable[item.opCode] = item
         }
     }

@@ -200,8 +200,7 @@ class Nes{
         var completedFrame = false
         cpuMemoryBus.readCount = 0
         var clockCount:UInt32 = 0
-        while (!completedFrame)
-        {
+        while (!completedFrame) {
             // Update CPU, get number of cycles elapsed
             var cpuCycles:UInt32 = 0
             cpu.execute(&cpuCycles)

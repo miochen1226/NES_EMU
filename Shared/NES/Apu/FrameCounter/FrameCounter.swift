@@ -49,9 +49,6 @@ class FrameCounter: NSObject
         assert(cpuAddress == 0x4017)
 
         let mode = readBits8(target: BIT(7), value: value) >> 7
-        
-        print("0x4017 Mode->" + String(mode));
-        
         setMode(UInt8(mode))
         
         if testBits(target: BIT(6), value: value) == false {

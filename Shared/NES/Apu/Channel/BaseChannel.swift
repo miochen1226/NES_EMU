@@ -54,27 +54,15 @@ class ChannelComponent {
         
         func setPeriodLow8(_ value: UInt8) {
             var period:UInt16 = divider.getPeriod()
-            //period = (period & BITS16([8,9,10])) | UInt16(value)
             period = (period & BITS16([8,9,10])) | UInt16(value)
-            //periodTemp = UInt16(value)
             setPeriod(period)
-            //print("periodTemp->" + String(periodTemp))
-            //setPeriod(UInt16(value))
-            //divider.resetCounter()
         }
         
-        //var periodTemp:UInt16 = 0
         func setPeriodHigh3(_ value: UInt16) {
             assert(value < BIT(3))
-            
             var period:UInt16 = divider.getPeriod()
             period = (value << 8) | (period & 0xFF)
-            
-            //periodTemp = (value << 8) | (periodTemp & 0xFF)
             setPeriod(period)
-            //print("periodTemp->" + String(periodTemp))
-            //setPeriod(UInt16(400))
-            //divider.resetCounter()
         }
         
         func setMinPeriod(_ minPeriod: Int){
@@ -85,10 +73,9 @@ class ChannelComponent {
         // Returns true when output chip should be clocked
         func clock()-> Bool {
             // Avoid popping and weird noises from ultra sonic frequencies
-            //if (m_divider.GetPeriod() < m_minPeriod)
-            //{
-            //    return false
-            //}
+            if divider.getPeriod() < minPeriod {
+                return false
+            }
                 
             if divider.clock() {
                 return true
@@ -131,7 +118,7 @@ class ChannelComponent {
             }
             
             if counter > 0 {
-                counter = counter-1
+                counter = counter - 1
             }
         }
         
@@ -198,6 +185,71 @@ class ChannelComponent {
         let divider = Divider()
         var reload: Bool = true
         var control: Bool = true
+    }
+    
+    class VolumeEnvelope {
+        var testDisable = false
+        func restart() {
+            wantRestart = true
+        }
+        
+        func setLoop(_ loop: Bool) {
+            self.loop = loop
+        }
+        
+        func setConstantVolumeMode(_ mode: Bool) {
+            constantVolumeMode = mode
+        }
+                    
+        func setCounter(_ value: UInt16) {
+            divider.setPeriod(value)
+        }
+        
+        func setConstantVolume(_ value: UInt16) {
+            constantVolume = value
+            divider.setPeriod(constantVolume)
+        }
+                    
+        func getVolume() -> UInt16 {
+            if testDisable {
+                return 15
+            }
+            
+            if constantVolumeMode {
+                return constantVolume
+            }
+            else {
+                return counter
+            }
+        }
+                    
+        func clock() {
+            if testDisable {
+                return
+            }
+            if wantRestart {
+                wantRestart = false
+                counter = 15
+                divider.resetCounter();
+            }
+            else {
+                if divider.clock() {
+                    if counter > 0 {
+                        counter = counter - 1
+                    }
+                    else if loop {
+                        counter = 15
+                    }
+                }
+            }
+        }
+        
+        var loop = false
+        var wantRestart = true
+        var counter: UInt16 = 0
+        var constantVolumeMode: Bool = false
+        var constantVolume: UInt16 = 0
+        let divider = ChannelComponent.Divider()
     }
 }
 

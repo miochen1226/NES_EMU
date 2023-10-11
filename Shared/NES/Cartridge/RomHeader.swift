@@ -83,11 +83,6 @@ class RomHeader{
             return nil
         }
         
-        if char7 == 0 && bytes[12] == 0 {
-            //Type = NES1
-            NSLog("NES1")
-        }
-        
         prgRomBanks = UInt.init(bytes[4])
         chrRomBanks = UInt.init(bytes[5])
         prgRamBanks = UInt.init(bytes[8])

@@ -49,12 +49,22 @@ class PulseChannel:BaseChannel {
         let DD = readBits8(target: BITS([6,7]), value: value) >> 6
         pulseWaveGenerator.setDuty(UInt8(DD))
         
-        lengthCounter.setHalt(l)
+        //lengthCounter.setHalt(l)
         volumeEnvelope.setLoop(l)
         
         volumeEnvelope.setConstantVolumeMode(c)
         volumeEnvelope.setConstantVolume(UInt16(vvvv))
         volumeEnvelope.setCounter(UInt16(vvvv))
+        
+        //Side effect
+        volumeEnvelope.restart()
+        /*
+        if c {
+            NSLog("C SetLoop" + String(l))
+        }
+        else {
+            NSLog("E SetLoop" + String(l))
+        }*/
     }
     
     func handle40014005(cpuAddress:UInt16, value: UInt8) {
@@ -144,72 +154,14 @@ class PulseChannel:BaseChannel {
         return value
     }
     
-    let volumeEnvelope = VolumeEnvelope()
+    let volumeEnvelope = ChannelComponent.VolumeEnvelope()
     let sweepUnit = SweepUnit()
     let pulseWaveGenerator = PulseWaveGenerator()
 }
 
-class VolumeEnvelope {
-    func restart() {
-        wantRestart = true
-    }
-    
-    func setLoop(_ loop: Bool) {
-        self.loop = loop
-    }
-    
-    func setConstantVolumeMode(_ mode: Bool) {
-        constantVolumeMode = mode
-    }
-                
-    func setCounter(_ value: UInt16) {
-        divider.setPeriod(value)
-    }
-    
-    func setConstantVolume(_ value: UInt16) {
-        constantVolume = value
-        divider.setPeriod(constantVolume)
-    }
-                
-    func getVolume() -> UInt16 {
-        var result: UInt16 = 0
-        if constantVolumeMode {
-            result = constantVolume
-        }
-        else {
-            result = counter
-        }
-        
-        return result
-    }
-                
-    func clock() {
-        if wantRestart {
-            wantRestart = false
-            counter = 15
-            divider.resetCounter();
-        }
-        else {
-            if divider.clock() {
-                if counter > 0 {
-                    counter = counter - 1
-                }
-                else if loop {
-                    counter = 15
-                }
-            }
-        }
-    }
-    
-    var loop = false
-    var wantRestart = true
-    var counter: UInt16 = 0
-    var constantVolumeMode: Bool = false
-    var constantVolume: UInt16 = 0
-    let divider = ChannelComponent.Divider()
-}
-
 class SweepUnit {
+    
+    var testDisable = false
     func setSubtractExtra() {
         subtractExtra = 1
     }
@@ -236,6 +188,10 @@ class SweepUnit {
     
     // Clocked by FrameCounter
     func clock(_ timer: inout ChannelComponent.Timer) {
+        if testDisable {
+            return
+        }
+        
         if reload {
             divider.resetCounter()
             reload = false
@@ -249,10 +205,14 @@ class SweepUnit {
     }
     
     func silenceChannel() -> Bool {
-        if !enabled {
+        if testDisable {
             return false
         }
-        return false//isSilenceChannel
+        
+        //if !enabled {
+        //    return false
+        //}
+        return isSilenceChannel
     }
     
     func computeTargetPeriod(timer: inout ChannelComponent.Timer) {

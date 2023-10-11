@@ -213,12 +213,12 @@ class Apu: NSObject {
             evenFrame = !evenFrame
             
             triangleChannel?.clockTimer()
-            //if evenFrame {
+            if evenFrame {
                 pulseChannel0?.clockTimer()
                 pulseChannel1?.clockTimer()
                 noiseChannel?.clockTimer()
                 dmcChannel?.clockTimer()
-            //}
+            }
             
             elapsedCpuCycles += 1
             
