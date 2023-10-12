@@ -7,7 +7,30 @@
 
 import Foundation
 
+
+extension LoadRegister: Codable {
+    /*
+     var bitsWritten:UInt8 = 0
+     var value:Bitfield8 = Bitfield8()
+     */
+    enum CodingKeys: String, CodingKey {
+        case bitsWritten
+        case value
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        print("LoadRegister.encode")
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(bitsWritten, forKey: .bitsWritten)
+        try container.encode(value, forKey: .value)
+    }
+}
+
 class LoadRegister: NSObject{
+    
+    required init(from decoder: Decoder) throws {
+        print("LoadRegister.decoder")
+    }
     
     override init() {
         super.init()
@@ -45,7 +68,64 @@ class LoadRegister: NSObject{
     var value:Bitfield8 = Bitfield8()
 }
 
+extension Mapper1 {
+    
+    /*
+     var controlReg:Bitfield8 = Bitfield8()
+     var chrReg0:Bitfield8 = Bitfield8()
+     var chrReg1:Bitfield8 = Bitfield8()
+     var prgReg:Bitfield8 = Bitfield8()
+     var boardType:BoardType  = BoardType.DEFAULT
+     var loadReg:LoadRegister = LoadRegister()
+     */
+    enum CodingKeys: String, CodingKey {
+        case controlReg
+        case chrReg0
+        case chrReg1
+        case prgReg
+        case boardType
+        case loadReg
+    }
+}
+
 class Mapper1: Mapper {
+    var controlReg:Bitfield8 = Bitfield8()
+    var chrReg0:Bitfield8 = Bitfield8()
+    var chrReg1:Bitfield8 = Bitfield8()
+    var prgReg:Bitfield8 = Bitfield8()
+    var boardType:BoardType  = BoardType.DEFAULT
+    var loadReg:LoadRegister = LoadRegister()
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        try! super.init(from: decoder)
+        print("Mapper1.decoder")
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        controlReg = try values.decode(Bitfield8.self, forKey: .controlReg)
+        chrReg0 = try values.decode(Bitfield8.self, forKey: .chrReg0)
+        chrReg1 = try values.decode(Bitfield8.self, forKey: .chrReg1)
+        prgReg = try values.decode(Bitfield8.self, forKey: .prgReg)
+        boardType = try values.decode(BoardType.self, forKey: .boardType)
+        loadReg = try values.decode(LoadRegister.self, forKey: .loadReg)
+    }
+    
+    override func encode(to encoder: Encoder) throws {
+        print("Mapper1.encode")
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try super.encode(to: encoder)
+        
+        try container.encode(controlReg, forKey: .controlReg)
+        try container.encode(chrReg0, forKey: .chrReg0)
+        try container.encode(chrReg1, forKey: .chrReg1)
+        try container.encode(prgReg, forKey: .prgReg)
+        try container.encode(boardType, forKey: .boardType)
+        try container.encode(loadReg, forKey: .loadReg)
+        
+    }
+    
     
     override func OnCpuWrite(cpuAddress:UInt16, value:UInt8) {
         if (cpuAddress < 0x8000) {
@@ -102,18 +182,11 @@ class Mapper1: Mapper {
         }
     }
 
-    var controlReg:Bitfield8 = Bitfield8()
-    var chrReg0:Bitfield8 = Bitfield8()
-    var chrReg1:Bitfield8 = Bitfield8()
-    var prgReg:Bitfield8 = Bitfield8()
-    
-    enum BoardType :UInt8{
+    enum BoardType: Codable{
         case DEFAULT
         case SUROM
     }
-    var boardType:BoardType  = BoardType.DEFAULT
     
-    var loadReg:LoadRegister = LoadRegister()
     override func postInitialize() {
         boardType = BoardType.DEFAULT
         

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NameTableMirroring {
+enum NameTableMirroring: Codable {
     case Horizontal
     case Vertical
     case FourScreen

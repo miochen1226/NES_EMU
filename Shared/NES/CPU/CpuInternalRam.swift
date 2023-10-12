@@ -6,7 +6,24 @@
 //
 
 import Foundation
-class CpuInternalRam: HandleCpuReadProtocol {
+class CpuInternalRam: HandleCpuReadProtocol, Codable {
+    
+    enum CodingKeys: String, CodingKey {
+        case memory
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        memory = try values.decode(CpuInternalMemory.self, forKey: .memory)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(memory, forKey: .memory)
+    }
+    init() {
+        memory = CpuInternalMemory.init().initialize(initSize:KB(2))
+    }
     
     func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         return memory.read(mapCpuToInternalRam(cpuAddress: cpuAddress))
@@ -21,5 +38,5 @@ class CpuInternalRam: HandleCpuReadProtocol {
         return cpuAddress % CpuMemory.kInternalRamSize
     }
     
-    let memory = CpuInternalMemory.init().initialize(initSize:KB(2))
+    var memory:CpuInternalMemory! = nil
 }

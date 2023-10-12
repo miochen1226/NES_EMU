@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SpriteData {
+struct SpriteData : Codable{
     
     // Fetched from VRAM
     var bmpLow:UInt8 = 0

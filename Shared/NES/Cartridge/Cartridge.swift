@@ -259,4 +259,44 @@ class Cartridge: ICartridge {
     
     var hasSRAM = false
     var cartNameTableMirroring:NameTableMirroring = .Undefined
+    
+    var stateObj:Data?
+    func saveState() {
+        saveBanks()
+        let data0 = try? JSONEncoder().encode(mapper)
+        stateObj = data0
+        
+        printDataObj(data: stateObj)
+    }
+    
+    var memoeyDatas:[Data] = []
+    func saveBanks() {
+        memoeyDatas.removeAll()
+        for memory in savBanks {
+            let dataMemory = try? JSONEncoder().encode(memory)
+            printDataObj(data: dataMemory)
+            memoeyDatas.append(dataMemory!)
+        }
+    }
+    
+    func printDataObj(data:Data?) {
+        //let dataObject = try? JSONSerialization.jsonObject(with: data!, options: [])
+        //print(dataObject ?? "nil")
+    }
+    
+    func loadBanks() {
+        savBanks.removeAll()
+        for memoeyData in memoeyDatas {
+            let memory  = try? JSONDecoder().decode(Memory.self, from: memoeyData)
+            savBanks.append(memory!)
+        }
+    }
+    
+    func loadState() {
+        loadBanks()
+        let mapper2 = try? JSONDecoder().decode(Mapper1.self, from: stateObj!)
+        if mapper2 != nil {
+            mapper = mapper2!
+        }
+    }
 }

@@ -8,7 +8,10 @@
 import Foundation
 
 class Bitfield8WithPpuRegister {
-    
+    /*var field: UInt8 = 0
+     var ppuRegisters:PpuRegisterMemory? = nil
+     var regAddressSelf:Int = 0
+     */
     func MapCpuToPpuRegister(_ cpuAddress: UInt16) -> UInt16 {
         let ppuRegAddress = (cpuAddress - CpuMemory.kPpuRegistersBase ) % CpuMemory.kPpuRegistersSize
         return ppuRegAddress

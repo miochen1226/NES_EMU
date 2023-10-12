@@ -9,6 +9,10 @@ import Foundation
 
 class Apu: NSObject {
     
+    func setNes(nes:Nes) {
+        self.nes = nes
+    }
+    
     func initialize(nes:Nes) {
         self.nes = nes
         initCompoment()

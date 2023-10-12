@@ -21,12 +21,12 @@ class CpuRegDef:NSObject
         case Negative           = 0b10000000 // aka Sign flag
     }
     
-    let Carry = StatusFlag.Carry.rawValue
-    let Zero = StatusFlag.Zero.rawValue
-    let IrqDisabled = StatusFlag.IrqDisabled.rawValue
-    let Decimal = StatusFlag.Decimal.rawValue
-    let BrkExecuted = StatusFlag.BrkExecuted.rawValue
-    let Unused = StatusFlag.Unused.rawValue
-    let Overflow = StatusFlag.Overflow.rawValue
-    let Negative = StatusFlag.Negative.rawValue
+    static let Carry = StatusFlag.Carry.rawValue
+    static let Zero = StatusFlag.Zero.rawValue
+    static let IrqDisabled = StatusFlag.IrqDisabled.rawValue
+    static let Decimal = StatusFlag.Decimal.rawValue
+    static let BrkExecuted = StatusFlag.BrkExecuted.rawValue
+    static let Unused = StatusFlag.Unused.rawValue
+    static let Overflow = StatusFlag.Overflow.rawValue
+    static let Negative = StatusFlag.Negative.rawValue
 }

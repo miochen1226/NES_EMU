@@ -7,12 +7,10 @@
 
 import Foundation
 
-class OpCodeTable:OpCodeDef
-{
+class OpCodeTable:OpCodeDef {
     static func GetOpCodeTable() -> [OpCodeEntry] {
         var array:[OpCodeEntry] = []
-        for obj in opCodeTable
-        {
+        for obj in opCodeTable {
            let opCode = obj[0] as! Int
            let opCodeName = obj[1] as! OpCodeEntryTtype
            let numBytes = obj[2] as! Int
@@ -22,7 +20,6 @@ class OpCodeTable:OpCodeDef
             
            let opCodeEntry = OpCodeEntry.init().initial(opCode:opCode,  opCodeName:opCodeName,  numBytes:numBytes,  numCycles:numCycles,  pageCrossCycles:pageCrossCycles,  addrMode:addrMode)
            array.append(opCodeEntry)
-            
         }
         return array
     }

@@ -159,9 +159,7 @@ class Nes{
     }
     
     func start() {
-        
         stop()
-        
         apu.audioDriver?.audioUnitPlayer.start()
         serialQueue.async {
             self.isRunning = true
@@ -259,13 +257,13 @@ class Nes{
     static let sharedInstance = Nes()
     
     let cartridge = Cartridge.init()
-    let ppu = Ppu.init()
+    var ppu = Ppu.init()
     let apu = Apu.init()
-    let cpu = Cpu.init()
+    var cpu = Cpu.init()
     private let controllerPorts = ControllerPorts.init()
     let cpuMemoryBus = CpuMemoryBus.init()
     let ppuMemoryBus = PpuMemoryBus.init()
-    let cpuInternalRam = CpuInternalRam.init()
+    var cpuInternalRam = CpuInternalRam.init()
     let renderer = Renderer.shared
     var wantQuit = false
     var isRunning = false
@@ -274,4 +272,89 @@ class Nes{
     var iRenderScreen:IRenderScreen?
     let frameLimitTime:Double = 1/60
     
+    //Save/Load state
+    var dataCpu:Data?
+    var dataPpu:Data?
+    var dataCpuInternalRam:Data?
+}
+
+//Save/Load state
+extension Nes {
+    func saveState() {
+        stop()
+        saveCpuInternalRam()
+        saveCpu()
+        savePpu()
+        saveCartridge()
+        start()
+    }
+    
+    func loadState() {
+        stop()
+        loadCpuInternalRam()
+        loadCpu()
+        loadPpu()
+        loadCartridge()
+        cpu.setApu(apu: apu)
+        cpu.setControllerPorts(controllerPorts: controllerPorts)
+        cpu.initialize(cpuMemoryBus: cpuMemoryBus)
+        ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
+        apu.setNes(nes: self)
+        
+        cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
+        ppuMemoryBus.initialize(ppu: ppu, cartridge: cartridge)
+        start()
+    }
+    
+    func saveCpu() {
+        dataCpu = try? JSONEncoder().encode(cpu)
+    }
+    
+    func loadCpu() {
+        let cpuLoad = try? JSONDecoder().decode(Cpu.self, from: dataCpu!)
+        if cpuLoad != nil {
+            cpu = cpuLoad!
+        }
+    }
+    
+    func saveCartridge() {
+        cartridge.saveState()
+    }
+    
+    func loadCartridge() {
+        cartridge.loadState()
+    }
+    
+    func saveCpuInternalRam() {
+        dataCpuInternalRam = try? JSONEncoder().encode(cpuInternalRam)
+    }
+    
+    func loadCpuInternalRam() {
+        let cpuInternalRamLoad = try? JSONDecoder().decode(CpuInternalRam.self, from: dataCpuInternalRam!)
+        if cpuInternalRamLoad != nil {
+            cpuInternalRam = cpuInternalRamLoad!
+        }
+    }
+    
+    func printDataObj(data:Data?) {
+        //let dataObject = try? JSONSerialization.jsonObject(with: data!, options: [])
+        //print(dataObject ?? "nil")
+    }
+    
+    func printCpuState() {
+        let data = try? JSONEncoder().encode(cpu)
+        printDataObj(data: data)
+    }
+    
+    func savePpu() {
+        dataPpu = try? JSONEncoder().encode(ppu)
+        printDataObj(data: dataPpu)
+    }
+    
+    func loadPpu() {
+        let ppuLoad = try? JSONDecoder().decode(Ppu.self, from: dataPpu!)
+        if ppuLoad != nil {
+            ppu = ppuLoad!
+        }
+    }
 }

@@ -6,7 +6,107 @@
 //
 
 import Foundation
-class Mapper {
+
+class MapperBase : Codable {
+    var irqEnabled = false
+    var irqReloadPending = false
+    var irqPending = false
+    var numPrgBanks: UInt8 = 0
+    var numChrBanks: UInt8 = 0
+    var numSavBanks: UInt8 = 0
+    var canWritePrgMemory = false
+    var canWriteChrMemory = false
+    var canWriteSavMemory = false
+    var nextBankToUpdate: UInt8 = 0
+    var nametableMirroring = NameTableMirroring.Vertical
+    var prgBankIndices: [Int:UInt8] = [:]
+    var chrBankIndices: [Int:UInt8] = [:]
+    var savBankIndices: [Int:UInt8] = [:]
+    
+    init() {
+        
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        /*var irqEnabled = false
+         var irqReloadPending = false
+         var irqPending = false
+         var numPrgBanks: UInt8 = 0
+         var numChrBanks: UInt8 = 0
+         var numSavBanks: UInt8 = 0
+         var canWritePrgMemory = false
+         var canWriteChrMemory = false
+         var canWriteSavMemory = false
+         var nextBankToUpdate: UInt8 = 0
+         var nametableMirroring = NameTableMirroring.Vertical*/
+        case irqEnabled
+        case irqReloadPending
+        case irqPending
+        case numPrgBanks
+        case numChrBanks
+        case numSavBanks
+        case canWritePrgMemory
+        case canWriteChrMemory
+        case canWriteSavMemory
+        case nextBankToUpdate
+        case nametableMirroring
+        case prgBankIndices
+        case chrBankIndices
+        case savBankIndices
+        //var prgBankIndices: [Int:UInt8] = [:]
+        //var chrBankIndices: [Int:UInt8] = [:]
+        //var savBankIndices: [Int:UInt8] = [:]
+        
+    }
+    
+    required init(from decoder: Decoder) throws {
+        print("MapperBase.decoder")
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        irqEnabled = try values.decode(Bool.self, forKey: .irqEnabled)
+        irqReloadPending = try values.decode(Bool.self, forKey: .irqReloadPending)
+        irqPending = try values.decode(Bool.self, forKey: .irqPending)
+        numPrgBanks = try values.decode(UInt8.self, forKey: .numPrgBanks)
+        numChrBanks = try values.decode(UInt8.self, forKey: .numChrBanks)
+        numSavBanks = try values.decode(UInt8.self, forKey: .numSavBanks)
+        canWritePrgMemory = try values.decode(Bool.self, forKey: .canWritePrgMemory)
+        canWriteChrMemory = try values.decode(Bool.self, forKey: .canWriteChrMemory)
+        canWriteSavMemory = try values.decode(Bool.self, forKey: .canWriteSavMemory)
+        nextBankToUpdate = try values.decode(UInt8.self, forKey: .nextBankToUpdate)
+        nametableMirroring = try values.decode(NameTableMirroring.self, forKey: .nametableMirroring)
+        prgBankIndices = try values.decode([Int:UInt8].self, forKey: .prgBankIndices)
+        chrBankIndices = try values.decode([Int:UInt8].self, forKey: .chrBankIndices)
+        savBankIndices = try values.decode([Int:UInt8].self, forKey: .savBankIndices)
+        initialForLoad()
+    }
+    
+    func initialForLoad() {}
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(irqEnabled, forKey: .irqEnabled)
+        try container.encode(irqReloadPending, forKey: .irqReloadPending)
+        try container.encode(irqPending, forKey: .irqPending)
+        
+        try container.encode(numPrgBanks, forKey: .numPrgBanks)
+        try container.encode(numChrBanks, forKey: .numChrBanks)
+        try container.encode(numSavBanks, forKey: .numSavBanks)
+        
+        try container.encode(canWritePrgMemory, forKey: .canWritePrgMemory)
+        try container.encode(canWriteChrMemory, forKey: .canWriteChrMemory)
+        try container.encode(canWriteSavMemory, forKey: .canWriteSavMemory)
+        
+        try container.encode(nextBankToUpdate, forKey: .nextBankToUpdate)
+        try container.encode(nametableMirroring, forKey: .nametableMirroring)
+        
+        try container.encode(prgBankIndices, forKey: .prgBankIndices)
+        try container.encode(chrBankIndices, forKey: .chrBankIndices)
+        try container.encode(savBankIndices, forKey: .savBankIndices)
+        
+        print("MapperBase.encode")
+    }
+}
+
+class Mapper : MapperBase {
     
     func CanWriteChrMemory() -> Bool {
         return canWriteChrMemory
@@ -29,6 +129,9 @@ class Mapper {
     
     func CanWriteSavMemory() -> Bool {
         return canWriteSavMemory
+    }
+    
+    override func initialForLoad() {
     }
     
     func Initialize(numPrgBanks: UInt8, numChrBanks: UInt8, numSavBanks: UInt8) {
@@ -247,19 +350,4 @@ class Mapper {
     static var kChrBankSize:UInt = KB(1)
     static var kSavBankCount:UInt = 1
     static var kSavBankSize:UInt = KB(8)
-    
-    var irqEnabled = false
-    var irqReloadPending = false
-    var irqPending = false
-    var numPrgBanks: UInt8 = 0
-    var numChrBanks: UInt8 = 0
-    var numSavBanks: UInt8 = 0
-    var canWritePrgMemory = false
-    var canWriteChrMemory = false
-    var canWriteSavMemory = false
-    var nextBankToUpdate: UInt8 = 0
-    var nametableMirroring = NameTableMirroring.Vertical
-    var prgBankIndices: [Int:UInt8] = [:]
-    var chrBankIndices: [Int:UInt8] = [:]
-    var savBankIndices: [Int:UInt8] = [:]
 }

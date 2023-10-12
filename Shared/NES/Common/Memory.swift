@@ -6,29 +6,63 @@
 //
 
 import Foundation
-class Memory:NSObject
-{
-    var memorySize:UInt = 0
-    var rawBuffer:UnsafeMutablePointer<UInt8>! = nil
+class Memory:NSObject, Codable {
+    enum CodingKeys: String, CodingKey {
+        case memorySize
+        case rawBuffer
+        case dataArray
+    }
     
-    deinit
-    {
+    override init() {
+        
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        memorySize = try values.decode(UInt.self, forKey: .memorySize)
+        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(memorySize))
+        dataArray = try values.decode([UInt8].self, forKey: .dataArray)
+        
+        
+        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(memorySize))
+        var address = 0
+        for dataValue in dataArray {
+            self.putValue(address: address, value: dataValue)
+            address += 1
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        prepareSave()
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(memorySize, forKey: .memorySize)
+        try container.encode(dataArray, forKey: .dataArray)
+    }
+    
+    func prepareSave() {
+        dataArray.removeAll()
+        for address in 0 ..< memorySize {
+            let value = rawRef(address: Int(address))
+            dataArray.append(value)
+        }
+    }
+    
+    deinit {
         rawBuffer.deallocate()
     }
     
-    func initial(size:UInt)
-    {
+    func initial(size: UInt) {
         memorySize = size
         rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size))
     }
     
-    func putValue(address:Int,value:UInt8)
-    {
+    func putValue(address: Int, value: UInt8) {
         rawBuffer[address] = value
     }
     
-    func rawRef(address:Int)->UInt8
-    {
+    func rawRef(address: Int) -> UInt8 {
         return rawBuffer[address]
     }
     
@@ -36,14 +70,21 @@ class Memory:NSObject
         return rawBuffer[Int(address)]
     }
 
-    func write(address: UInt16, value: UInt8)
-    {
+    func write(address: UInt16, value: UInt8) {
         rawBuffer[Int(address)] = value
     }
+    
+    var memorySize:UInt = 0
+    var rawBuffer:UnsafeMutablePointer<UInt8>! = nil
+    private var dataArray:[UInt8] = []
 }
 
-class PpuRegisterMemory:Memory
-{
+class PpuRegisterMemory: Memory {
+    required init(from decoder: Decoder) throws {
+        try! super.init(from: decoder)
+        //let values = try decoder.container(keyedBy: CodingKeys.self)
+    }
+    
     override init() {
         super.init()
         memorySize = 8
@@ -51,8 +92,11 @@ class PpuRegisterMemory:Memory
     }
 }
 
-class PaletteMemory:Memory
-{
+class PaletteMemory: Memory {
+    required init(from decoder: Decoder) throws {
+        try! super.init(from: decoder)
+    }
+    
     override init() {
         super.init()
         memorySize = 32
@@ -61,6 +105,10 @@ class PaletteMemory:Memory
 }
 
 class CpuInternalMemory: Memory {
+    required init(from decoder: Decoder) throws {
+        try! super.init(from: decoder)
+    }
+    
     override init() {
         super.init()
     }
@@ -73,6 +121,11 @@ class CpuInternalMemory: Memory {
 }
 
 class NameTableMemory: Memory {
+    
+    required init(from decoder: Decoder) throws {
+        try! super.init(from: decoder)
+    }
+    
     static var kSize = 2048
     override init() {
         super.init()

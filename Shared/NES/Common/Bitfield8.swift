@@ -6,7 +6,27 @@
 //
 
 import Foundation
-class Bitfield8 {
+class Bitfield8 : Codable {
+    
+    enum CodingKeys: String, CodingKey {
+        case field
+    }
+    
+    init() {
+        
+    }
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        field = try values.decode(UInt8.self, forKey: .field)
+        
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(field, forKey: .field)
+        
+    }
+    
     
     func value() -> UInt8 {
         return field

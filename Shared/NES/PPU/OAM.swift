@@ -7,10 +7,12 @@
 
 import Foundation
 
-class OAM
-{
-    deinit
-    {
+class OAM: Codable {
+    init(){
+        
+    }
+    
+    deinit {
         memPointer.deallocate()
     }
     
@@ -31,6 +33,36 @@ class OAM
         var valueSet = value
         let rawMemory = UnsafeMutableRawPointer(memPointer)
         memcpy(rawMemory.advanced(by: Int(address)), &valueSet, 1)
+    }
+    var spriteDatas:[SpriteData] = []
+    
+    enum CodingKeys: String, CodingKey {
+        case spriteDatas
+    }
+    
+    //var paletteColorsData:[PixelColor] = []
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        spriteDatas = try values.decode([SpriteData].self, forKey: .spriteDatas)
+        
+        var index = 0
+        for spriteData in spriteDatas {
+            setSprite(index, spriteData: spriteData)
+            index += 1
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        beforeSave()
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(spriteDatas, forKey: .spriteDatas)
+    }
+    
+    func beforeSave(){
+        spriteDatas.removeAll()
+        for i in 0 ..< 64 {
+            spriteDatas.append(getSprite(i))
+        }
     }
     
     var memPointer:UnsafeMutablePointer<SpriteData> = UnsafeMutablePointer<SpriteData>.allocate(capacity: 64)

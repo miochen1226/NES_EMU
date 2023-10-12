@@ -6,8 +6,77 @@
 //
 
 import Foundation
-class Cpu: CpuRegDef, ICpu {
+
+
+class CpuBase : Codable {
     
+    init() {
+        
+    }
+    var PC:UInt16 = 0        // Program counter
+    var SP:UInt8 = 0        // Stack pointer
+    var A:UInt8 = 0       // Accumulator
+    var X:UInt8 = 0     // X register
+    var Y:UInt8 = 0        // Y register
+    var P: Bitfield8 = Bitfield8()   // Processor status (flags) TODO
+    var pendingNmi:Bool = false
+    var pendingIrq:Bool = false
+    
+    var spriteDmaRegister:UInt8 = 0
+    
+    var cycles:UInt32 = 0
+    var totalCycles:UInt32 = 0
+    
+    enum CodingKeys: String, CodingKey {
+        case PC
+        case SP
+        case A
+        case X
+        case Y
+        case P
+        case pendingNmi
+        case pendingIrq
+        case spriteDmaRegister
+        case cycles
+        case totalCycles
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        PC = try values.decode(UInt16.self, forKey: .PC)
+        SP = try values.decode(UInt8.self, forKey: .SP)
+        A = try values.decode(UInt8.self, forKey: .A)
+        X = try values.decode(UInt8.self, forKey: .X)
+        Y = try values.decode(UInt8.self, forKey: .Y)
+        P = try values.decode(Bitfield8.self, forKey: .P)
+        
+        pendingNmi = try values.decode(Bool.self, forKey: .pendingNmi)
+        pendingIrq = try values.decode(Bool.self, forKey: .pendingIrq)
+        
+        cycles = try values.decode(UInt32.self, forKey: .cycles)
+        totalCycles = try values.decode(UInt32.self, forKey: .totalCycles)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(PC, forKey: .PC)
+        try container.encode(SP, forKey: .SP)
+        try container.encode(A, forKey: .A)
+        try container.encode(X, forKey: .X)
+        try container.encode(Y, forKey: .Y)
+        
+        try container.encode(P, forKey: .P)
+        
+        try container.encode(pendingNmi, forKey: .pendingNmi)
+        try container.encode(pendingIrq, forKey: .pendingIrq)
+        
+        try container.encode(cycles, forKey: .cycles)
+        try container.encode(totalCycles, forKey: .totalCycles)
+    }
+}
+
+
+class Cpu: CpuBase, ICpu {
     func setApu(apu: Apu) {
         self.apu = apu
     }
@@ -22,7 +91,7 @@ class Cpu: CpuRegDef, ICpu {
         switch (cpuAddress)
         {
         case CpuMemory.kSpriteDmaReg: // $4014
-            result = spriteDmaRegister;
+            result = spriteDmaRegister
             break
 
         case CpuMemory.kControllerPort1: // $4016
@@ -48,7 +117,7 @@ class Cpu: CpuRegDef, ICpu {
         for i in 0 ..< 256
         {
             let value:UInt8 = cpuMemoryBus!.read(cpuAddress + UInt16(i))
-            cpuMemoryBus!.write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value);
+            cpuMemoryBus!.write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value)
         }
 
         // While DMA transfer occurs, the memory bus is in use, preventing CPU from fetching memory
@@ -68,7 +137,7 @@ class Cpu: CpuRegDef, ICpu {
             // Note: we perform the full DMA transfer right here instead of emulating the transfers over multiple frames.
             // If we need to do it right, see http://wiki.nesdev.com/w/index.php/PPU_programmer_reference#DMA
             SpriteDmaTransfer(srcCpuAddress)
-            break;
+            break
 
         case CpuMemory.kControllerPort1: // $4016
             controllerPorts.handleCpuWrite(cpuAddress: cpuAddress, value:value)
@@ -85,6 +154,7 @@ class Cpu: CpuRegDef, ICpu {
     func initialize(cpuMemoryBus: CpuMemoryBus) {
         self.cpuMemoryBus = cpuMemoryBus
         let array = OpCodeTable.GetOpCodeTable()
+        opCodeTable.removeAll()
         for item in array {
             opCodeTable[item.opCode] = item
         }
@@ -98,6 +168,10 @@ class Cpu: CpuRegDef, ICpu {
         let opCode:UInt8 = read8(PC)
         opCodeEntry = opCodeTable[opCode]
 
+        if opCodeEntry == nil {
+            let opCode:UInt8 = read8(PC)
+            print("opCode->" + String(opCode))
+        }
         assert((opCodeEntry != nil))
         
         updateOperandAddress()
@@ -107,6 +181,7 @@ class Cpu: CpuRegDef, ICpu {
         executePendingInterrupts() // Handle when instruction (memory read) causes interrupt
     
         cpuCyclesElapsed = cycles
+        totalCycles += 1
     }
     
     func read16(_ address: UInt16) -> UInt16 {
@@ -118,8 +193,8 @@ class Cpu: CpuRegDef, ICpu {
         if pendingNmi {
             push16(PC)
             pushProcessorStatus(false)
-            P.clear(BrkExecuted)
-            P.set(IrqDisabled)
+            P.clear(CpuRegDef.BrkExecuted)
+            P.set(CpuRegDef.IrqDisabled)
             PC = read16(CpuMemory.kNmiVector)
             
             //@HACK: *2 here fixes Battletoads not loading levels, and also Marble Madness
@@ -132,8 +207,8 @@ class Cpu: CpuRegDef, ICpu {
         else if pendingIrq {
             push16(PC)
             pushProcessorStatus(false)
-            P.clear(BrkExecuted)
-            P.set(IrqDisabled)
+            P.clear(CpuRegDef.BrkExecuted)
+            P.set(CpuRegDef.IrqDisabled)
             PC = read16(CpuMemory.kIrqVector)
             cycles += UInt32(kInterruptCycles)
             pendingIrq = false
@@ -148,12 +223,10 @@ class Cpu: CpuRegDef, ICpu {
         return (address & 0xFF00)
     }
     
-    func updateOperandAddress()
-    {
+    func updateOperandAddress() {
         operandReadCrossedPage = false
 
-        switch (opCodeEntry!.addrMode)
-        {
+        switch opCodeEntry!.addrMode {
         case AddressMode.Immedt:
             operandAddress = PC + 1 // Set to address of immediate value in code segment
             break
@@ -234,7 +307,7 @@ class Cpu: CpuRegDef, ICpu {
             let baseAddress:UInt16 = (tO16(read8(low)) | tO16(read8(high)) << 8)
             let basePage:UInt16 = getPageAddress(baseAddress)
             operandAddress = baseAddress + UInt16(Y)
-            operandReadCrossedPage = basePage != getPageAddress(operandAddress);
+            operandReadCrossedPage = basePage != getPageAddress(operandAddress)
             
             //Original code
             //const uint16 low = tO16(read8(PC+1)); // Zero page low byte of operand address
@@ -251,11 +324,7 @@ class Cpu: CpuRegDef, ICpu {
         //NSLog("%d,%d",pc,opa)
     }
     
-    func executeInstruction()
-    {
-        //using namespace OpCodeName;
-        //using namespace StatusFlag;
-
+    func executeInstruction() {
         // By default, next instruction is after current, but can also be changed by a branch or jump
         var nextPC = UInt16(PC + UInt16(opCodeEntry!.numBytes))
         
@@ -266,53 +335,47 @@ class Cpu: CpuRegDef, ICpu {
         case OpCodeEntryTtype.ADC: // Add memory to accumulator with carry
             // Operation:  A + M + C -> A, C
             let value = getMemValue()
-            let result = tO16(A) + tO16(value) + tO16(P.test01(Carry))
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
-            P.set(bits: Overflow, enabled: calcOverflowFlag(a: A, b: value, r: result))
+            let result = tO16(A) + tO16(value) + tO16(P.test01(CpuRegDef.Carry))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Overflow, enabled: calcOverflowFlag(a: A, b: value, r: result))
             A = tO8(result)
             
             break
 
         case OpCodeEntryTtype.AND: // "AND" memory with accumulator
             A &= getMemValue()
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
-            
-            
-            //Original code
-            //A &= getMemValue();
-            //P.set(Negative, calcNegativeFlag(A));
-            //P.set(Zero, calcZeroFlag(A));
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.ASL: // Shift Left One Bit (Memory or Accumulator)
             
             let result = tO16(getAccumOrMemValue()) << 1
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
             setAccumOrMemValue(tO8(result))
             
             break
 
         case OpCodeEntryTtype.BCC: // Branch on Carry Clear
-            if !P.test(Carry) {
+            if !P.test(CpuRegDef.Carry) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
-            break;
+            break
 
         case OpCodeEntryTtype.BCS: // Branch on Carry Set
-            if P.test(Carry) {
+            if P.test(CpuRegDef.Carry) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
-            break;
+            break
 
         case OpCodeEntryTtype.BEQ: // Branch on result zero (equal means compare difference is 0)
-            if P.test(Zero) {
+            if P.test(CpuRegDef.Zero) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
@@ -323,22 +386,22 @@ class Cpu: CpuRegDef, ICpu {
             let memValue = getMemValue()
             let result = A & getMemValue()
             P.setValue( (P.value() & 0x3F) | (memValue & 0xC0) ) // Copy bits 6 and 7 of mem value to status register
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
             break
         case OpCodeEntryTtype.BMI: // Branch on result minus
-            if P.test(Negative) {
+            if P.test(CpuRegDef.Negative) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
         case OpCodeEntryTtype.BNE:  // Branch on result non-zero
-            if !P.test(Zero) {
+            if !P.test(CpuRegDef.Zero) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
         case OpCodeEntryTtype.BPL: // Branch on result plus
-            if !P.test(Negative) {
+            if !P.test(CpuRegDef.Negative) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
@@ -351,112 +414,112 @@ class Cpu: CpuRegDef, ICpu {
             let returnAddr = PC + 2
             push16(returnAddr)
             pushProcessorStatus(true)
-            P.set(IrqDisabled) // Disable hardware IRQs
+            P.set(CpuRegDef.IrqDisabled) // Disable hardware IRQs
             nextPC = read16(CpuMemory.kIrqVector)
             break
         case OpCodeEntryTtype.BVC: // Branch on Overflow Clear
-            if !P.test(Overflow) {
-                nextPC = getBranchOrJmpLocation();
+            if !P.test(CpuRegDef.Overflow) {
+                nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
         case OpCodeEntryTtype.BVS: // Branch on Overflow Set
-            if P.test(Overflow) {
+            if P.test(CpuRegDef.Overflow) {
                 nextPC = getBranchOrJmpLocation()
                 branchTaken = true
             }
             break
         case OpCodeEntryTtype.CLC: // CLC Clear carry flag
-            P.clear(Carry)
+            P.clear(CpuRegDef.Carry)
             break
 
         case OpCodeEntryTtype.CLD: // CLD Clear decimal mode
-            P.clear(Decimal)
+            P.clear(CpuRegDef.Decimal)
             break
 
         case OpCodeEntryTtype.CLI: // CLI Clear interrupt disable bit
-            P.clear(IrqDisabled)
+            P.clear(CpuRegDef.IrqDisabled)
             break
 
         case OpCodeEntryTtype.CLV: // CLV Clear overflow flag
-            P.clear(Overflow)
+            P.clear(CpuRegDef.Overflow)
             break
 
         case OpCodeEntryTtype.CMP: // CMP Compare memory and accumulator
             let memValue = getMemValue()
             let result = Int(A) - Int(memValue)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
             break
 
         case OpCodeEntryTtype.CPX: // CPX Compare Memory and Index X
             let memValue = getMemValue()
             let result = Int(X) - Int(memValue)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
             break
 
         case OpCodeEntryTtype.CPY: // CPY Compare memory and index Y
             let memValue = getMemValue()
             let result = Int(Y) - Int(memValue)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
             break
 
         case OpCodeEntryTtype.DEC: // Decrement memory by one
             let memValue = getMemValue()
             let result = Int(memValue) - Int(1)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
             let newMemValue = intToUint(result)
             setMemValue(newMemValue)
-            P.set(bits: Zero, enabled: calcZeroFlag(newMemValue))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(newMemValue))
             break
 
         case OpCodeEntryTtype.DEX: // Decrement index X by one
             let result = Int(X) - Int(1)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
             X = intToUint(result)
-            P.set(bits: Zero, enabled: calcZeroFlag(X))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.DEY: // Decrement index Y by one
             let result = Int(Y) - Int(1)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
             Y = intToUint(result)
-            P.set(bits: Zero, enabled: calcZeroFlag(Y))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.EOR: // "Exclusive-Or" memory with accumulator
             A = A ^ getMemValue()
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.INC: // Increment memory by one
             let memValue = getMemValue()
             let result = Int(memValue) + Int(1)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
             let newMemValue = intToUint(result)
             setMemValue(newMemValue)
-            P.set(bits: Zero, enabled: calcZeroFlag(newMemValue))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(newMemValue))
             break
 
         case OpCodeEntryTtype.INX: // Increment Index X by one
             let result = Int(X) + Int(1)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
             X = intToUint(result)
-            P.set(bits: Zero, enabled: calcZeroFlag(X))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.INY: // Increment Index Y by one
             let result = Int(Y) + Int(1)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
             
             Y = intToUint(result)
-            P.set(bits: Zero, enabled: calcZeroFlag(Y))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.JMP: // Jump to new location
@@ -470,47 +533,33 @@ class Cpu: CpuRegDef, ICpu {
             let returnAddr:UInt16 = PC + UInt16(opCodeEntry!.numBytes) - 1
             push16(returnAddr)
             nextPC = getBranchOrJmpLocation()
-            
-            //Original Code
-            //const uint16 returnAddr = PC + opCodeEntry->numBytes - 1;
-            //push16(returnAddr);
-            //nextPC = getBranchOrJmpLocation();
-            
             break
 
         case OpCodeEntryTtype.LDA: // Load accumulator with memory
             A = getMemValue()
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
-            
-            
-            //Original code
-            //A = getMemValue();
-            //P.set(Negative, calcNegativeFlag(A));
-            //P.set(Zero, calcZeroFlag(A));
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.LDX: // Load index X with memory
             X = getMemValue()
-            P.set(bits: Negative, enabled: calcNegativeFlag(X))
-            P.set(bits: Zero, enabled: calcZeroFlag(X))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(X))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.LDY: // Load index Y with memory
-            Y = getMemValue();
-            P.set(bits: Negative, enabled: calcNegativeFlag(Y))
-            P.set(bits: Zero, enabled: calcZeroFlag(Y))
+            Y = getMemValue()
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(Y))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.LSR: // Shift right one bit (memory or accumulator)
-            
             let value = getAccumOrMemValue()
             let result = value >> 1
-            P.set(bits: Carry, enabled: value & 0x01) // Will get shifted into carry
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.clear(Negative) // 0 is shifted into sign bit position
+            P.set(bits: CpuRegDef.Carry, enabled: value & 0x01) // Will get shifted into carry
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.clear(CpuRegDef.Negative) // 0 is shifted into sign bit position
             setAccumOrMemValue(result)
-            
             break
 
         case OpCodeEntryTtype.NOP: // No Operation (2 cycles)
@@ -518,8 +567,8 @@ class Cpu: CpuRegDef, ICpu {
 
         case OpCodeEntryTtype.ORA: // "OR" memory with accumulator
             A |= getMemValue()
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.PHA: // Push accumulator on stack
@@ -532,8 +581,8 @@ class Cpu: CpuRegDef, ICpu {
 
         case OpCodeEntryTtype.PLA: // Pull accumulator from stack
             A = pop8()
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.PLP: // Pull processor status from stack
@@ -541,24 +590,20 @@ class Cpu: CpuRegDef, ICpu {
             break
 
         case OpCodeEntryTtype.ROL: // Rotate one bit left (memory or accumulator)
-            
-            let result = (tO16(getAccumOrMemValue()) << 1) | tO16(P.test01(Carry))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            let result = (tO16(getAccumOrMemValue()) << 1) | tO16(P.test01(CpuRegDef.Carry))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
             setAccumOrMemValue(tO8(result))
-            
             break
 
         case OpCodeEntryTtype.ROR: // Rotate one bit right (memory or accumulator)
-            
             let value = getAccumOrMemValue()
-            let result = (value >> 1) | (P.test01(Carry) << 7)
-            P.set(bits: Carry, enabled: value & 0x01)
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
+            let result = (value >> 1) | (P.test01(CpuRegDef.Carry) << 7)
+            P.set(bits: CpuRegDef.Carry, enabled: value & 0x01)
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
             setAccumOrMemValue(result)
-            
             break
 
         case OpCodeEntryTtype.RTI: // Return from interrupt (used with BRK, Nmi or Irq)
@@ -578,25 +623,25 @@ class Cpu: CpuRegDef, ICpu {
             // and we want to perform the bitwise add ourself
             let value = getMemValue() ^ 0xFF
 
-            let result = tO16(A) + tO16(value) + tO16(P.test01(Carry))
-            P.set(bits: Negative, enabled: calcNegativeFlag(result))
-            P.set(bits: Zero, enabled: calcZeroFlag(result))
-            P.set(bits: Carry, enabled: calcCarryFlag(result))
-            P.set(bits: Overflow, enabled: calcOverflowFlag(a: A, b: value, r: result))
+            let result = tO16(A) + tO16(value) + tO16(P.test01(CpuRegDef.Carry))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(result))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(result))
+            P.set(bits: CpuRegDef.Carry, enabled: calcCarryFlag(result))
+            P.set(bits: CpuRegDef.Overflow, enabled: calcOverflowFlag(a: A, b: value, r: result))
             A = tO8(result)
             
             break
 
         case OpCodeEntryTtype.SEC: // Set carry flag
-            P.set(Carry)
+            P.set(CpuRegDef.Carry)
             break
 
         case OpCodeEntryTtype.SED: // Set decimal mode
-            P.set(Decimal)
+            P.set(CpuRegDef.Decimal)
             break
 
         case OpCodeEntryTtype.SEI: // Set interrupt disable status
-            P.set(IrqDisabled)
+            P.set(CpuRegDef.IrqDisabled)
             break
 
         case OpCodeEntryTtype.STA: // Store accumulator in memory
@@ -613,26 +658,26 @@ class Cpu: CpuRegDef, ICpu {
 
         case OpCodeEntryTtype.TAX: // Transfer accumulator to index X
             X = A
-            P.set(bits: Negative, enabled: calcNegativeFlag(X))
-            P.set(bits: Zero, enabled: calcZeroFlag(X))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(X))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.TAY: // Transfer accumulator to index Y
             Y = A
-            P.set(bits: Negative, enabled: calcNegativeFlag(Y))
-            P.set(bits: Zero, enabled: calcZeroFlag(Y))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(Y))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(Y))
             break
 
         case OpCodeEntryTtype.TSX: // Transfer stack pointer to index X
             X = SP
-            P.set(bits: Negative, enabled: calcNegativeFlag(X))
-            P.set(bits: Zero, enabled: calcZeroFlag(X))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(X))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(X))
             break
 
         case OpCodeEntryTtype.TXA: // Transfer index X to accumulator
             A = X
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
 
         case OpCodeEntryTtype.TXS: // Transfer index X to stack pointer
@@ -641,14 +686,14 @@ class Cpu: CpuRegDef, ICpu {
 
         case OpCodeEntryTtype.TYA: // Transfer index Y to accumulator
             A = Y
-            P.set(bits: Negative, enabled: calcNegativeFlag(A))
-            P.set(bits: Zero, enabled: calcZeroFlag(A))
+            P.set(bits: CpuRegDef.Negative, enabled: calcNegativeFlag(A))
+            P.set(bits: CpuRegDef.Zero, enabled: calcZeroFlag(A))
             break
         }
 
         // Compute cycles for instruction
         
-        var cyclesOfOp = opCodeEntry!.numCycles;
+        var cyclesOfOp = opCodeEntry!.numCycles
 
         // Some instructions take an extra cycle when reading operand across page boundary
         if operandReadCrossedPage {
@@ -681,7 +726,7 @@ class Cpu: CpuRegDef, ICpu {
         SP = 0xFF // Should be FD, but for improved compatibility set to FF
         
         P.clearAll()
-        P.set(StatusFlag.IrqDisabled.rawValue)
+        P.set(CpuRegDef.IrqDisabled)
 
         // Entry point is located at the Reset interrupt location
         PC = read16(CpuMemory.kResetVector)
@@ -826,7 +871,7 @@ class Cpu: CpuRegDef, ICpu {
             A = value
         }
         else {
-            write8(address: operandAddress, value: value);
+            write8(address: operandAddress, value: value)
         }
     }
     
@@ -845,14 +890,14 @@ class Cpu: CpuRegDef, ICpu {
         
         
         if SP == 0xFF {
-            NSLog("Stack overflow!");
+            NSLog("Stack overflow!")
         }
     }
 
     func pop8() -> UInt8 {
         SP = SP + 1
         if  SP == 0 {
-            NSLog("Stack overflow!");
+            NSLog("Stack overflow!")
         }
         
         return read8(CpuMemory.kStackBase + UInt16(SP))
@@ -867,13 +912,13 @@ class Cpu: CpuRegDef, ICpu {
     func pushProcessorStatus(_ softwareInterrupt: Bool) {
         var brkFlag:UInt8 = 0
         if softwareInterrupt {
-            brkFlag = BrkExecuted
+            brkFlag = CpuRegDef.BrkExecuted
         }
-        push8(P.value() | Unused | brkFlag)
+        push8(P.value() | CpuRegDef.Unused | brkFlag)
     }
 
     func popProcessorStatus() {
-        P.setValue(pop8() & ~Unused & ~BrkExecuted)
+        P.setValue(pop8() & ~CpuRegDef.Unused & ~CpuRegDef.BrkExecuted)
         //assert(!P.test(Unused) && !P.test(BrkExecuted) && "P should never have these set, only on stack");
     }
     
@@ -948,26 +993,12 @@ class Cpu: CpuRegDef, ICpu {
     }
 
     func Irq() {
-        if !P.test(StatusFlag.IrqDisabled.rawValue) {
+        if !P.test(CpuRegDef.IrqDisabled) {
             pendingIrq = true
         }
     }
 
-    var PC: UInt16 = 0        // Program counter
-    var SP: UInt8 = 0        // Stack pointer
-    var A: UInt8 = 0       // Accumulator
-    var X: UInt8 = 0     // X register
-    var Y: UInt8 = 0        // Y register
-    var P: Bitfield8 = Bitfield8()   // Processor status (flags) TODO
-    var pendingNmi = false
-    var pendingIrq = false
-    
-    var spriteDmaRegister:UInt8 = 0
-    
-    var cycles:UInt32 = 0
-    var totalCycles:UInt32 = 0
     var opCodeEntry:OpCodeEntry!
-    var opCodeTableEx: NSDictionary = [0:1,1:2,2:3]
     var opCodeTable:[UInt8:OpCodeEntry] = [:]
     var cpuMemoryBus:CpuMemoryBus?
     

@@ -73,6 +73,12 @@ struct GameViewRepresentable: NSViewRepresentable {
         override func keyDown(with event: NSEvent) {
             switch(event.charactersIgnoringModifiers)
             {
+            case "1":
+                nes.saveState()
+                break
+            case "2":
+                nes.loadState()
+                break
             case "a":
                 nes.pressL()
                 break

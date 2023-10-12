@@ -7,7 +7,151 @@
 
 import Foundation
 
-class Ppu: IPpu {
+struct BgTileFetchData {
+    var bmpLow:UInt8 = 0
+    var bmpHigh:UInt8 = 0
+    var paletteHighBits:UInt8 = 0
+}
+
+class PpuBase : Codable {
+    enum CodingKeys: String, CodingKey {
+        case ppuRegisters
+        case kNumPaletteColors
+        case nameTables
+        case ppuControlReg1
+        case ppuControlReg2
+        case numSpritesToRender
+        case vramAndScrollFirstWrite
+        case kScreenWidth
+        case kScreenHeight
+        case renderSprite0
+        case oam
+        case oam2
+        case palette
+    }
+    
+    init() {
+    }
+    
+    func initPaletteColors() {
+        struct RGB {
+            var r:UInt8 = 0
+            var g:UInt8 = 0
+            var b:UInt8 = 0
+        }
+
+        // This palette seems more "accurate"
+        // 2C03 and 2C05 palettes (http://wiki.nesdev.com/w/index.php/PPU_palettes#2C03_and_2C05)
+        let dac3Palette:[[UInt8]] =
+        [
+            [3,3,3],[0,1,4],[0,0,6],[3,2,6],[4,0,3],[5,0,3],[5,1,0],[4,2,0],[3,2,0],[1,2,0],[0,3,1],[0,4,0],[0,2,2],[0,0,0],[0,0,0],[0,0,0],
+            [5,5,5],[0,3,6],[0,2,7],[4,0,7],[5,0,7],[7,0,4],[7,0,0],[6,3,0],[4,3,0],[1,4,0],[0,4,0],[0,5,3],[0,4,4],[0,0,0],[0,0,0],[0,0,0],
+            [7,7,7],[3,5,7],[4,4,7],[6,3,7],[7,0,7],[7,3,7],[7,4,0],[7,5,0],[6,6,0],[3,6,0],[0,7,0],[2,7,6],[0,7,7],[0,0,0],[0,0,0],[0,0,0],
+            [7,7,7],[5,6,7],[6,5,7],[7,5,7],[7,4,7],[7,5,5],[7,6,4],[7,7,2],[7,7,3],[5,7,2],[4,7,3],[2,7,6],[4,6,7],[0,0,0],[0,0,0],[0,0,0]
+        ]
+        
+        paletteColors = UnsafeMutablePointer<PixelColor>.allocate(capacity: Int(kNumPaletteColors))
+        let rawBuffer = UnsafeMutableRawPointer(paletteColors)
+        for i:Int in 0 ..< Int(kNumPaletteColors)
+        {
+            let colorItem = dac3Palette[Int(i)]
+            
+            let iR:UInt8 = colorItem[0]
+            let iG:UInt8 = colorItem[1]
+            let iB:UInt8 = colorItem[2]
+            let fr = Float(iR)
+            let fg = Float(iG)
+            let fb = Float(iB)
+            
+            
+            let R = UInt8(fr/7*255)
+            let G = (UInt8(fg/7*255))
+            let B = (UInt8(fb/7*255))
+            let A = 0xFF
+            
+            var pixelColor = PixelColor()
+            pixelColor.d_r = R
+            pixelColor.d_g = G
+            pixelColor.d_b = B
+            pixelColor.d_a = UInt8(A)
+            
+            memcpy(rawBuffer?.advanced(by: Int(i*MemoryLayout<PixelColor>.stride)), &pixelColor, MemoryLayout<PixelColor>.stride)
+        }
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        ppuRegisters = try values.decode(PpuRegisterMemory.self, forKey: .ppuRegisters)
+        kNumPaletteColors = try values.decode(UInt.self, forKey: .kNumPaletteColors)
+        nameTables = try values.decode(NameTableMemory.self, forKey: .nameTables)
+        numSpritesToRender = try values.decode(Int.self, forKey: .numSpritesToRender)
+        vramAndScrollFirstWrite = try values.decode(Bool.self, forKey: .vramAndScrollFirstWrite)
+        kScreenWidth = try values.decode(UInt32.self, forKey: .kScreenWidth)
+        kScreenHeight = try values.decode(UInt32.self, forKey: .kScreenHeight)
+        renderSprite0 = try values.decode(Bool.self, forKey: .renderSprite0)
+        oam = try values.decode(OAM.self, forKey: .oam)
+        oam2 = try values.decode(OAM.self, forKey: .oam2)
+        palette = try values.decode(PaletteMemory.self, forKey: .palette)
+        
+        ppuStatusReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuStatusReg)
+        ppuControlReg1.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg1)
+        ppuControlReg2.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg2)
+        
+        initPaletteColors()
+        
+        spriteFetchData.removeAll()
+        for _ in 0 ..< 64 {
+            spriteFetchData.append(SpriteFetchData.init())
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(ppuRegisters, forKey: .ppuRegisters)
+        try container.encode(kNumPaletteColors, forKey: .kNumPaletteColors)
+        try container.encode(nameTables, forKey: .nameTables)
+        try container.encode(numSpritesToRender, forKey: .numSpritesToRender)
+        try container.encode(vramAndScrollFirstWrite, forKey: .vramAndScrollFirstWrite)
+        try container.encode(kScreenWidth, forKey: .kScreenWidth)
+        try container.encode(kScreenHeight, forKey: .kScreenHeight)
+        try container.encode(renderSprite0, forKey: .renderSprite0)
+        try container.encode(oam, forKey: .oam)
+        try container.encode(oam2, forKey: .oam2)
+        try container.encode(palette, forKey: .palette)
+    }
+    
+    var palette = PaletteMemory.init()
+    var renderer: Renderer? = nil
+    var ppuStatusReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var ppuControlReg1: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var ppuControlReg2: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var numSpritesToRender:Int = 0
+    var vramAndScrollFirstWrite: Bool = false
+    var ppuRegisters: PpuRegisterMemory = PpuRegisterMemory.init()
+    var tempVRamAddress: UInt16 = 0
+    var vramAddress: UInt16 = 0
+    var fineX: UInt8 = 0                    // Fine x scroll (3 bits), "Loopy x"
+    var vramBufferedValue: UInt8 = 0
+    var cycle: UInt32 = 0
+    var evenFrame: Bool = false
+    var vblankFlagSetThisFrame: Bool = false
+    var nes:Nes? = nil
+    var ppuMemoryBus: PpuMemoryBus? = nil
+    var spriteFetchData: [SpriteFetchData] = []
+    var nameTables = NameTableMemory.init(initSize: KB(2))
+    var kScreenWidth:UInt32 = 256
+    var kScreenHeight:UInt32 = 240
+    var renderSprite0 = false
+    var oam = OAM()
+    var oam2 = OAM()
+    var kNumPaletteColors:UInt = 64
+    var paletteColors:UnsafeMutablePointer<PixelColor>!
+    var bgTileFetchDataPipeline_0 = BgTileFetchData.init()
+    var bgTileFetchDataPipeline_1 = BgTileFetchData.init()
+    private var paletteColorsData:[PixelColor] = []
+}
+
+class Ppu: PpuBase,IPpu {
    
     func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer) {
         self.renderer = renderer
@@ -15,8 +159,7 @@ class Ppu: IPpu {
         self.nes = nes
     }
     
-    func reset()
-    {
+    func reset() {
         initPaletteColors()
         // See http://wiki.nesdev.com/w/index.php/PPU_power_up_state
         
@@ -497,61 +640,7 @@ class Ppu: IPpu {
         bgTileFetchDataPipeline_1.paletteHighBits = paletteHighBits
     }
     
-    func initPaletteColors() {
-        struct RGB {
-            var r:UInt8 = 0
-            var g:UInt8 = 0
-            var b:UInt8 = 0
-        }
-
-        // This palette seems more "accurate"
-        // 2C03 and 2C05 palettes (http://wiki.nesdev.com/w/index.php/PPU_palettes#2C03_and_2C05)
-        let dac3Palette:[[UInt8]] =
-        [
-            [3,3,3],[0,1,4],[0,0,6],[3,2,6],[4,0,3],[5,0,3],[5,1,0],[4,2,0],[3,2,0],[1,2,0],[0,3,1],[0,4,0],[0,2,2],[0,0,0],[0,0,0],[0,0,0],
-            [5,5,5],[0,3,6],[0,2,7],[4,0,7],[5,0,7],[7,0,4],[7,0,0],[6,3,0],[4,3,0],[1,4,0],[0,4,0],[0,5,3],[0,4,4],[0,0,0],[0,0,0],[0,0,0],
-            [7,7,7],[3,5,7],[4,4,7],[6,3,7],[7,0,7],[7,3,7],[7,4,0],[7,5,0],[6,6,0],[3,6,0],[0,7,0],[2,7,6],[0,7,7],[0,0,0],[0,0,0],[0,0,0],
-            [7,7,7],[5,6,7],[6,5,7],[7,5,7],[7,4,7],[7,5,5],[7,6,4],[7,7,2],[7,7,3],[5,7,2],[4,7,3],[2,7,6],[4,6,7],[0,0,0],[0,0,0],[0,0,0]
-        ]
-        
-        paletteColors = UnsafeMutablePointer<PixelColor>.allocate(capacity: Int(kNumPaletteColors))
-        let rawBuffer = UnsafeMutableRawPointer(paletteColors)
-        for i:Int in 0 ..< Int(kNumPaletteColors)
-        {
-            let colorItem = dac3Palette[Int(i)]
-            
-            let iR:UInt8 = colorItem[0]
-            let iG:UInt8 = colorItem[1]
-            let iB:UInt8 = colorItem[2]
-            let fr = Float(iR)
-            let fg = Float(iG)
-            let fb = Float(iB)
-            
-            
-            let R = UInt8(fr/7*255)
-            let G = (UInt8(fg/7*255))
-            let B = (UInt8(fb/7*255))
-            let A = 0xFF
-            
-            var pixelColor = PixelColor()
-            pixelColor.d_r = R
-            pixelColor.d_g = G
-            pixelColor.d_b = B
-            pixelColor.d_a = UInt8(A)
-            
-            memcpy(rawBuffer?.advanced(by: Int(i*MemoryLayout<PixelColor>.stride)), &pixelColor, MemoryLayout<PixelColor>.stride)
-        }
-    }
-    
-    struct BgTileFetchData
-    {
-        var bmpLow:UInt8 = 0
-        var bmpHigh:UInt8 = 0
-        var paletteHighBits:UInt8 = 0
-    }
-    
-    func isHitSprite(x:UInt32,spriteData:SpriteFetchData)->Bool
-    {
+    func isHitSprite(x: UInt32, spriteData: SpriteFetchData) -> Bool {
         let left = spriteData.x
         let right:Int = Int(spriteData.x) + 8
         if(x >= left && x <= right)
@@ -950,34 +1039,4 @@ class Ppu: IPpu {
 
         return physicalVRamAddress
     }
-    
-    var palette = PaletteMemory.init()
-    var renderer: Renderer? = nil
-    var ppuStatusReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var ppuControlReg1: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var ppuControlReg2: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var numSpritesToRender = 0
-    var vramAndScrollFirstWrite: Bool = false
-    var ppuRegisters: PpuRegisterMemory = PpuRegisterMemory.init()
-    var tempVRamAddress: UInt16 = 0
-    var vramAddress: UInt16 = 0
-    var fineX: UInt8 = 0                    // Fine x scroll (3 bits), "Loopy x"
-    var vramBufferedValue: UInt8 = 0
-    var cycle: UInt32 = 0
-    var evenFrame: Bool = false
-    var vblankFlagSetThisFrame: Bool = false
-    var nes:Nes? = nil
-    var ppuMemoryBus: PpuMemoryBus? = nil
-    var spriteFetchData: [SpriteFetchData] = []
-    let nameTables = NameTableMemory.init(initSize: KB(2))
-    let kScreenWidth:UInt32 = 256
-    let kScreenHeight:UInt32 = 240
-    var renderSprite0 = false
-    var oam = OAM()
-    var oam2 = OAM()
-    let kNumPaletteColors:UInt = 64
-    var paletteColors:UnsafeMutablePointer<PixelColor>!
-    var bgTileFetchDataPipeline_0 = BgTileFetchData.init()
-    var bgTileFetchDataPipeline_1 = BgTileFetchData.init()
-    
 }

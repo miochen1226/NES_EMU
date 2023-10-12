@@ -7,16 +7,14 @@
 
 import Foundation
 
-struct PixelColor
-{
+struct PixelColor: Codable {
     var d_r:UInt8 = 0
     var d_g:UInt8 = 0
     var d_b:UInt8 = 0
     var d_a:UInt8 = 0
 }
 
-class Color4:NSObject
-{
+class Color4: NSObject, Codable {
     var argb:UInt32 = 0
     
     var d_r:UInt8 = 0
