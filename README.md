@@ -15,9 +15,9 @@ Practice implement NES emu with swift ,  just for fun
 ## 10/10/2023
 - 1.Support Mapper1.
 - 2.Fix apu bugs
-  > <img src="./Image/SnapShot/IMG_8586.PNG">
-  > <img src="./Image/SnapShot/IMG_8587.PNG">
-  > <img src="./Image/SnapShot/IMG_8588.PNG">
+  > <img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image/SnapShot/IMG_8586.PNG">
+  > <img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image/SnapShot/IMG_8587.PNG">
+  > <img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image/SnapShot/IMG_8588.PNG">
 
 
 
@@ -25,7 +25,7 @@ Practice implement NES emu with swift ,  just for fun
 - 1.Support Mapper4.
 - 2.Add Virtual Game Controller for iOS
 - 3.[Hack] change sprite limit per line from 8 to 64 
-  > <img src="./Image/SnapShot/2023-08-11.png">
+  > <img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image/SnapShot/2023-08-11.png">
     <a href="https://www.youtube.com/watch?v=kpTZFsyE5VQ">Demo video</a>
 ## 7/27/2023
 -  1.correct pulseWave implementation
@@ -40,5 +40,5 @@ Practice implement NES emu with swift ,  just for fun
     - "m": Start
 ## 7/24/2023
 - 1.Support display for ios.
-  > <img src="./Image/SnapShot/F1666584-9E5B-4A69-B5C9-2DFF10E65850.jpg">
-  > <img src="./Image/SnapShot/2023-06-25.png">
+  > <img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image//SnapShot/F1666584-9E5B-4A69-B5C9-2DFF10E65850.jpg">
+  > <img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image//SnapShot/2023-06-25.png">
