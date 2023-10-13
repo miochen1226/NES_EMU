@@ -7,6 +7,11 @@ Practice implement NES emu with swift ,  just for fun
   
 # Change log
 
+## 10/13/2023
+- 1.Support Save/Load state to file for Osx version 
+  >key '1' for save, '2' for load).
+  >File path /Users/mio/Library/Containers/com.mio.NES-EMU/Data/Documents/nesSave.json
+
 ## 10/10/2023
 - 1.Support Mapper1.
 - 2.Fix apu bugs

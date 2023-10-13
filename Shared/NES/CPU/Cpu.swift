@@ -42,6 +42,7 @@ class CpuBase : Codable {
     }
     
     required init(from decoder: Decoder) throws {
+        print("Cpu.decoder")
         let values = try decoder.container(keyedBy: CodingKeys.self)
         PC = try values.decode(UInt16.self, forKey: .PC)
         SP = try values.decode(UInt8.self, forKey: .SP)
@@ -58,6 +59,7 @@ class CpuBase : Codable {
     }
     
     func encode(to encoder: Encoder) throws {
+        print("Cpu.encoder")
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(PC, forKey: .PC)
         try container.encode(SP, forKey: .SP)

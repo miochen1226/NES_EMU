@@ -72,6 +72,14 @@
 		3530FA5D26BFBCA900CF18DD /* Mapper1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA5B26BFBCA800CF18DD /* Mapper1.swift */; };
 		3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA6026C0590300CF18DD /* OpCodeTable.swift */; };
 		3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA6026C0590300CF18DD /* OpCodeTable.swift */; };
+		3538AD572AD90A1A00787E9A /* IMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD562AD90A1A00787E9A /* IMapper.swift */; };
+		3538AD582AD90A1A00787E9A /* IMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD562AD90A1A00787E9A /* IMapper.swift */; };
+		3538AD5A2AD91F0000787E9A /* Nes+GetSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD592AD91F0000787E9A /* Nes+GetSprite.swift */; };
+		3538AD5B2AD91F0000787E9A /* Nes+GetSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD592AD91F0000787E9A /* Nes+GetSprite.swift */; };
+		3538AD5D2AD91FA200787E9A /* Nes+SaveState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD5C2AD91FA200787E9A /* Nes+SaveState.swift */; };
+		3538AD5E2AD91FA200787E9A /* Nes+SaveState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD5C2AD91FA200787E9A /* Nes+SaveState.swift */; };
+		3538AD602AD9206100787E9A /* Nes+Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD5F2AD9206100787E9A /* Nes+Controller.swift */; };
+		3538AD612AD9206100787E9A /* Nes+Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD5F2AD9206100787E9A /* Nes+Controller.swift */; };
 		3539627C2A83619800CF1E97 /* VirtualConteollerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3539627B2A83619800CF1E97 /* VirtualConteollerView.swift */; };
 		3539627E2A83623800CF1E97 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3539627D2A83623800CF1E97 /* GameViewController.swift */; };
 		353962A42A83762200CF1E97 /* iTunesArtwork@1x.png in Resources */ = {isa = PBXBuildFile; fileRef = 353962902A83762100CF1E97 /* iTunesArtwork@1x.png */; };
@@ -157,6 +165,11 @@
 		3530FA5626BF880E00CF18DD /* Mapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper.swift; sourceTree = "<group>"; };
 		3530FA5B26BFBCA800CF18DD /* Mapper1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper1.swift; sourceTree = "<group>"; };
 		3530FA6026C0590300CF18DD /* OpCodeTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeTable.swift; sourceTree = "<group>"; };
+		3538AD552AD8EED800787E9A /* NES_EMU (macOS)Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "NES_EMU (macOS)Release.entitlements"; sourceTree = "<group>"; };
+		3538AD562AD90A1A00787E9A /* IMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMapper.swift; sourceTree = "<group>"; };
+		3538AD592AD91F0000787E9A /* Nes+GetSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Nes+GetSprite.swift"; sourceTree = "<group>"; };
+		3538AD5C2AD91FA200787E9A /* Nes+SaveState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Nes+SaveState.swift"; sourceTree = "<group>"; };
+		3538AD5F2AD9206100787E9A /* Nes+Controller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Nes+Controller.swift"; sourceTree = "<group>"; };
 		3539627B2A83619800CF1E97 /* VirtualConteollerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualConteollerView.swift; sourceTree = "<group>"; };
 		3539627D2A83623800CF1E97 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		353962902A83762100CF1E97 /* iTunesArtwork@1x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iTunesArtwork@1x.png"; sourceTree = "<group>"; };
@@ -235,6 +248,7 @@
 				35B78E2D2A86091100B1E42F /* Mapper4.swift */,
 				35B9C5A126C3191600E13D57 /* Mapper0.swift */,
 				3530FA5B26BFBCA800CF18DD /* Mapper1.swift */,
+				3538AD562AD90A1A00787E9A /* IMapper.swift */,
 			);
 			path = Mapper;
 			sourceTree = "<group>";
@@ -242,6 +256,7 @@
 		352575DC26BD4827005AB816 = {
 			isa = PBXGroup;
 			children = (
+				3538AD552AD8EED800787E9A /* NES_EMU (macOS)Release.entitlements */,
 				351C8C7B2A83C96E00C2735D /* Roms.bundle */,
 				352575E126BD4828005AB816 /* Shared */,
 				352575EB26BD4829005AB816 /* iOS */,
@@ -336,6 +351,9 @@
 				3530B86F26C7F4AF00A2858C /* CPU */,
 				3530B86E26C7F41600A2858C /* PPU */,
 				3530FA3226BF6C8B00CF18DD /* Nes.swift */,
+				3538AD5C2AD91FA200787E9A /* Nes+SaveState.swift */,
+				3538AD592AD91F0000787E9A /* Nes+GetSprite.swift */,
+				3538AD5F2AD9206100787E9A /* Nes+Controller.swift */,
 			);
 			path = NES;
 			sourceTree = "<group>";
@@ -554,6 +572,7 @@
 				3530B88E26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88726C7FBE600A2858C /* ICpu.swift in Sources */,
 				356CF08C2A87935C0093A24F /* AudioController.swift in Sources */,
+				3538AD5D2AD91FA200787E9A /* Nes+SaveState.swift in Sources */,
 				35DA36F926C3C10F005B2BC1 /* Color4.swift in Sources */,
 				35DEF54D2A84FF9D00AE8149 /* OAM.swift in Sources */,
 				3505EAB12A6F82D700B14943 /* PulseChannel.swift in Sources */,
@@ -563,12 +582,14 @@
 				3530FA5726BF880E00CF18DD /* Mapper.swift in Sources */,
 				35714DD22AD3E5FB004A7A3F /* DmcChannel.swift in Sources */,
 				3530B89426C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
+				3538AD5A2AD91F0000787E9A /* Nes+GetSprite.swift in Sources */,
 				3539627C2A83619800CF1E97 /* VirtualConteollerView.swift in Sources */,
 				3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				352AFFE42A6E6DD100F811F8 /* Apu.swift in Sources */,
 				3530FA4626BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3505EAB82A6F85B600B14943 /* TriangleChannel.swift in Sources */,
 				35B78E2E2A86091100B1E42F /* Mapper4.swift in Sources */,
+				3538AD602AD9206100787E9A /* Nes+Controller.swift in Sources */,
 				3530FA3D26BF6E7A00CF18DD /* CpuMemoryBus.swift in Sources */,
 				35265B3B26C5548F0031E1A6 /* Renderer.swift in Sources */,
 				352BF7602A7295D40093CB65 /* ControllerPorts.swift in Sources */,
@@ -581,6 +602,7 @@
 				356CF08F2A87BFD70093A24F /* GameScene+GameController.swift in Sources */,
 				3530FA4B26BF771500CF18DD /* CpuInternalRam.swift in Sources */,
 				35B9C5A226C3191600E13D57 /* Mapper0.swift in Sources */,
+				3538AD572AD90A1A00787E9A /* IMapper.swift in Sources */,
 				3525760626BD48DF005AB816 /* Cartridge.swift in Sources */,
 				350858922A72261A00318C3D /* FrameCounter.swift in Sources */,
 				35B9C58326C29A5400E13D57 /* PpuMemoryBus.swift in Sources */,
@@ -597,6 +619,8 @@
 				35DEF54E2A84FF9D00AE8149 /* OAM.swift in Sources */,
 				3530B88126C7FAC400A2858C /* IPpu.swift in Sources */,
 				3530B89E26C8006100A2858C /* CpuRegDef.swift in Sources */,
+				3538AD612AD9206100787E9A /* Nes+Controller.swift in Sources */,
+				3538AD582AD90A1A00787E9A /* IMapper.swift in Sources */,
 				3505EAB62A6F83AE00B14943 /* BaseChannel.swift in Sources */,
 				3530FA3426BF6C8B00CF18DD /* Nes.swift in Sources */,
 				3505EABC2A6F89F300B14943 /* NoiseChannel.swift in Sources */,
@@ -606,6 +630,7 @@
 				35265B4126C566540031E1A6 /* Bitfield8WithPpuRegister.swift in Sources */,
 				3557FBB22A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */,
 				3557FBB42A7C12E90059AA50 /* AudioDriveImp.swift in Sources */,
+				3538AD5B2AD91F0000787E9A /* Nes+GetSprite.swift in Sources */,
 				3530FA3926BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3530B88F26C7FC4200A2858C /* ICartridge.swift in Sources */,
 				3530B88826C7FBE600A2858C /* ICpu.swift in Sources */,
@@ -618,6 +643,7 @@
 				3530FA5826BF880E00CF18DD /* Mapper.swift in Sources */,
 				3530B89526C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
 				3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */,
+				3538AD5E2AD91FA200787E9A /* Nes+SaveState.swift in Sources */,
 				352AFFE52A6E6DD100F811F8 /* Apu.swift in Sources */,
 				3530FA4726BF70BB00CF18DD /* Ppu.swift in Sources */,
 				3505EAB92A6F85B600B14943 /* TriangleChannel.swift in Sources */,
@@ -843,7 +869,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Osx";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "NES_EMU (macOS)Release.entitlements";
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

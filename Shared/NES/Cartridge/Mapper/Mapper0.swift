@@ -6,8 +6,7 @@
 //
 
 import Foundation
-class Mapper0: Mapper
-{
+class Mapper0: Mapper {
     override func postInitialize() {
         
         SetPrgBankIndex16k(cpuBankIndexIn: 0, cartBankIndexIn: 0)
@@ -23,8 +22,7 @@ class Mapper0: Mapper
         SetChrBankIndex8k(ppuBankIndexIn: 0, cartBankIndexIn: 0)
     }
     
-    override func OnCpuWrite(cpuAddress:UInt16, value:UInt8)
-    {
+    override func OnCpuWrite(cpuAddress:UInt16, value:UInt8) {
         // Nothing to do
     }
 }

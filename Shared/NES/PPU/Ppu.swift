@@ -80,6 +80,7 @@ class PpuBase : Codable {
     }
     
     required init(from decoder: Decoder) throws {
+        print("Ppu.decoder")
         let values = try decoder.container(keyedBy: CodingKeys.self)
         ppuRegisters = try values.decode(PpuRegisterMemory.self, forKey: .ppuRegisters)
         kNumPaletteColors = try values.decode(UInt.self, forKey: .kNumPaletteColors)
@@ -106,6 +107,7 @@ class PpuBase : Codable {
     }
     
     func encode(to encoder: Encoder) throws {
+        print("Ppu.encoder")
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(ppuRegisters, forKey: .ppuRegisters)
         try container.encode(kNumPaletteColors, forKey: .kNumPaletteColors)

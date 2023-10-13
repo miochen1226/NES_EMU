@@ -112,7 +112,7 @@ class Mapper4: Mapper {
         }
     }
  
-    override func hackOnScanline() {
+    func hackOnScanline() {
         if irqCounter == 0 || irqReloadPending {
             irqCounter = irqReloadValue
             irqReloadPending = false

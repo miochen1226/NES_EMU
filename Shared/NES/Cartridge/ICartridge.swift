@@ -8,4 +8,5 @@
 import Foundation
 
 protocol ICartridge:HandleCpuReadProtocol,HandlePpuReadProtocol {
+    func hackOnScanline(nes:Nes)
 }

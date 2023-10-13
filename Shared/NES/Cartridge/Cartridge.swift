@@ -7,14 +7,75 @@
 
 import Foundation
 
-class Cartridge: ICartridge {
-    func hackOnScanline(nes:Nes) {
-        mapper.hackOnScanline()
+enum MapperType:Codable {
+    case Mapper0
+    case Mapper1
+    case Mapper4
+}
+
+class CartridgeBase : Codable {
+    init(){}
+    var romHeader:RomHeader?
+    var mapperType: MapperType = MapperType.Mapper0
+    var prgBanks:[Memory] = []
+    var chrBanks:[Memory] = []
+    
+    
+    var savBanks:[Memory] = []
+    
+    var mapper: IMapper!
+    
+    
+    enum CodingKeys: String, CodingKey {
+        case mapperType
+        case savBanks
+        case mapper
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        mapperType = try values.decode(MapperType.self, forKey: .mapperType)
+        
+        switch mapperType {
+        case .Mapper0:
+            mapper = try values.decode(Mapper0.self, forKey: .mapper)
+            break
+        case .Mapper1:
+            mapper = try values.decode(Mapper1.self, forKey: .mapper)
+            break
+        case .Mapper4:
+            mapper = try values.decode(Mapper4.self, forKey: .mapper)
+            break
+        }
+        
+        savBanks = try values.decode([Memory].self, forKey: .savBanks)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(savBanks, forKey: .savBanks)
+        let mapperImpl = getMapper()
+        if (mapperImpl != nil) {
+            try container.encode(mapperImpl, forKey: .mapper)
+        }
+        try container.encode(mapperType, forKey: .mapperType)
+    }
+    
+    func getMapper() -> MapperBase? {
+        return mapper as? MapperBase
+    }
+}
+
+extension Cartridge:ICartridge {
+    func hackOnScanline(nes: Nes) {
+        mapper.hackOnScanline?()
         if mapper.TestAndClearIrqPending() {
             nes.SignalCpuIrq()
         }
     }
-    
+}
+
+class Cartridge: CartridgeBase {
     func handlePpuRead(_ ppuAddress: UInt16) -> UInt8 {
         return accessChrMem(ppuAddress)
     }
@@ -192,26 +253,48 @@ class Cartridge: ICartridge {
             }
             
             let mN = romHeader!.GetMapperNumber()
-            if mN == 0 {
-                mapper = Mapper0()
-                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            
+            switch mN {
+            case 0:
+                mapperType = .Mapper0
+                break
+            case 1:
+                mapperType = .Mapper1
+            case 4:
+                mapperType = .Mapper4
+                break
+            default:
+                break
             }
-            else if mN == 1 {
-                mapper = Mapper1()
-                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
-            }
-            else if mN == 4 {
-                mapper = Mapper4()
-                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
-            }
-            else {
-                mapper = Mapper1()
-                mapper.Initialize(numPrgBanks: UInt8(numPrgBanks), numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
-            }
+            
+            mapper = CreateMapper(mapperType: mapperType, numPrgBanks: UInt8(numPrgBanks) ,numChrBanks: UInt8(numChrBanks), numSavBanks: UInt8(numSavBanks))
+            
             
             cartNameTableMirroring = romHeader!.GetNameTableMirroring()
             hasSRAM = romHeader!.HasSRAM();
         }
+    }
+    
+    func CreateMapper(mapperType:MapperType,numPrgBanks:UInt8 ,numChrBanks: UInt8, numSavBanks: UInt8) -> IMapper {
+        var mapperBase:Mapper!
+        switch mapperType {
+        case .Mapper0:
+            let mapper = Mapper0()
+            mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+            mapperBase = mapper
+            break
+        case .Mapper1:
+            let mapper = Mapper1()
+            mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+            mapperBase = mapper
+            break
+        case .Mapper4:
+            let mapper = Mapper4()
+            mapper.Initialize(numPrgBanks: numPrgBanks, numChrBanks: numChrBanks, numSavBanks: numSavBanks)
+            mapperBase = mapper
+        }
+        
+        return mapperBase
     }
     
     func getNameTableMirroring() -> NameTableMirroring {
@@ -251,52 +334,10 @@ class Cartridge: ICartridge {
     let kSavBankCount:UInt16 = 1
     let kSavBankSize:UInt16 = UInt16(KB(8))
     
-    var romHeader:RomHeader?
-    var prgBanks:[Memory] = []
-    var chrBanks:[Memory] = []
-    var savBanks:[Memory] = []
-    var mapper:Mapper = Mapper.init()
-    
     var hasSRAM = false
     var cartNameTableMirroring:NameTableMirroring = .Undefined
     
-    var stateObj:Data?
-    func saveState() {
-        saveBanks()
-        let data0 = try? JSONEncoder().encode(mapper)
-        stateObj = data0
-        
-        printDataObj(data: stateObj)
-    }
-    
     var memoeyDatas:[Data] = []
-    func saveBanks() {
-        memoeyDatas.removeAll()
-        for memory in savBanks {
-            let dataMemory = try? JSONEncoder().encode(memory)
-            printDataObj(data: dataMemory)
-            memoeyDatas.append(dataMemory!)
-        }
-    }
-    
-    func printDataObj(data:Data?) {
-        //let dataObject = try? JSONSerialization.jsonObject(with: data!, options: [])
-        //print(dataObject ?? "nil")
-    }
-    
-    func loadBanks() {
-        savBanks.removeAll()
-        for memoeyData in memoeyDatas {
-            let memory  = try? JSONDecoder().decode(Memory.self, from: memoeyData)
-            savBanks.append(memory!)
-        }
-    }
-    
-    func loadState() {
-        loadBanks()
-        let mapper2 = try? JSONDecoder().decode(Mapper1.self, from: stateObj!)
-        if mapper2 != nil {
-            mapper = mapper2!
-        }
-    }
 }
+
+

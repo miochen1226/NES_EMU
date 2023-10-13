@@ -19,7 +19,6 @@ extension LoadRegister: Codable {
     }
     
     func encode(to encoder: Encoder) throws {
-        print("LoadRegister.encode")
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(bitsWritten, forKey: .bitsWritten)
         try container.encode(value, forKey: .value)
@@ -29,7 +28,6 @@ extension LoadRegister: Codable {
 class LoadRegister: NSObject{
     
     required init(from decoder: Decoder) throws {
-        print("LoadRegister.decoder")
     }
     
     override init() {
@@ -96,7 +94,7 @@ class Mapper1: Mapper {
     var boardType:BoardType  = BoardType.DEFAULT
     var loadReg:LoadRegister = LoadRegister()
     
-    override init() {
+    override init(){
         super.init()
     }
     

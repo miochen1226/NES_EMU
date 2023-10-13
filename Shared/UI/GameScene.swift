@@ -102,6 +102,7 @@ class GameScene: SKScene,IRenderScreen {
         bIsBusy = false
     }
     
+    //Current not use.
     func renderSprites() {
         let spriteObjs = nes.getSpriteObjs()
         for spriteObj in spriteObjs {
@@ -117,22 +118,22 @@ class GameScene: SKScene,IRenderScreen {
     }
     
     func renderScreen() {
-        for sKShapeNode in arraySKShapeNode
-        {
+        for sKShapeNode in arraySKShapeNode {
             sKShapeNode.removeFromParent()
         }
         
         arraySKShapeNode.removeAll()
         
-        if(enableDrawBG)
-        {
+        if enableDrawBG {
             self.renderBG()
         }
         
+        //Current not use.
+        /*
         if(enableDrawSprites)
         {
             self.renderSprites()
-        }
+        }*/
     }
     
     

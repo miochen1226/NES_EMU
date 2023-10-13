@@ -7,10 +7,10 @@
 
 import Foundation
 
-class MapperBase : Codable {
-    var irqEnabled = false
-    var irqReloadPending = false
-    var irqPending = false
+class MapperBase: NSObject, Codable {
+    var irqEnabled: Bool = false
+    var irqReloadPending: Bool = false
+    var irqPending: Bool = false
     var numPrgBanks: UInt8 = 0
     var numChrBanks: UInt8 = 0
     var numSavBanks: UInt8 = 0
@@ -23,22 +23,9 @@ class MapperBase : Codable {
     var chrBankIndices: [Int:UInt8] = [:]
     var savBankIndices: [Int:UInt8] = [:]
     
-    init() {
-        
-    }
+    override init() {}
     
     enum CodingKeys: String, CodingKey {
-        /*var irqEnabled = false
-         var irqReloadPending = false
-         var irqPending = false
-         var numPrgBanks: UInt8 = 0
-         var numChrBanks: UInt8 = 0
-         var numSavBanks: UInt8 = 0
-         var canWritePrgMemory = false
-         var canWriteChrMemory = false
-         var canWriteSavMemory = false
-         var nextBankToUpdate: UInt8 = 0
-         var nametableMirroring = NameTableMirroring.Vertical*/
         case irqEnabled
         case irqReloadPending
         case irqPending
@@ -53,10 +40,6 @@ class MapperBase : Codable {
         case prgBankIndices
         case chrBankIndices
         case savBankIndices
-        //var prgBankIndices: [Int:UInt8] = [:]
-        //var chrBankIndices: [Int:UInt8] = [:]
-        //var savBankIndices: [Int:UInt8] = [:]
-        
     }
     
     required init(from decoder: Decoder) throws {
@@ -76,13 +59,10 @@ class MapperBase : Codable {
         prgBankIndices = try values.decode([Int:UInt8].self, forKey: .prgBankIndices)
         chrBankIndices = try values.decode([Int:UInt8].self, forKey: .chrBankIndices)
         savBankIndices = try values.decode([Int:UInt8].self, forKey: .savBankIndices)
-        initialForLoad()
     }
     
-    func initialForLoad() {}
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
         try container.encode(irqEnabled, forKey: .irqEnabled)
         try container.encode(irqReloadPending, forKey: .irqReloadPending)
         try container.encode(irqPending, forKey: .irqPending)
@@ -106,8 +86,8 @@ class MapperBase : Codable {
     }
 }
 
-class Mapper : MapperBase {
-    
+
+class Mapper : MapperBase,IMapper {
     func CanWriteChrMemory() -> Bool {
         return canWriteChrMemory
     }
@@ -129,9 +109,6 @@ class Mapper : MapperBase {
     
     func CanWriteSavMemory() -> Bool {
         return canWriteSavMemory
-    }
-    
-    override func initialForLoad() {
     }
     
     func Initialize(numPrgBanks: UInt8, numChrBanks: UInt8, numSavBanks: UInt8) {
@@ -156,10 +133,6 @@ class Mapper : MapperBase {
     }
     
     func postInitialize() {
-        
-    }
-    
-    func hackOnScanline() {
         
     }
     
