@@ -103,6 +103,7 @@ class GameScene: SKScene,IRenderScreen {
     }
     
     //Current not use.
+    /*
     func renderSprites() {
         let spriteObjs = nes.getSpriteObjs()
         for spriteObj in spriteObjs {
@@ -116,6 +117,7 @@ class GameScene: SKScene,IRenderScreen {
             addChild(spriteNode)
         }
     }
+    */
     
     func renderScreen() {
         for sKShapeNode in arraySKShapeNode {

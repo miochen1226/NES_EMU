@@ -13,8 +13,7 @@ class NesFrameProvider : FrameProvider{
     var frames:[Float32] = []
     let lockInput = NSLock()
     
-    func enqueue(inputFrame: Float32)
-    {
+    func enqueue(inputFrame: Float32) {
         lockInput.lock()
         frames.append(inputFrame)
         lockInput.unlock()

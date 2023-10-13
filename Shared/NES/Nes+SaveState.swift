@@ -59,7 +59,9 @@ extension Nes {
     }
     
     func saveStateFile(){
-        let stateSave = StateSave.init(cpu: self.cpu, ppu: self.ppu,cpuInternalRam: self.cpuInternalRam, cartridge: self.cartridge)
+        let cpu = self.cpu as! Cpu
+        let ppu = self.ppu as! Ppu
+        let stateSave = StateSave.init(cpu: cpu, ppu: ppu,cpuInternalRam: self.cpuInternalRam, cartridge: self.cartridge)
         let jsonData = try? JSONEncoder().encode(stateSave)
         saveToFile(data: jsonData)
     }
@@ -110,7 +112,6 @@ extension Nes {
         cpu.setControllerPorts(controllerPorts: controllerPorts)
         cpu.initialize(cpuMemoryBus: cpuMemoryBus)
         ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
-        apu.setNes(nes: self)
         
         cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
         ppuMemoryBus.initialize(ppu: ppu, cartridge: cartridge)

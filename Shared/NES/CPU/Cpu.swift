@@ -79,7 +79,25 @@ class CpuBase : Codable {
 
 
 class Cpu: CpuBase, ICpu {
-    func setApu(apu: Apu) {
+    func reset() {
+        // See http://wiki.nesdev.com/w/index.php/CPU_power_up_state
+        A = 0
+        X = 0
+        Y = 0
+        SP = 0xFF // Should be FD, but for improved compatibility set to FF
+        
+        P.clearAll()
+        P.set(CpuRegDef.IrqDisabled)
+
+        // Entry point is located at the Reset interrupt location
+        PC = read16(CpuMemory.kResetVector)
+
+        cycles = 0
+        pendingNmi = false
+        pendingIrq = false
+    }
+    
+    func setApu(apu: IApu) {
         self.apu = apu
     }
     
@@ -101,14 +119,14 @@ class Cpu: CpuBase, ICpu {
             break
             
         case 0x4015: // $4015
-            result = apu.HandleCpuRead(cpuAddress: cpuAddress)
+            result = apu.handleCpuRead(cpuAddress)
             break
             
         case CpuMemory.kControllerPort2: // $4017
             result = controllerPorts.handleCpuRead(cpuAddress: cpuAddress)
             break
         default:
-            result = apu.HandleCpuRead(cpuAddress: cpuAddress)
+            result = apu.handleCpuRead(cpuAddress)
             break
         }
         return result
@@ -148,7 +166,7 @@ class Cpu: CpuBase, ICpu {
         case CpuMemory.kControllerPort2: // $4017 For writes, this address is mapped to the APU!
             break
         default:
-            apu.HandleCpuWrite(cpuAddress: cpuAddress, value: value)
+            apu.handleCpuWrite(cpuAddress, value: value)
             break
         }
     }
@@ -720,33 +738,12 @@ class Cpu: CpuBase, ICpu {
         //NSLog("PC->%d",PC)
     }
     
-    func reset() {
-        // See http://wiki.nesdev.com/w/index.php/CPU_power_up_state
-        A = 0
-        X = 0
-        Y = 0
-        SP = 0xFF // Should be FD, but for improved compatibility set to FF
-        
-        P.clearAll()
-        P.set(CpuRegDef.IrqDisabled)
-
-        // Entry point is located at the Reset interrupt location
-        PC = read16(CpuMemory.kResetVector)
-
-        cycles = 0
-        pendingNmi = false
-        pendingIrq = false
-        //m_controllerPorts.Reset();
-    }
-
-    
     func getMemValue() -> UInt8 {
         let result = read8(operandAddress)
         return result
     }
     
-    func calcNegativeFlag(_ v: UInt16) -> UInt8
-    {
+    func calcNegativeFlag(_ v: UInt16) -> UInt8 {
         // Check if bit 7 is set
         if (v & 0x0080) != 0 {
             return 1
@@ -756,8 +753,7 @@ class Cpu: CpuBase, ICpu {
         }
     }
     
-    func calcNegativeFlag(_ v: Int) -> UInt8
-    {
+    func calcNegativeFlag(_ v: Int) -> UInt8 {
         // Check if bit 7 is set
         if (v & 0x80) != 0 {
             return 1
@@ -767,8 +763,7 @@ class Cpu: CpuBase, ICpu {
         }
     }
     
-    func calcNegativeFlag(_ v: UInt8) -> UInt8
-    {
+    func calcNegativeFlag(_ v: UInt8) -> UInt8 {
         // Check if bit 7 is set
         if (v & 0x80) != 0 {
             return 1
@@ -1004,7 +999,7 @@ class Cpu: CpuBase, ICpu {
     var opCodeTable:[UInt8:OpCodeEntry] = [:]
     var cpuMemoryBus:CpuMemoryBus?
     
-    var apu:Apu!
+    var apu:IApu!
     var controllerPorts:ControllerPorts!
     var operandAddress:UInt16 = 0
     var operandReadCrossedPage = false

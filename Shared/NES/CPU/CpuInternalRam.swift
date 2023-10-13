@@ -6,7 +6,7 @@
 //
 
 import Foundation
-class CpuInternalRam: HandleCpuReadProtocol, Codable {
+class CpuInternalRam: HandleCpuReadWriteProtocol, Codable {
     
     enum CodingKeys: String, CodingKey {
         case memory

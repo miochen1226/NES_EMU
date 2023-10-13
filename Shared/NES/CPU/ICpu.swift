@@ -7,6 +7,13 @@
 
 import Foundation
 
-protocol ICpu:HandleCpuReadProtocol {
+protocol ICpu:HandleCpuReadWriteProtocol {
+    func initialize(cpuMemoryBus: CpuMemoryBus)
+    func reset()
+    func setApu(apu: IApu)
+    func setControllerPorts(controllerPorts: ControllerPorts)
     
+    func execute(_ cpuCyclesElapsed: inout UInt32)
+    func Nmi()
+    func Irq()
 }

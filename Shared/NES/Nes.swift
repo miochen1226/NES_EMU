@@ -10,13 +10,12 @@ import Foundation
 
 class Nes {
     init() {
+        cpu.initialize(cpuMemoryBus: cpuMemoryBus)
         cpu.setApu(apu: apu)
         cpu.setControllerPorts(controllerPorts: controllerPorts)
         
         renderer.initialize()
-        cpu.initialize(cpuMemoryBus: cpuMemoryBus)
         ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
-        apu.initialize(nes: self)
         cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
         ppuMemoryBus.initialize(ppu: ppu, cartridge: cartridge)
     }
@@ -44,7 +43,7 @@ class Nes {
     }
     
     func stop() {
-        apu.audioDriver?.audioUnitPlayer.stop()
+        apu.stopPlayer()
         wantQuit = true
         while isRunning {
             usleep(1000)
@@ -58,13 +57,11 @@ class Nes {
     
     func start() {
         stop()
-        apu.audioDriver?.audioUnitPlayer.start()
+        apu.startPlayer()
         serialQueue.async {
             self.isRunning = true
             while self.wantQuit == false {
-                
                 let beginDate = Date().timeIntervalSince1970
-                
                 self.executeCpuAndPpuFrame()
                 self.renderer.pushFrame()
                 
@@ -119,9 +116,9 @@ class Nes {
     static let sharedInstance = Nes()
     
     let cartridge = Cartridge.init()
-    var ppu = Ppu.init()
-    let apu = Apu.init()
-    var cpu = Cpu.init()
+    var ppu:IPpu = Ppu.init()
+    let apu:IApu = Apu.init()
+    var cpu:ICpu = Cpu.init()
     let controllerPorts = ControllerPorts.init()
     let cpuMemoryBus = CpuMemoryBus.init()
     let ppuMemoryBus = PpuMemoryBus.init()

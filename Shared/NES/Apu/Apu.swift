@@ -7,14 +7,123 @@
 
 import Foundation
 
-class Apu: NSObject {
-    
-    func setNes(nes:Nes) {
-        self.nes = nes
+extension Apu: IApu {
+    func execute(_ cpuCycles: UInt32) {
+        for _ in 0 ..< cpuCycles {
+            frameCounter?.Clock()
+            
+            evenFrame = !evenFrame
+            
+            triangleChannel?.clockTimer()
+            if evenFrame {
+                pulseChannel0?.clockTimer()
+                pulseChannel1?.clockTimer()
+                noiseChannel?.clockTimer()
+                dmcChannel?.clockTimer()
+            }
+            
+            elapsedCpuCycles += 1
+            
+            if elapsedCpuCycles >= Apu.kCpuCyclesPerSample {
+                elapsedCpuCycles = elapsedCpuCycles - Apu.kCpuCyclesPerSample
+                let inputFrame: Float32 = SampleChannelsAndMix()
+                audioDriver?.enqueue(inputFrame: inputFrame)
+            }
+        }
     }
     
-    func initialize(nes:Nes) {
-        self.nes = nes
+    func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
+        let bitField = Bitfield8()
+        switch cpuAddress {
+        case 0x4015:
+            //IF-D NT21
+            //@TODO: set bits 7,6,4: DMC interrupt (I), frame interrupt (F), DMC active (D)
+            //@TODO: Reading this register clears the frame interrupt flag (but not the DMC interrupt flag).
+            frameCounter?.InhibitInterrupt()
+            
+            if(pulseChannel0?.getLengthCounter().getValue() ?? 0 > 0)
+            {
+                bitField.setPos(bitPos: 0, enabled: 1)
+            }
+            if(pulseChannel1?.getLengthCounter().getValue() ?? 0 > 0)
+            {
+                bitField.setPos(bitPos: 1, enabled: 1)
+            }
+            if(triangleChannel?.getLengthCounter().getValue() ?? 0 > 0)
+            {
+                bitField.setPos(bitPos: 2, enabled: 1)
+            }
+            if(noiseChannel?.getLengthCounter().getValue() ?? 0 > 0)
+            {
+                bitField.setPos(bitPos: 3, enabled: 1)
+            }
+            
+            let D:UInt8 = dmcChannel?.interrupt ?? 0
+            bitField.setPos(bitPos: 4, enabled: D)
+            
+            let F:UInt8 = getFrameInterrupt()
+            bitField.setPos(bitPos: 6, enabled: F)
+            break
+        default:
+            break
+        }
+        
+        return bitField.value()
+    }
+    
+    func handleCpuWrite(_ cpuAddress: UInt16, value: UInt8) {
+        switch cpuAddress {
+        case 0x4000,0x4001,0x4002,0x4003:
+            pulseChannel0?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
+            break;
+        case 0x4004,0x4005,0x4006,0x4007:
+            pulseChannel1?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
+            break;
+        case 0x4008,0x400A,0x400B:
+            triangleChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
+            break
+        case 0x400C,0x400E,0x400F:
+            noiseChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
+            break
+        case 0x4010,0x4011,0x4012,0x4013:
+            dmcChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
+            break
+        case 0x4015:
+            //---D NT21
+            let enableP1 = testBits(target: BIT(0), value: value)
+            pulseChannel0?.getLengthCounter().setEnabled(enableP1)
+            
+            let enableP2 = testBits(target: BIT(1), value: value)
+            pulseChannel1?.getLengthCounter().setEnabled(enableP2)
+            
+            let enableTriangle = testBits(target: BIT(2), value: value)
+            triangleChannel?.getLengthCounter().setEnabled(enableTriangle)
+            
+            let enableNoise = testBits(target: BIT(3), value: value)
+            noiseChannel?.getLengthCounter().setEnabled(enableNoise)
+            
+            let enableDMC = testBits(target: BIT(4), value: value)
+            dmcChannel?.getLengthCounter().setEnabled(enableDMC)
+            break
+        case 0x4017:
+            frameCounter?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
+            break
+        default:
+            break
+        }
+    }
+}
+
+class Apu: NSObject {
+    func stopPlayer() {
+        audioDriver?.audioUnitPlayer.stop()
+    }
+    
+    func startPlayer() {
+        audioDriver?.audioUnitPlayer.start()
+    }
+    
+    func initialize() {
         initCompoment()
         setChannelVolume(type: .PulseChannel1, volume: 1.0)
         setChannelVolume(type: .PulseChannel2, volume: 1.0)
@@ -26,6 +135,7 @@ class Apu: NSObject {
     
     override init() {
         super.init()
+        initialize()
     }
     
     func initCompoment() {
@@ -36,6 +146,7 @@ class Apu: NSObject {
         pulseChannel1 = PulseChannel.init(pulseChannelNumber: 1)
         triangleChannel = TriangleChannel()
         noiseChannel = NoiseChannel()
+        //@TODO dmcChannel not implement now
         //dmcChannel = DmcChannel()
     }
     
@@ -60,10 +171,10 @@ class Apu: NSObject {
         sampleSum = 0
         numSamples = 0
         
-        HandleCpuWrite(cpuAddress: 0x4017, value: 0)
-        HandleCpuWrite(cpuAddress: 0x4015, value: 0)
+        handleCpuWrite(0x4017, value: 0)
+        handleCpuWrite(0x4015, value: 0)
         for address in 0x4000...0x400F {
-            HandleCpuWrite(cpuAddress:UInt16(address), value:0);
+            handleCpuWrite(UInt16(address), value:0);
         }
     }
     
@@ -114,128 +225,9 @@ class Apu: NSObject {
         return sample
     }
     
-    func HandleCpuRead( cpuAddress:UInt16) -> UInt8 {
-        let bitField = Bitfield8()
-        print("APU HandleCpuRead")
-        switch cpuAddress {
-        case 0x4015:
-            //IF-D NT21
-            //@TODO: set bits 7,6,4: DMC interrupt (I), frame interrupt (F), DMC active (D)
-            //@TODO: Reading this register clears the frame interrupt flag (but not the DMC interrupt flag).
-            frameCounter?.InhibitInterrupt()
-            
-            if(pulseChannel0?.getLengthCounter().getValue() ?? 0 > 0)
-            {
-                bitField.setPos(bitPos: 0, enabled: 1)
-            }
-            if(pulseChannel1?.getLengthCounter().getValue() ?? 0 > 0)
-            {
-                bitField.setPos(bitPos: 1, enabled: 1)
-            }
-            if(triangleChannel?.getLengthCounter().getValue() ?? 0 > 0)
-            {
-                bitField.setPos(bitPos: 2, enabled: 1)
-            }
-            if(noiseChannel?.getLengthCounter().getValue() ?? 0 > 0)
-            {
-                bitField.setPos(bitPos: 3, enabled: 1)
-            }
-            
-            let D:UInt8 = dmcChannel?.interrupt ?? 0
-            bitField.setPos(bitPos: 4, enabled: D)
-            
-            let F:UInt8 = getFrameInterrupt()
-            bitField.setPos(bitPos: 6, enabled: F)
-            
-            //let I:UInt8 = dmcChannel?.getI() ?? 0
-            //bitField.setPos(bitPos: 7, enabled: I)
-            
-            break
-        default:
-            break
-        }
-        
-        return bitField.value()
-    }
-    
     func getFrameInterrupt() -> UInt8 {
         let interrupt = frameCounter?.enableIRQ ?? 0
         return interrupt
-    }
-    
-    func HandleCpuWrite(cpuAddress: UInt16, value: UInt8) {
-        switch cpuAddress {
-        case 0x4000,0x4001,0x4002,0x4003:
-            pulseChannel0?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
-            break;
-        case 0x4004,0x4005,0x4006,0x4007:
-            pulseChannel1?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
-            break;
-        case 0x4008,0x400A,0x400B:
-            triangleChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
-            break
-        case 0x400C,0x400E,0x400F:
-            noiseChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
-            break
-        case 0x4010,0x4011,0x4012,0x4013:
-            
-            //print("$4010–$4013")
-            dmcChannel?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
-            break
-        case 0x4015:
-            //---D NT21
-            let enableP1 = testBits(target: BIT(0), value: value)
-            pulseChannel0?.getLengthCounter().setEnabled(enableP1)
-            
-            let enableP2 = testBits(target: BIT(1), value: value)
-            pulseChannel1?.getLengthCounter().setEnabled(enableP2)
-            
-            
-            let enableTriangle = testBits(target: BIT(2), value: value)
-            triangleChannel?.getLengthCounter().setEnabled(enableTriangle)
-            
-            let enableNoise = testBits(target: BIT(3), value: value)
-            noiseChannel?.getLengthCounter().setEnabled(enableNoise)
-            
-            //@TODO: DMC Enable bit 4
-            let enableDMC = testBits(target: BIT(4), value: value)
-            dmcChannel?.getLengthCounter().setEnabled(enableDMC)
-            break
-        case 0x4017:
-            frameCounter?.handleCpuWrite(cpuAddress:cpuAddress,value:value)
-            break
-        default:
-            break
-        }
-    }
-    
-    var evenFrame = false
-    func execute(_ cpuCycles: UInt32) {
-        for _ in 0 ..< cpuCycles {
-            frameCounter?.Clock()
-            
-            evenFrame = !evenFrame
-            
-            triangleChannel?.clockTimer()
-            if evenFrame {
-                pulseChannel0?.clockTimer()
-                pulseChannel1?.clockTimer()
-                noiseChannel?.clockTimer()
-                dmcChannel?.clockTimer()
-            }
-            
-            elapsedCpuCycles += 1
-            
-            //All output
-            //let inputFrame: Float32 = SampleChannelsAndMix()
-            //audioDriver?.enqueue(inputFrame: inputFrame)
-            
-            if elapsedCpuCycles >= Apu.kCpuCyclesPerSample {
-                elapsedCpuCycles = elapsedCpuCycles - Apu.kCpuCyclesPerSample
-                let inputFrame: Float32 = SampleChannelsAndMix()
-                audioDriver?.enqueue(inputFrame: inputFrame)
-            }
-        }
     }
     
     enum ApuChannel {
@@ -264,5 +256,5 @@ class Apu: NSObject {
     var sampleSum = 0
     var numSamples = 0
     var channelVolumes:[ApuChannel:Float32] = [:]
-    var nes:Nes? = nil
+    var evenFrame = false
 }

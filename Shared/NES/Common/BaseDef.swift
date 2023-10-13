@@ -31,12 +31,12 @@ struct globeDef
     static let kSavBankSize = KB(8)
 }
 
-protocol HandleCpuReadProtocol {
+protocol HandleCpuReadWriteProtocol {
     func handleCpuRead(_ cpuAddress: UInt16) -> UInt8
     func handleCpuWrite(_ cpuAddress: UInt16, value: UInt8)
 }
 
-protocol HandlePpuReadProtocol {
+protocol HandlePpuReadWriteProtocol {
     func handlePpuRead(_ ppuAddress: UInt16) -> UInt8
     func handlePpuWrite(_ ppuAddress: UInt16, value: UInt8)
 }

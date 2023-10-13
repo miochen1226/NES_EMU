@@ -7,6 +7,8 @@
 
 import Foundation
 
-protocol IPpu:HandleCpuReadProtocol,HandlePpuReadProtocol {
-    
+protocol IPpu:HandleCpuReadWriteProtocol,HandlePpuReadWriteProtocol {
+    func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer)
+    func execute(_ cpuCycles:UInt32, completedFrame: inout Bool)
+    func reset()
 }

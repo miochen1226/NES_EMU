@@ -34,6 +34,7 @@ class SpriteObj {
     var rawColors:[Color4] = []
 }
 
+/*
 extension Nes {
     //Current not use.
     func getSpriteObjs() -> [SpriteObj] {
@@ -111,3 +112,4 @@ extension Nes {
         return spriteObjs
     }
 }
+*/

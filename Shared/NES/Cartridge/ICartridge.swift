@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol ICartridge:HandleCpuReadProtocol,HandlePpuReadProtocol {
+protocol ICartridge:HandleCpuReadWriteProtocol,HandlePpuReadWriteProtocol {
     func hackOnScanline(nes:Nes)
 }

@@ -153,8 +153,7 @@ class PpuBase : Codable {
     private var paletteColorsData:[PixelColor] = []
 }
 
-class Ppu: PpuBase,IPpu {
-   
+extension Ppu: IPpu {
     func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer) {
         self.renderer = renderer
         self.ppuMemoryBus = ppuMemoryBus
@@ -192,40 +191,113 @@ class Ppu: PpuBase,IPpu {
         vblankFlagSetThisFrame = false
     }
     
-    func yXtoPpuCycle(y: UInt32, x: UInt32) -> UInt32 {
-        return y * 341 + x
-    }
+    func execute(_ cpuCycles:UInt32, completedFrame: inout Bool) {
+        let kNumTotalScanlines:UInt32 = 262
+        let kNumHBlankAndBorderCycles:UInt32 = 85
+        let kNumScanlineCycles = UInt32(kScreenWidth + kNumHBlankAndBorderCycles) // 256 + 85 = 341
+        let kNumScreenCycles = UInt32(kNumScanlineCycles * kNumTotalScanlines) // 89342 cycles per screen
 
-    func cpuToPpuCycles(_ cpuCycles: UInt32) -> UInt32 {
-        return cpuCycles * 3
-    }
-    
-    func setVBlankFlag() {
-        if !vblankFlagSetThisFrame {
-            ppuStatusReg.set(PpuStatus.InVBlank)
-            vblankFlagSetThisFrame = true
-        }
-    }
-    
-    func mapPpuToPalette(ppuAddress: UInt16) -> UInt16 {
-        var paletteAddress = (ppuAddress - PpuMemory.kPalettesBase) % PpuMemory.kPalettesSize;
-        // Addresses $3F10/$3F14/$3F18/$3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C
-        // If least 2 bits are unset, it's one of the 8 mirrored addresses, so clear bit 4 to mirror
-        if !testBits(target: paletteAddress, value: (BIT(1)|BIT(0))) {
-            clearBits(target: &paletteAddress, value: BIT(4))
-        }
-        return paletteAddress
-    }
-    
-    func readPpuRegister(_ cpuAddress: UInt16) -> UInt8 {
-        return ppuRegisters.read(mapCpuToPpuRegister(cpuAddress))
-    }
+        let ppuCycles = cpuToPpuCycles(cpuCycles)
+        completedFrame = false
+        
+        let renderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
+        
+        for _ in 0 ..< ppuCycles
+        {
+            let x = cycle % kNumScanlineCycles // offset in current scanline
+            let y = cycle / kNumScanlineCycles // scanline
 
-    func writePpuRegister(_ cpuAddress:UInt16, value: UInt8) {
-        ppuRegisters.write(address: mapCpuToPpuRegister(cpuAddress), value: value)
-        ppuStatusReg.reload()
-        ppuControlReg1.reload()
-        ppuControlReg2.reload()
+            if ( (y <= 239) || y == 261 ) // Visible and Pre-render scanlines
+            {
+                if renderingEnabled {
+                    if x == 64 {
+                        // Cycles 1-64: Clear secondary OAM to $FF
+                        clearOAM2()
+                    }
+                    else if x == 256 {
+                        // Cycles 65-256: Sprite evaluation
+                        performSpriteEvaluation(x: x, y: y)
+                    }
+                    else if (x == 260)
+                    {
+                        //@TODO: This is a dirty hack for Mapper4 (MMC3) and the like to get around the fact that
+                        // my PPU implementation doesn't perform Sprite fetches as expected (must fetch even if no
+                        // sprites found on scanline, and fetch each sprite separately like I do for tiles). For now
+                        // this mostly works.
+                        
+                        nes?.hackOnScanline()
+                    }
+                }
+
+                if x >= 257 && x <= 320 {
+                    // "HBlank" (idle cycles)
+                    if renderingEnabled {
+                        if x == 257 {
+                            copyVRamAddressHori(target: &vramAddress, source: &tempVRamAddress)
+                        }
+                        else if y == 261 && x >= 280 && x <= 304 {
+                            copyVRamAddressVert(target: &vramAddress, source: &tempVRamAddress)
+                        }
+                        else if x == 320 {
+                            // Cycles 257-320: sprite data fetch for next scanline
+                            fetchSpriteData(y)
+                        }
+                    }
+                }
+                else {
+                    // Fetch and render cycles
+                    // Update VRAM address and fetch data
+                    if renderingEnabled {
+                        // PPU fetches 4 bytes every 8 cycles for a given tile (NT, AT, LowBG, and HighBG).
+                        // We want to know when we're on the last cycle of the HighBG tile byte (see Ntsc_timing.jpg)
+                        let lastFetchCycle = (x >= 8) && (x % 8 == 0)
+
+                        if lastFetchCycle {
+                            FetchBackgroundTileData()
+                            
+                            // Data for v was just fetched, so we can now increment it
+                            if x != 256 {
+                                incHoriVRamAddress(&vramAddress)
+                            }
+                            else {
+                                incVertVRamAddress(&vramAddress)
+                            }
+                        }
+                    }
+
+                    // Render pixel at x,y using pipelined fetch data. If rendering is disabled, will render background color.
+                    if x < kScreenWidth && y < kScreenHeight {
+                        renderPixel(x: x, y: y)
+                    }
+
+                    // Clear flags on pre-render line at dot 1
+                    if y == 261 && x == 1 {
+                        ppuStatusReg.clear(PpuStatus.InVBlank | PpuStatus.PpuHitSprite0 | PpuStatus.SpriteOverflow)
+                    }
+
+                    // Present on (second to) last cycle of last visible scanline
+                    //@TODO: Do this on last frame of post-render line?
+                    if y == 239 && x == 339 {
+                        completedFrame = true
+                        onFrameComplete()
+                    }
+                }
+            }
+            else {
+                // Post-render and VBlank 240-260
+                assert(y >= 240 && y <= 260)
+
+                if y == 241 && x == 1 {
+                    setVBlankFlag()
+                    if ppuControlReg1.test(PpuControl1.NmiOnVBlank) {
+                        nes?.SignalCpuNmi()
+                    }
+                }
+            }
+
+            // Update cycle
+            cycle = (cycle + 1) % kNumScreenCycles;
+        }
     }
     
     func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
@@ -363,6 +435,44 @@ class Ppu: PpuBase,IPpu {
         default:
             break
         }
+    }
+}
+
+class Ppu: PpuBase {
+    func yXtoPpuCycle(y: UInt32, x: UInt32) -> UInt32 {
+        return y * 341 + x
+    }
+
+    func cpuToPpuCycles(_ cpuCycles: UInt32) -> UInt32 {
+        return cpuCycles * 3
+    }
+    
+    func setVBlankFlag() {
+        if !vblankFlagSetThisFrame {
+            ppuStatusReg.set(PpuStatus.InVBlank)
+            vblankFlagSetThisFrame = true
+        }
+    }
+    
+    func mapPpuToPalette(ppuAddress: UInt16) -> UInt16 {
+        var paletteAddress = (ppuAddress - PpuMemory.kPalettesBase) % PpuMemory.kPalettesSize;
+        // Addresses $3F10/$3F14/$3F18/$3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C
+        // If least 2 bits are unset, it's one of the 8 mirrored addresses, so clear bit 4 to mirror
+        if !testBits(target: paletteAddress, value: (BIT(1)|BIT(0))) {
+            clearBits(target: &paletteAddress, value: BIT(4))
+        }
+        return paletteAddress
+    }
+    
+    func readPpuRegister(_ cpuAddress: UInt16) -> UInt8 {
+        return ppuRegisters.read(mapCpuToPpuRegister(cpuAddress))
+    }
+
+    func writePpuRegister(_ cpuAddress:UInt16, value: UInt8) {
+        ppuRegisters.write(address: mapCpuToPpuRegister(cpuAddress), value: value)
+        ppuStatusReg.reload()
+        ppuControlReg1.reload()
+        ppuControlReg2.reload()
     }
     
     func setVRamAddressFineY(v:inout UInt16, value: UInt8) {
@@ -858,115 +968,6 @@ class Ppu: PpuBase,IPpu {
     func copyVRamAddressVert(target:inout UInt16, source: inout UInt16) {
         // Copy coarse Y (5 bits), fine Y (3 bits), and high nametable bit
         target = (target & 0x041F) | ((source & ~0x041F))
-    }
-    
-    func execute(_ cpuCycles:UInt32, completedFrame: inout Bool) {
-        let kNumTotalScanlines:UInt32 = 262
-        let kNumHBlankAndBorderCycles:UInt32 = 85
-        let kNumScanlineCycles = UInt32(kScreenWidth + kNumHBlankAndBorderCycles) // 256 + 85 = 341
-        let kNumScreenCycles = UInt32(kNumScanlineCycles * kNumTotalScanlines) // 89342 cycles per screen
-
-        let ppuCycles = cpuToPpuCycles(cpuCycles)
-        completedFrame = false
-        
-        let renderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
-        
-        for _ in 0 ..< ppuCycles
-        {
-            let x = cycle % kNumScanlineCycles // offset in current scanline
-            let y = cycle / kNumScanlineCycles // scanline
-
-            if ( (y <= 239) || y == 261 ) // Visible and Pre-render scanlines
-            {
-                if renderingEnabled {
-                    if x == 64 {
-                        // Cycles 1-64: Clear secondary OAM to $FF
-                        clearOAM2()
-                    }
-                    else if x == 256 {
-                        // Cycles 65-256: Sprite evaluation
-                        performSpriteEvaluation(x: x, y: y)
-                    }
-                    else if (x == 260)
-                    {
-                        //@TODO: This is a dirty hack for Mapper4 (MMC3) and the like to get around the fact that
-                        // my PPU implementation doesn't perform Sprite fetches as expected (must fetch even if no
-                        // sprites found on scanline, and fetch each sprite separately like I do for tiles). For now
-                        // this mostly works.
-                        
-                        nes?.hackOnScanline()
-                    }
-                }
-
-                if x >= 257 && x <= 320 {
-                    // "HBlank" (idle cycles)
-                    if renderingEnabled {
-                        if x == 257 {
-                            copyVRamAddressHori(target: &vramAddress, source: &tempVRamAddress)
-                        }
-                        else if y == 261 && x >= 280 && x <= 304 {
-                            copyVRamAddressVert(target: &vramAddress, source: &tempVRamAddress)
-                        }
-                        else if x == 320 {
-                            // Cycles 257-320: sprite data fetch for next scanline
-                            fetchSpriteData(y)
-                        }
-                    }
-                }
-                else {
-                    // Fetch and render cycles
-                    // Update VRAM address and fetch data
-                    if renderingEnabled {
-                        // PPU fetches 4 bytes every 8 cycles for a given tile (NT, AT, LowBG, and HighBG).
-                        // We want to know when we're on the last cycle of the HighBG tile byte (see Ntsc_timing.jpg)
-                        let lastFetchCycle = (x >= 8) && (x % 8 == 0)
-
-                        if lastFetchCycle {
-                            FetchBackgroundTileData()
-                            
-                            // Data for v was just fetched, so we can now increment it
-                            if x != 256 {
-                                incHoriVRamAddress(&vramAddress)
-                            }
-                            else {
-                                incVertVRamAddress(&vramAddress)
-                            }
-                        }
-                    }
-
-                    // Render pixel at x,y using pipelined fetch data. If rendering is disabled, will render background color.
-                    if x < kScreenWidth && y < kScreenHeight {
-                        renderPixel(x: x, y: y)
-                    }
-
-                    // Clear flags on pre-render line at dot 1
-                    if y == 261 && x == 1 {
-                        ppuStatusReg.clear(PpuStatus.InVBlank | PpuStatus.PpuHitSprite0 | PpuStatus.SpriteOverflow)
-                    }
-
-                    // Present on (second to) last cycle of last visible scanline
-                    //@TODO: Do this on last frame of post-render line?
-                    if y == 239 && x == 339 {
-                        completedFrame = true
-                        onFrameComplete()
-                    }
-                }
-            }
-            else {
-                // Post-render and VBlank 240-260
-                assert(y >= 240 && y <= 260)
-
-                if y == 241 && x == 1 {
-                    setVBlankFlag()
-                    if ppuControlReg1.test(PpuControl1.NmiOnVBlank) {
-                        nes?.SignalCpuNmi()
-                    }
-                }
-            }
-
-            // Update cycle
-            cycle = (cycle + 1) % kNumScreenCycles;
-        }
     }
     
     func mapCpuToPpuRegister(_ cpuAddress: UInt16) -> UInt16 {
