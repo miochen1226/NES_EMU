@@ -70,6 +70,7 @@ struct GameViewRepresentable: NSViewRepresentable {
                 break
             }
         }
+        
         override func keyDown(with event: NSEvent) {
             switch(event.charactersIgnoringModifiers)
             {

@@ -7,24 +7,64 @@
 
 import Foundation
 
+extension ControllerPorts: IControllerPorts {
+    func handleCpuRead( _ cpuAddress: UInt16) -> UInt8 {
+        var result:UInt8 = 0x40
+        let controllerIndex = MapCpuToPorts(cpuAddress)
+        
+        if controllerIndex == 0 {
+            let btnIndex:Int = readIndex[controllerIndex]
+            let isButtonDown = readInputDown(controllerIndex: controllerIndex, btnIndex: btnIndex)
+            lastIsButtonDown[btnIndex] = isButtonDown
+            if isButtonDown {
+                result = result | 1
+            }
+        }
+        
+        if !strobe {
+            readIndex[Int(controllerIndex)] += 1
+            if readIndex[Int(controllerIndex)]>7 {
+                readIndex[Int(controllerIndex)] = 0
+            }
+        }
+        
+        return result
+    }
+    
+    func handleCpuWrite(_ cpuAddress:UInt16, value: UInt8) {
+        let controllerIndex = MapCpuToPorts(cpuAddress)
+        if controllerIndex == 0 {
+            lastStrobe = strobe
+            if value == 1 {
+                strobe = true
+            }
+            else {
+                strobe = false
+            }
+            
+            if strobe || lastStrobe {
+                readIndex[0] = 0
+                readIndex[1] = 0
+            }
+        }
+    }
+}
+
 class ControllerPorts: NSObject {
     
     func pressL(_ isDown: Bool = true) {
         setKeyPressStatus(6, isPress: isDown)
     }
     
-    func pressR(_ isDown: Bool = true)
-    {
+    func pressR(_ isDown: Bool = true) {
         setKeyPressStatus(7, isPress: isDown)
     }
     
-    func pressU(_ isDown: Bool = true)
-    {
+    func pressU(_ isDown: Bool = true) {
         setKeyPressStatus(4, isPress: isDown)
     }
     
-    func pressD(_ isDown: Bool = true)
-    {
+    func pressD(_ isDown: Bool = true) {
         setKeyPressStatus(5, isPress: isDown)
     }
     
@@ -78,47 +118,6 @@ class ControllerPorts: NSObject {
         return isDown
     }
     
-    func handleCpuRead( cpuAddress: UInt16) -> UInt8 {
-        var result:UInt8 = 0x40
-        let controllerIndex = MapCpuToPorts(cpuAddress)
-        
-        if controllerIndex == 0 {
-            let btnIndex:Int = readIndex[controllerIndex]
-            let isButtonDown = readInputDown(controllerIndex: controllerIndex, btnIndex: btnIndex)
-            lastIsButtonDown[btnIndex] = isButtonDown
-            if isButtonDown {
-                result = result | 1
-            }
-        }
-        
-        if !strobe {
-            readIndex[Int(controllerIndex)] += 1
-            if readIndex[Int(controllerIndex)]>7 {
-                readIndex[Int(controllerIndex)] = 0
-            }
-        }
-        
-        return result
-    }
-    
-    func handleCpuWrite(cpuAddress:UInt16, value: UInt8) {
-        let controllerIndex = MapCpuToPorts(cpuAddress)
-        if controllerIndex == 0 {
-            lastStrobe = strobe
-            if value == 1 {
-                strobe = true
-            }
-            else {
-                strobe = false
-            }
-            
-            if strobe || lastStrobe {
-                readIndex[0] = 0
-                readIndex[1] = 0
-            }
-        }
-    }
-    
     var readIndex:[Int] = [0,0]
     var start_status:Bool = false
     var pushTime = 0
@@ -134,5 +133,4 @@ class ControllerPorts: NSObject {
     private let lock = NSLock()
     var readIndex_1 = 0
     var readIndex_2 = 0
-    
 }

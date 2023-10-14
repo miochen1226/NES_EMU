@@ -8,11 +8,23 @@
 import Foundation
 
 
-class CpuBase : Codable {
+class CpuBase: NSObject, Codable {
     
-    init() {
-        
+    override init() {
+        super.init()
+        initOpTable()
     }
+    
+    func initOpTable() {
+        let array = OpCodeTable.GetOpCodeTable()
+        opCodeTable.removeAll()
+        for item in array {
+            opCodeTable[item.opCode] = item
+        }
+    }
+    
+    var opCodeTable:[UInt8:OpCodeEntry] = [:]
+    
     var PC:UInt16 = 0        // Program counter
     var SP:UInt8 = 0        // Stack pointer
     var A:UInt8 = 0       // Accumulator
@@ -43,6 +55,7 @@ class CpuBase : Codable {
     
     required init(from decoder: Decoder) throws {
         print("Cpu.decoder")
+        super.init()
         let values = try decoder.container(keyedBy: CodingKeys.self)
         PC = try values.decode(UInt16.self, forKey: .PC)
         SP = try values.decode(UInt8.self, forKey: .SP)
@@ -56,6 +69,8 @@ class CpuBase : Codable {
         
         cycles = try values.decode(UInt32.self, forKey: .cycles)
         totalCycles = try values.decode(UInt32.self, forKey: .totalCycles)
+        
+        self.initOpTable()
     }
     
     func encode(to encoder: Encoder) throws {
@@ -77,8 +92,7 @@ class CpuBase : Codable {
     }
 }
 
-
-class Cpu: CpuBase, ICpu {
+extension Cpu:ICpu {
     func reset() {
         // See http://wiki.nesdev.com/w/index.php/CPU_power_up_state
         A = 0
@@ -97,14 +111,6 @@ class Cpu: CpuBase, ICpu {
         pendingIrq = false
     }
     
-    func setApu(apu: IApu) {
-        self.apu = apu
-    }
-    
-    func setControllerPorts(controllerPorts: ControllerPorts) {
-        self.controllerPorts = controllerPorts
-    }
-    
     func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         var result:UInt8 = 0
 
@@ -115,7 +121,7 @@ class Cpu: CpuBase, ICpu {
             break
 
         case CpuMemory.kControllerPort1: // $4016
-            result = controllerPorts.handleCpuRead(cpuAddress: cpuAddress)
+            result = controllerPorts.handleCpuRead(cpuAddress)
             break
             
         case 0x4015: // $4015
@@ -123,7 +129,7 @@ class Cpu: CpuBase, ICpu {
             break
             
         case CpuMemory.kControllerPort2: // $4017
-            result = controllerPorts.handleCpuRead(cpuAddress: cpuAddress)
+            result = controllerPorts.handleCpuRead(cpuAddress)
             break
         default:
             result = apu.handleCpuRead(cpuAddress)
@@ -132,20 +138,7 @@ class Cpu: CpuBase, ICpu {
         return result
     }
     
-    func SpriteDmaTransfer(_ cpuAddress:UInt16)
-    {
-        for i in 0 ..< 256
-        {
-            let value:UInt8 = cpuMemoryBus!.read(cpuAddress + UInt16(i))
-            cpuMemoryBus!.write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value)
-        }
-
-        // While DMA transfer occurs, the memory bus is in use, preventing CPU from fetching memory
-        cycles += 512
-    }
-    
-    func handleCpuWrite(_ cpuAddress:UInt16, value:UInt8)
-    {
+    func handleCpuWrite(_ cpuAddress:UInt16, value:UInt8) {
         switch (cpuAddress)
         {
         case CpuMemory.kSpriteDmaReg: // $4014
@@ -160,7 +153,7 @@ class Cpu: CpuBase, ICpu {
             break
 
         case CpuMemory.kControllerPort1: // $4016
-            controllerPorts.handleCpuWrite(cpuAddress: cpuAddress, value:value)
+            controllerPorts.handleCpuWrite(cpuAddress, value:value)
             break
 
         case CpuMemory.kControllerPort2: // $4017 For writes, this address is mapped to the APU!
@@ -171,20 +164,18 @@ class Cpu: CpuBase, ICpu {
         }
     }
     
-    func initialize(cpuMemoryBus: CpuMemoryBus) {
+    func initialize(cpuMemoryBus:CpuMemoryBus,apu: IApu,controllerPorts: IControllerPorts) {
         self.cpuMemoryBus = cpuMemoryBus
-        let array = OpCodeTable.GetOpCodeTable()
-        opCodeTable.removeAll()
-        for item in array {
-            opCodeTable[item.opCode] = item
-        }
+        self.apu = apu
+        self.controllerPorts = controllerPorts
     }
     
     func execute(_ cpuCyclesElapsed: inout UInt32) {
         cycles = 0
-        executePendingInterrupts()// Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
         
-        //print(PC)
+        // Handle when interrupts are called "between" CPU updates (e.g. PPU sends NMI)
+        executePendingInterrupts()
+        
         let opCode:UInt8 = read8(PC)
         opCodeEntry = opCodeTable[opCode]
 
@@ -203,6 +194,34 @@ class Cpu: CpuBase, ICpu {
         cpuCyclesElapsed = cycles
         totalCycles += 1
     }
+    
+    func Nmi() {
+        pendingNmi = true
+    }
+
+    func Irq() {
+        if !P.test(CpuRegDef.IrqDisabled) {
+            pendingIrq = true
+        }
+    }
+}
+
+class Cpu: CpuBase {
+    
+    
+    func SpriteDmaTransfer(_ cpuAddress:UInt16)
+    {
+        for i in 0 ..< 256
+        {
+            let value:UInt8 = cpuMemoryBus!.read(cpuAddress + UInt16(i))
+            cpuMemoryBus!.write(cpuAddress: CpuMemory.kPpuSprRamIoReg, value: value)
+        }
+
+        // While DMA transfer occurs, the memory bus is in use, preventing CPU from fetching memory
+        cycles += 512
+    }
+    
+    
     
     func read16(_ address: UInt16) -> UInt16 {
         return tO16(cpuMemoryBus!.read(address)) | (tO16(cpuMemoryBus!.read(address + 1)) << 8)
@@ -985,22 +1004,13 @@ class Cpu: CpuBase, ICpu {
           return Int(Int8(bitPattern: x))
     }
     
-    func Nmi() {
-        pendingNmi = true
-    }
-
-    func Irq() {
-        if !P.test(CpuRegDef.IrqDisabled) {
-            pendingIrq = true
-        }
-    }
+    
 
     var opCodeEntry:OpCodeEntry!
-    var opCodeTable:[UInt8:OpCodeEntry] = [:]
     var cpuMemoryBus:CpuMemoryBus?
     
     var apu:IApu!
-    var controllerPorts:ControllerPorts!
+    var controllerPorts:IControllerPorts!
     var operandAddress:UInt16 = 0
     var operandReadCrossedPage = false
 }

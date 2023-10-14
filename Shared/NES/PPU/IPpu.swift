@@ -8,7 +8,7 @@
 import Foundation
 
 protocol IPpu:HandleCpuReadWriteProtocol,HandlePpuReadWriteProtocol {
-    func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer)
+    func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:IRenderer)
     func execute(_ cpuCycles:UInt32, completedFrame: inout Bool)
     func reset()
 }

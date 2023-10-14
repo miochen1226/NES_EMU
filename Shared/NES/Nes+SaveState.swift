@@ -108,9 +108,7 @@ extension Nes {
         cartridge.mapper = stateSave.cartridge.mapper
         cartridge.savBanks = stateSave.cartridge.savBanks
         
-        cpu.setApu(apu: apu)
-        cpu.setControllerPorts(controllerPorts: controllerPorts)
-        cpu.initialize(cpuMemoryBus: cpuMemoryBus)
+        cpu.initialize(cpuMemoryBus: cpuMemoryBus,apu: apu,controllerPorts: controllerPorts)
         ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
         
         cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)

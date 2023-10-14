@@ -96,6 +96,10 @@
 		3557FBB22A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */; };
 		3557FBB32A7C12E90059AA50 /* AudioDriveImp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */; };
 		3557FBB42A7C12E90059AA50 /* AudioDriveImp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */; };
+		356883202ADA377C0009AE7C /* IRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3568831F2ADA377C0009AE7C /* IRenderer.swift */; };
+		356883212ADA377C0009AE7C /* IRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3568831F2ADA377C0009AE7C /* IRenderer.swift */; };
+		356883232ADA3B4C0009AE7C /* IControllerPorts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356883222ADA3B4C0009AE7C /* IControllerPorts.swift */; };
+		356883242ADA3B4C0009AE7C /* IControllerPorts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356883222ADA3B4C0009AE7C /* IControllerPorts.swift */; };
 		356CF08C2A87935C0093A24F /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF08B2A87935C0093A24F /* AudioController.swift */; };
 		356CF08D2A87935C0093A24F /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF08B2A87935C0093A24F /* AudioController.swift */; };
 		356CF08F2A87BFD70093A24F /* GameScene+GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF08E2A87BFD70093A24F /* GameScene+GameController.swift */; };
@@ -183,6 +187,8 @@
 		3547C22C26BECE62008DB9B9 /* Memory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Memory.swift; sourceTree = "<group>"; };
 		3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioUnitPlayer.swift; sourceTree = "<group>"; };
 		3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioDriveImp.swift; sourceTree = "<group>"; };
+		3568831F2ADA377C0009AE7C /* IRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IRenderer.swift; sourceTree = "<group>"; };
+		356883222ADA3B4C0009AE7C /* IControllerPorts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IControllerPorts.swift; sourceTree = "<group>"; };
 		356CF08B2A87935C0093A24F /* AudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioController.swift; sourceTree = "<group>"; };
 		356CF08E2A87BFD70093A24F /* GameScene+GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+GameController.swift"; sourceTree = "<group>"; };
 		356CF0912A87C0BF0093A24F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -328,6 +334,7 @@
 			isa = PBXGroup;
 			children = (
 				352BF75F2A7295D40093CB65 /* ControllerPorts.swift */,
+				356883222ADA3B4C0009AE7C /* IControllerPorts.swift */,
 			);
 			path = ControllerPorts;
 			sourceTree = "<group>";
@@ -420,6 +427,7 @@
 			isa = PBXGroup;
 			children = (
 				35265B3A26C5548F0031E1A6 /* Renderer.swift */,
+				3568831F2ADA377C0009AE7C /* IRenderer.swift */,
 			);
 			path = Render;
 			sourceTree = "<group>";
@@ -571,6 +579,7 @@
 				35265B4026C566540031E1A6 /* Bitfield8WithPpuRegister.swift in Sources */,
 				3557FBB12A7C12E90059AA50 /* AudioUnitPlayer.swift in Sources */,
 				3557FBB32A7C12E90059AA50 /* AudioDriveImp.swift in Sources */,
+				356883232ADA3B4C0009AE7C /* IControllerPorts.swift in Sources */,
 				3530FA3826BF6DCF00CF18DD /* Cpu.swift in Sources */,
 				3539627E2A83623800CF1E97 /* GameViewController.swift in Sources */,
 				3592DB1D2AD96E51003D52AD /* IApu.swift in Sources */,
@@ -602,6 +611,7 @@
 				3525761026BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F526BD4829005AB816 /* NES_EMUApp.swift in Sources */,
 				352AFFE72A6E6EA800F811F8 /* AudioDriver.swift in Sources */,
+				356883202ADA377C0009AE7C /* IRenderer.swift in Sources */,
 				356CF0922A87C0BF0093A24F /* GameScene.swift in Sources */,
 				3545B4E42A6D776F00C1E32E /* GameView.swift in Sources */,
 				356CF08F2A87BFD70093A24F /* GameScene+GameController.swift in Sources */,
@@ -646,6 +656,7 @@
 				356CF08D2A87935C0093A24F /* AudioController.swift in Sources */,
 				35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5826BF880E00CF18DD /* Mapper.swift in Sources */,
+				356883212ADA377C0009AE7C /* IRenderer.swift in Sources */,
 				3530B89526C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
 				3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				3538AD5E2AD91FA200787E9A /* Nes+SaveState.swift in Sources */,
@@ -661,6 +672,7 @@
 				3592DB1E2AD96E51003D52AD /* IApu.swift in Sources */,
 				3525761126BD5D5B005AB816 /* RomHeader.swift in Sources */,
 				352575F626BD4829005AB816 /* NES_EMUApp.swift in Sources */,
+				356883242ADA3B4C0009AE7C /* IControllerPorts.swift in Sources */,
 				352AFFE82A6E6EA800F811F8 /* AudioDriver.swift in Sources */,
 				3545B4E52A6D776F00C1E32E /* GameView.swift in Sources */,
 				3530FA4C26BF771500CF18DD /* CpuInternalRam.swift in Sources */,

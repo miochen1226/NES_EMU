@@ -41,20 +41,16 @@ extension Apu: IApu {
             //@TODO: Reading this register clears the frame interrupt flag (but not the DMC interrupt flag).
             frameCounter?.InhibitInterrupt()
             
-            if(pulseChannel0?.getLengthCounter().getValue() ?? 0 > 0)
-            {
+            if(pulseChannel0?.getLengthCounter().getValue() ?? 0 > 0) {
                 bitField.setPos(bitPos: 0, enabled: 1)
             }
-            if(pulseChannel1?.getLengthCounter().getValue() ?? 0 > 0)
-            {
+            if(pulseChannel1?.getLengthCounter().getValue() ?? 0 > 0) {
                 bitField.setPos(bitPos: 1, enabled: 1)
             }
-            if(triangleChannel?.getLengthCounter().getValue() ?? 0 > 0)
-            {
+            if(triangleChannel?.getLengthCounter().getValue() ?? 0 > 0) {
                 bitField.setPos(bitPos: 2, enabled: 1)
             }
-            if(noiseChannel?.getLengthCounter().getValue() ?? 0 > 0)
-            {
+            if(noiseChannel?.getLengthCounter().getValue() ?? 0 > 0) {
                 bitField.setPos(bitPos: 3, enabled: 1)
             }
             

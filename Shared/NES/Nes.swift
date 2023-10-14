@@ -10,11 +10,7 @@ import Foundation
 
 class Nes {
     init() {
-        cpu.initialize(cpuMemoryBus: cpuMemoryBus)
-        cpu.setApu(apu: apu)
-        cpu.setControllerPorts(controllerPorts: controllerPorts)
-        
-        renderer.initialize()
+        cpu.initialize(cpuMemoryBus: cpuMemoryBus,apu: apu, controllerPorts: controllerPorts)
         ppu.initialize(ppuMemoryBus: ppuMemoryBus, nes: self,renderer: renderer)
         cpuMemoryBus.initialize(cpu: cpu, ppu: ppu, cartridge: cartridge,cpuInternalRam: cpuInternalRam)
         ppuMemoryBus.initialize(ppu: ppu, cartridge: cartridge)
@@ -116,14 +112,14 @@ class Nes {
     static let sharedInstance = Nes()
     
     let cartridge = Cartridge.init()
-    var ppu:IPpu = Ppu.init()
-    let apu:IApu = Apu.init()
-    var cpu:ICpu = Cpu.init()
-    let controllerPorts = ControllerPorts.init()
-    let cpuMemoryBus = CpuMemoryBus.init()
-    let ppuMemoryBus = PpuMemoryBus.init()
-    var cpuInternalRam = CpuInternalRam.init()
-    let renderer = Renderer.shared
+    var ppu:IPpu = Ppu()
+    let apu:IApu = Apu()
+    var cpu:ICpu = Cpu()
+    let controllerPorts = ControllerPorts()
+    let cpuMemoryBus = CpuMemoryBus()
+    let ppuMemoryBus = PpuMemoryBus()
+    var cpuInternalRam = CpuInternalRam()
+    let renderer:IRenderer = Renderer.shared
     var wantQuit = false
     var isRunning = false
     var totalFrame = 0

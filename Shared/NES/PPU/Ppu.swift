@@ -13,7 +13,9 @@ struct BgTileFetchData {
     var paletteHighBits:UInt8 = 0
 }
 
-class PpuBase : Codable {
+class PpuBase : NSObject, Codable {
+    
+    override init() {}
     enum CodingKeys: String, CodingKey {
         case ppuRegisters
         case kNumPaletteColors
@@ -28,9 +30,6 @@ class PpuBase : Codable {
         case oam
         case oam2
         case palette
-    }
-    
-    init() {
     }
     
     func initPaletteColors() {
@@ -52,8 +51,7 @@ class PpuBase : Codable {
         
         paletteColors = UnsafeMutablePointer<PixelColor>.allocate(capacity: Int(kNumPaletteColors))
         let rawBuffer = UnsafeMutableRawPointer(paletteColors)
-        for i:Int in 0 ..< Int(kNumPaletteColors)
-        {
+        for i:Int in 0 ..< Int(kNumPaletteColors) {
             let colorItem = dac3Palette[Int(i)]
             
             let iR:UInt8 = colorItem[0]
@@ -81,6 +79,7 @@ class PpuBase : Codable {
     
     required init(from decoder: Decoder) throws {
         print("Ppu.decoder")
+        super.init()
         let values = try decoder.container(keyedBy: CodingKeys.self)
         ppuRegisters = try values.decode(PpuRegisterMemory.self, forKey: .ppuRegisters)
         kNumPaletteColors = try values.decode(UInt.self, forKey: .kNumPaletteColors)
@@ -123,7 +122,7 @@ class PpuBase : Codable {
     }
     
     var palette = PaletteMemory.init()
-    var renderer: Renderer? = nil
+    var renderer: IRenderer? = nil
     var ppuStatusReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
     var ppuControlReg1: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
     var ppuControlReg2: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
@@ -154,7 +153,7 @@ class PpuBase : Codable {
 }
 
 extension Ppu: IPpu {
-    func initialize(ppuMemoryBus:PpuMemoryBus,nes:Nes,renderer:Renderer) {
+    func initialize(ppuMemoryBus: PpuMemoryBus,nes: Nes, renderer: IRenderer) {
         self.renderer = renderer
         self.ppuMemoryBus = ppuMemoryBus
         self.nes = nes
@@ -191,7 +190,7 @@ extension Ppu: IPpu {
         vblankFlagSetThisFrame = false
     }
     
-    func execute(_ cpuCycles:UInt32, completedFrame: inout Bool) {
+    func execute(_ cpuCycles: UInt32, completedFrame: inout Bool) {
         let kNumTotalScanlines:UInt32 = 262
         let kNumHBlankAndBorderCycles:UInt32 = 85
         let kNumScanlineCycles = UInt32(kScreenWidth + kNumHBlankAndBorderCycles) // 256 + 85 = 341
@@ -202,8 +201,7 @@ extension Ppu: IPpu {
         
         let renderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
         
-        for _ in 0 ..< ppuCycles
-        {
+        for _ in 0 ..< ppuCycles {
             let x = cycle % kNumScanlineCycles // offset in current scanline
             let y = cycle / kNumScanlineCycles // scanline
 
@@ -316,8 +314,7 @@ extension Ppu: IPpu {
             // least 3 CPU cycles long, and we check if we _will_ set the VBlank flag on the next PPU update;
             // if so, we set the flag right away and return it.
             let kSetVBlankCycle:UInt32 = yXtoPpuCycle(y: 241, x: 1)
-            if (cycle < kSetVBlankCycle && (cycle + cpuToPpuCycles(3) >= kSetVBlankCycle))
-            {
+            if (cycle < kSetVBlankCycle && (cycle + cpuToPpuCycles(3) >= kSetVBlankCycle)) {
                 setVBlankFlag()
             }
 
@@ -357,7 +354,7 @@ extension Ppu: IPpu {
         return result
     }
     
-    func handleCpuWrite(_ cpuAddress:UInt16, value: UInt8) {
+    func handleCpuWrite(_ cpuAddress: UInt16, value: UInt8) {
         let registerAddress = mapCpuToPpuRegister(cpuAddress)
         //const uint8
         let oldValue = ppuRegisters.read(registerAddress)
@@ -365,8 +362,7 @@ extension Ppu: IPpu {
         // Update register value
         writePpuRegister(cpuAddress, value: value)
         
-        switch (cpuAddress)
-        {
+        switch (cpuAddress) {
         case CpuMemory.kPpuControlReg1: // $2000
             
             setVRamAddressNameTable(v: &tempVRamAddress, value: value & 0x3)
@@ -488,13 +484,11 @@ class Ppu: PpuBase {
     }
     
     
-    func clearOAM2()
-    {
+    func clearOAM2() {
         oam2.clear()
     }
     
-    func isSpriteInRangeY( y:UInt32,  spriteY:UInt8,  spriteHeight:UInt8) -> Bool
-    {
+    func isSpriteInRangeY(y: UInt32, spriteY: UInt8, spriteHeight: UInt8) -> Bool {
         return (y >= spriteY && (y < UInt32(spriteY) + UInt32(spriteHeight)) && spriteY < kScreenHeight)
     }
     
@@ -591,14 +585,13 @@ class Ppu: PpuBase {
         }
     }
     
-    func flipBits(_ v:UInt8) -> UInt8
-    {
+    func flipBits(_ v:UInt8) -> UInt8 {
         return
               ((v & BIT(0)) << 7) | ((v & BIT(1)) << 5) | ((v & BIT(2)) << 3) | ((v & BIT(3)) << 1) | ((v & BIT(4)) >> 1) | ((v & BIT(5)) >> 3) | ((v & BIT(6)) >> 5) | ((v & BIT(7)) >> 7)
     }
     
-    func fetchSpriteData(_ y:UInt32) // OAM2 -> render (shift) registers
-    {
+    // OAM2 -> render (shift) registers
+    func fetchSpriteData(_ y:UInt32) {
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering#Cycles_257-320
         
         let isSprite8x16 = ppuControlReg1.test(PpuControl1.SpriteSize8x16)
@@ -617,27 +610,23 @@ class Ppu: PpuBase {
 
             var patternTableAddress:UInt16 = 0
             var tileIndex:UInt8 = 0
-            if ( !isSprite8x16 ) // 8x8 sprite, oam byte 1 is tile index
-            {
-                if(ppuControlReg1.test(PpuControl1.SpritePatternTableAddress8x8))
-                {
+            // 8x8 sprite, oam byte 1 is tile index
+            if !isSprite8x16 {
+                if ppuControlReg1.test(PpuControl1.SpritePatternTableAddress8x8) {
                     patternTableAddress = 0x1000
                 }
-                else
-                {
+                else {
                     patternTableAddress = 0x0000
                 }
                 
                 tileIndex = byte1
             }
-            else // 8x16 sprite, both address and tile index are stored in oam byte 1
-            {
-                if(testBits(target: UInt16(byte1), value: BIT(0)))
-                {
+            // 8x16 sprite, both address and tile index are stored in oam byte 1
+            else {
+                if testBits(target: UInt16(byte1), value: BIT(0)) {
                     patternTableAddress = 0x1000
                 }
-                else
-                {
+                else {
                     patternTableAddress = 0x0000
                 }
                 tileIndex = UInt8(readBits(target: UInt16(byte1), value: ~BIT(0)))
@@ -645,43 +634,33 @@ class Ppu: PpuBase {
 
             var yOffset:UInt8 = UInt8(y) - spriteY
             
-            if(isSprite8x16)
-            {
+            if isSprite8x16 {
                 assert(yOffset < 16)
             }
-            else
-            {
+            else {
                 assert(yOffset < 8)
             }
             
 
-            if (isSprite8x16)
-            {
+            if isSprite8x16 {
                 // In 8x16 mode, first tile is at tileIndex, second tile (underneath) is at tileIndex + 1
                 var nextTile:UInt8 = 0
-                if (yOffset >= 8)
-                {
+                if yOffset >= 8 {
                     nextTile = nextTile + 1
                     yOffset = yOffset - 8
                 }
 
                 // In 8x16 mode, vertical flip also flips the tile index order
-                if (flipVert)
-                {
+                if flipVert {
                     nextTile = (nextTile + 1) % 2
                 }
 
                 tileIndex = tileIndex + nextTile
             }
 
-            if (flipVert)
-            {
-                if(yOffset>7)
-                {
-                    //Bug
-                    print("Err->"+String(yOffset))
+            if flipVert {
+                if yOffset>7 {
                     yOffset = yOffset%8
-                    print("Err->->"+String(yOffset))
                 }
                 yOffset = 7 - yOffset
             }
@@ -695,15 +674,12 @@ class Ppu: PpuBase {
             spriteFetchData[n].attributes = sprite.attributes
             spriteFetchData[n].x = sprite.x
             
-            if (flipHorz)
-            {
+            if flipHorz {
                 spriteFetchData[n].bmpLow = flipBits(spriteFetchData[n].bmpLow)
                 spriteFetchData[n].bmpHigh = flipBits(spriteFetchData[n].bmpHigh)
             }
         }
     }
-    
-    
     
     func GetVRamAddressFineY(_ v: UInt16) -> UInt8 {
         return tO8((v & 0x7000) >> 12)
@@ -755,12 +731,10 @@ class Ppu: PpuBase {
     func isHitSprite(x: UInt32, spriteData: SpriteFetchData) -> Bool {
         let left = spriteData.x
         let right:Int = Int(spriteData.x) + 8
-        if(x >= left && x <= right)
-        {
+        if(x >= left && x <= right) {
             return true
         }
-        else
-        {
+        else {
             return false
         }
     }
@@ -787,8 +761,7 @@ class Ppu: PpuBase {
         var bgPaletteHighBits:UInt8 = 0
         var bgPaletteLowBits:UInt8 = 0
         
-        if (bgRenderingEnabled)
-        {
+        if (bgRenderingEnabled) {
             let currTile = bgTileFetchDataPipeline_0
             let nextTile = bgTileFetchDataPipeline_1
 
@@ -807,8 +780,7 @@ class Ppu: PpuBase {
             if xShift + fineX < 8 {
                 bgPaletteHighBits = currTile.paletteHighBits
             }
-            else
-            {
+            else {
                 bgPaletteHighBits = nextTile.paletteHighBits
             }
         }
@@ -820,8 +792,7 @@ class Ppu: PpuBase {
         var sprPaletteHighBits:UInt8 = 0
         var sprPaletteLowBits:UInt8 = 0
         
-        if (spriteRenderingEnabled)
-        {
+        if (spriteRenderingEnabled) {
             if numSpritesToRender != 0 {
                 for n in 0 ..< numSpritesToRender {
                     var spriteData = spriteFetchData[n]
@@ -854,38 +825,31 @@ class Ppu: PpuBase {
             }
         }
         
-        if (bgPaletteLowBits == 0)
-        {
-            if (!foundSprite || sprPaletteLowBits == 0)
-            {
+        if (bgPaletteLowBits == 0) {
+            if (!foundSprite || sprPaletteLowBits == 0) {
                 // Background color 0
                 let pixelColor = getBackgroundPixelColor()
                 renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
-            else
-            {
+            else {
                 // Sprite color
                 let pixelColor = getPaletteColor(highBits: sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress: PpuMemory.kSpritePalette)
                 renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
         }
-        else
-        {
-            if (foundSprite && !spriteHasBgPriority)
-            {
+        else {
+            if (foundSprite && !spriteHasBgPriority) {
                 // Sprite color
                 let pixelColor = getPaletteColor(highBits:sprPaletteHighBits, lowBits: sprPaletteLowBits, paletteBaseAddress:PpuMemory.kSpritePalette)
                 renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
-            else
-            {
+            else {
                 // BG color
                 let pixelColor = getPaletteColor(highBits: bgPaletteHighBits, lowBits: bgPaletteLowBits, paletteBaseAddress: PpuMemory.kImagePalette)
                 renderer?.drawPixelColor(x: x, y: y, pixelColor: pixelColor)
             }
 
-            if (isSprite0)
-            {
+            if (isSprite0) {
                 ppuStatusReg.set(PpuStatus.PpuHitSprite0)
             }
         }

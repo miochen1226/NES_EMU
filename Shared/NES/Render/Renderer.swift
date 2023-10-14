@@ -8,20 +8,7 @@
 import Foundation
 import CoreAudio
 
-class Renderer {
-    
-    deinit {
-        rawBuffer.deallocate()
-        rawColorsDisplay.deallocate()
-    }
-    
-    func initialize() {
-        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-        rawColorsDisplay = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-        memset(rawBuffer, 0, bufferSize)
-        memset(rawColorsDisplay, 0, bufferSize)
-    }
-    
+extension Renderer: IRenderer {
     func pushFrame() {
         locker.lock()
         memcpy(rawColorsDisplay, rawBuffer, bufferSize)
@@ -35,6 +22,28 @@ class Renderer {
         locker.unlock()
     }
     
+    func drawPixelColor(x: UInt32, y: UInt32, pixelColor: PixelColor) {
+        let pixelPos = Int(x + (239-y)*256)*4
+        rawBuffer[pixelPos] = pixelColor.d_r
+        rawBuffer[pixelPos+1] = pixelColor.d_g
+        rawBuffer[pixelPos+2] = pixelColor.d_b
+        rawBuffer[pixelPos+3] = pixelColor.d_a
+    }
+}
+
+class Renderer: NSObject {
+    override init() {
+        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        rawColorsDisplay = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        memset(rawBuffer, 0, bufferSize)
+        memset(rawColorsDisplay, 0, bufferSize)
+    }
+    
+    deinit {
+        rawBuffer.deallocate()
+        rawColorsDisplay.deallocate()
+    }
+    
     func getPixel(_ index: Int) -> Color4 {
         let color = Color4()
         color.d_b = 255
@@ -45,14 +54,6 @@ class Renderer {
         color.d_b = rawBuffer[pos+2]
         color.d_a = rawBuffer[pos+3]
         return color
-    }
-    
-    func drawPixelColor(x: UInt32, y: UInt32, pixelColor: PixelColor) {
-        let pixelPos = Int(x + (239-y)*256)*4
-        rawBuffer[pixelPos] = pixelColor.d_r
-        rawBuffer[pixelPos+1] = pixelColor.d_g
-        rawBuffer[pixelPos+2] = pixelColor.d_b
-        rawBuffer[pixelPos+3] = pixelColor.d_a
     }
     
     let locker = NSLock()
