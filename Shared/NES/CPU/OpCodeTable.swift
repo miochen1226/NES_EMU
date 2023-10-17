@@ -7,7 +7,7 @@
 
 import Foundation
 
-class OpCodeTable:OpCodeDef {
+class OpCodeTable {
     static func GetOpCodeTable() -> [OpCodeEntry] {
         var array:[OpCodeEntry] = []
         for obj in opCodeTable {

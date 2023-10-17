@@ -8,8 +8,10 @@
 import Foundation
 
 class PpuMemoryBus {
+    var ppu:IPpu?
+    var cartridge:ICartridge?
     
-    func initialize(ppu:IPpu, cartridge: ICartridge) {
+    func initialize(ppu: IPpu, cartridge: ICartridge) {
         self.ppu = ppu
         self.cartridge = cartridge
     }
@@ -42,7 +44,4 @@ class PpuMemoryBus {
         }
         return cartridge!.handlePpuWrite(ppuAddress, value: value)
     }
-    
-    var ppu:IPpu?
-    var cartridge:ICartridge?
 }

@@ -21,7 +21,7 @@ class Memory:NSObject, Codable {
         super.init()
         
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        memorySize = try values.decode(UInt.self, forKey: .memorySize)
+        memorySize = try values.decode(Int.self, forKey: .memorySize)
         rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(memorySize))
         dataArray = try values.decode([UInt8].self, forKey: .dataArray)
         
@@ -53,9 +53,12 @@ class Memory:NSObject, Codable {
         rawBuffer.deallocate()
     }
     
-    func initial(size: UInt) {
+    func initial(size: Int) {
         memorySize = size
         rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(size))
+        for index in 0..<memorySize {
+            rawBuffer[Int(index)] = 0
+        }
     }
     
     func putValue(address: Int, value: UInt8) {
@@ -74,7 +77,7 @@ class Memory:NSObject, Codable {
         rawBuffer[Int(address)] = value
     }
     
-    var memorySize:UInt = 0
+    var memorySize:Int = 0
     var rawBuffer:UnsafeMutablePointer<UInt8>! = nil
     private var dataArray:[UInt8] = []
 }
@@ -112,12 +115,13 @@ class CpuInternalMemory: Memory {
     override init() {
         super.init()
     }
-    
-    func initialize(initSize:UInt) -> CpuInternalMemory {
+    /*
+    func initialize(initSize:Int) -> CpuInternalMemory {
         memorySize = initSize
         initial(size: initSize)
         return self
     }
+     */
 }
 
 class NameTableMemory: Memory {
@@ -131,12 +135,13 @@ class NameTableMemory: Memory {
         super.init()
     }
     
+    /*
     init(initSize: UInt) {
         super.init()
         memorySize = initSize
         initial(size: initSize)
     }
-    
+    */
     override func read(_ address: UInt16) -> UInt8 {
         assert(address < 2048)
         return rawBuffer[Int(address)]

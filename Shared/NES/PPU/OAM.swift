@@ -7,11 +7,14 @@
 
 import Foundation
 
-class OAM: Codable {
-    init(){
-        
+class OAM: NSObject, Codable {
+    enum CodingKeys: String, CodingKey {
+        case spriteDatas
     }
+    var spriteDatas:[SpriteData] = []
+    var memPointer:UnsafeMutablePointer<SpriteData> = UnsafeMutablePointer<SpriteData>.allocate(capacity: 64)
     
+    override init() {}
     deinit {
         memPointer.deallocate()
     }
@@ -34,14 +37,11 @@ class OAM: Codable {
         let rawMemory = UnsafeMutableRawPointer(memPointer)
         memcpy(rawMemory.advanced(by: Int(address)), &valueSet, 1)
     }
-    var spriteDatas:[SpriteData] = []
     
-    enum CodingKeys: String, CodingKey {
-        case spriteDatas
-    }
     
     //var paletteColorsData:[PixelColor] = []
     required init(from decoder: Decoder) throws {
+        super.init()
         let values = try decoder.container(keyedBy: CodingKeys.self)
         spriteDatas = try values.decode([SpriteData].self, forKey: .spriteDatas)
         
@@ -58,12 +58,10 @@ class OAM: Codable {
         try container.encode(spriteDatas, forKey: .spriteDatas)
     }
     
-    func beforeSave(){
+    func beforeSave() {
         spriteDatas.removeAll()
         for i in 0 ..< 64 {
             spriteDatas.append(getSprite(i))
         }
     }
-    
-    var memPointer:UnsafeMutablePointer<SpriteData> = UnsafeMutablePointer<SpriteData>.allocate(capacity: 64)
 }

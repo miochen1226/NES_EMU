@@ -50,8 +50,6 @@
 		3530B88826C7FBE600A2858C /* ICpu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B88626C7FBE600A2858C /* ICpu.swift */; };
 		3530B88E26C7FC4200A2858C /* ICartridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B88D26C7FC4200A2858C /* ICartridge.swift */; };
 		3530B88F26C7FC4200A2858C /* ICartridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B88D26C7FC4200A2858C /* ICartridge.swift */; };
-		3530B89426C7FE4B00A2858C /* OpCodeDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B89326C7FE4B00A2858C /* OpCodeDef.swift */; };
-		3530B89526C7FE4B00A2858C /* OpCodeDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B89326C7FE4B00A2858C /* OpCodeDef.swift */; };
 		3530B89D26C8006100A2858C /* CpuRegDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B89C26C8006100A2858C /* CpuRegDef.swift */; };
 		3530B89E26C8006100A2858C /* CpuRegDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B89C26C8006100A2858C /* CpuRegDef.swift */; };
 		3530FA3326BF6C8B00CF18DD /* Nes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3226BF6C8B00CF18DD /* Nes.swift */; };
@@ -106,8 +104,8 @@
 		356CF0902A87BFD70093A24F /* GameScene+GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF08E2A87BFD70093A24F /* GameScene+GameController.swift */; };
 		356CF0922A87C0BF0093A24F /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0912A87C0BF0093A24F /* GameScene.swift */; };
 		356CF0932A87C0BF0093A24F /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0912A87C0BF0093A24F /* GameScene.swift */; };
-		356CF0952A87FF780093A24F /* PpuControl2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuControl2.swift */; };
-		356CF0962A87FF780093A24F /* PpuControl2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuControl2.swift */; };
+		356CF0952A87FF780093A24F /* PpuMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuMask.swift */; };
+		356CF0962A87FF780093A24F /* PpuMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuMask.swift */; };
 		35714DD22AD3E5FB004A7A3F /* DmcChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */; };
 		35714DD32AD3E5FB004A7A3F /* DmcChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */; };
 		358D403526C66CEB005AAAD8 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
@@ -116,8 +114,8 @@
 		3592DB1E2AD96E51003D52AD /* IApu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3592DB1C2AD96E51003D52AD /* IApu.swift */; };
 		35B78E2E2A86091100B1E42F /* Mapper4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B78E2D2A86091100B1E42F /* Mapper4.swift */; };
 		35B78E2F2A86091100B1E42F /* Mapper4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B78E2D2A86091100B1E42F /* Mapper4.swift */; };
-		35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
-		35B9C57A26C28F9A00E13D57 /* PpuControl1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl1.swift */; };
+		35B9C57926C28F9A00E13D57 /* PpuControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl.swift */; };
+		35B9C57A26C28F9A00E13D57 /* PpuControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl.swift */; };
 		35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57D26C291C700E13D57 /* PpuMemory.swift */; };
 		35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57D26C291C700E13D57 /* PpuMemory.swift */; };
 		35B9C58326C29A5400E13D57 /* PpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */; };
@@ -160,7 +158,6 @@
 		3530B87F26C7FAC400A2858C /* IPpu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPpu.swift; sourceTree = "<group>"; };
 		3530B88626C7FBE600A2858C /* ICpu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICpu.swift; sourceTree = "<group>"; };
 		3530B88D26C7FC4200A2858C /* ICartridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICartridge.swift; sourceTree = "<group>"; };
-		3530B89326C7FE4B00A2858C /* OpCodeDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpCodeDef.swift; sourceTree = "<group>"; };
 		3530B89C26C8006100A2858C /* CpuRegDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CpuRegDef.swift; sourceTree = "<group>"; };
 		3530FA3226BF6C8B00CF18DD /* Nes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Nes.swift; sourceTree = "<group>"; };
 		3530FA3726BF6DCF00CF18DD /* Cpu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cpu.swift; sourceTree = "<group>"; };
@@ -192,12 +189,12 @@
 		356CF08B2A87935C0093A24F /* AudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioController.swift; sourceTree = "<group>"; };
 		356CF08E2A87BFD70093A24F /* GameScene+GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameScene+GameController.swift"; sourceTree = "<group>"; };
 		356CF0912A87C0BF0093A24F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-		356CF0942A87FF780093A24F /* PpuControl2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PpuControl2.swift; sourceTree = "<group>"; };
+		356CF0942A87FF780093A24F /* PpuMask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PpuMask.swift; sourceTree = "<group>"; };
 		35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DmcChannel.swift; sourceTree = "<group>"; };
 		358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteFetchData.swift; sourceTree = "<group>"; };
 		3592DB1C2AD96E51003D52AD /* IApu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IApu.swift; sourceTree = "<group>"; };
 		35B78E2D2A86091100B1E42F /* Mapper4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Mapper4.swift; sourceTree = "<group>"; };
-		35B9C57826C28F9A00E13D57 /* PpuControl1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl1.swift; sourceTree = "<group>"; };
+		35B9C57826C28F9A00E13D57 /* PpuControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuControl.swift; sourceTree = "<group>"; };
 		35B9C57D26C291C700E13D57 /* PpuMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemory.swift; sourceTree = "<group>"; };
 		35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PpuMemoryBus.swift; sourceTree = "<group>"; };
 		35B9C5A126C3191600E13D57 /* Mapper0.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapper0.swift; sourceTree = "<group>"; };
@@ -386,8 +383,8 @@
 			isa = PBXGroup;
 			children = (
 				3530FA4526BF70BB00CF18DD /* Ppu.swift */,
-				35B9C57826C28F9A00E13D57 /* PpuControl1.swift */,
-				356CF0942A87FF780093A24F /* PpuControl2.swift */,
+				35B9C57826C28F9A00E13D57 /* PpuControl.swift */,
+				356CF0942A87FF780093A24F /* PpuMask.swift */,
 				35B9C57D26C291C700E13D57 /* PpuMemory.swift */,
 				35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */,
 				35265B3F26C566540031E1A6 /* Bitfield8WithPpuRegister.swift */,
@@ -446,7 +443,6 @@
 		3530B89226C7FE3F00A2858C /* Define */ = {
 			isa = PBXGroup;
 			children = (
-				3530B89326C7FE4B00A2858C /* OpCodeDef.swift */,
 				3530B89C26C8006100A2858C /* CpuRegDef.swift */,
 			);
 			path = Define;
@@ -569,11 +565,11 @@
 				3547C22D26BECE62008DB9B9 /* Memory.swift in Sources */,
 				3530B88026C7FAC400A2858C /* IPpu.swift in Sources */,
 				3530B89D26C8006100A2858C /* CpuRegDef.swift in Sources */,
-				356CF0952A87FF780093A24F /* PpuControl2.swift in Sources */,
+				356CF0952A87FF780093A24F /* PpuMask.swift in Sources */,
 				3505EAB52A6F83AE00B14943 /* BaseChannel.swift in Sources */,
 				3530FA3326BF6C8B00CF18DD /* Nes.swift in Sources */,
 				3505EABB2A6F89F300B14943 /* NoiseChannel.swift in Sources */,
-				35B9C57926C28F9A00E13D57 /* PpuControl1.swift in Sources */,
+				35B9C57926C28F9A00E13D57 /* PpuControl.swift in Sources */,
 				352575F726BD4829005AB816 /* ContentView.swift in Sources */,
 				3547C22826BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				35265B4026C566540031E1A6 /* Bitfield8WithPpuRegister.swift in Sources */,
@@ -595,7 +591,6 @@
 				35B9C57E26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5726BF880E00CF18DD /* Mapper.swift in Sources */,
 				35714DD22AD3E5FB004A7A3F /* DmcChannel.swift in Sources */,
-				3530B89426C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
 				3538AD5A2AD91F0000787E9A /* Nes+GetSprite.swift in Sources */,
 				3539627C2A83619800CF1E97 /* VirtualConteollerView.swift in Sources */,
 				3530FA6126C0590300CF18DD /* OpCodeTable.swift in Sources */,
@@ -630,7 +625,7 @@
 			files = (
 				3530FA5326BF7A6B00CF18DD /* OpCodeEntry.swift in Sources */,
 				3547C22E26BECE62008DB9B9 /* Memory.swift in Sources */,
-				356CF0962A87FF780093A24F /* PpuControl2.swift in Sources */,
+				356CF0962A87FF780093A24F /* PpuMask.swift in Sources */,
 				35DEF54E2A84FF9D00AE8149 /* OAM.swift in Sources */,
 				3530B88126C7FAC400A2858C /* IPpu.swift in Sources */,
 				3530B89E26C8006100A2858C /* CpuRegDef.swift in Sources */,
@@ -639,7 +634,7 @@
 				3505EAB62A6F83AE00B14943 /* BaseChannel.swift in Sources */,
 				3530FA3426BF6C8B00CF18DD /* Nes.swift in Sources */,
 				3505EABC2A6F89F300B14943 /* NoiseChannel.swift in Sources */,
-				35B9C57A26C28F9A00E13D57 /* PpuControl1.swift in Sources */,
+				35B9C57A26C28F9A00E13D57 /* PpuControl.swift in Sources */,
 				352575F826BD4829005AB816 /* ContentView.swift in Sources */,
 				3547C22926BEBDB0008DB9B9 /* BaseDef.swift in Sources */,
 				35265B4126C566540031E1A6 /* Bitfield8WithPpuRegister.swift in Sources */,
@@ -657,7 +652,6 @@
 				35B9C57F26C291C700E13D57 /* PpuMemory.swift in Sources */,
 				3530FA5826BF880E00CF18DD /* Mapper.swift in Sources */,
 				356883212ADA377C0009AE7C /* IRenderer.swift in Sources */,
-				3530B89526C7FE4B00A2858C /* OpCodeDef.swift in Sources */,
 				3530FA6226C0590300CF18DD /* OpCodeTable.swift in Sources */,
 				3538AD5E2AD91FA200787E9A /* Nes+SaveState.swift in Sources */,
 				352AFFE52A6E6DD100F811F8 /* Apu.swift in Sources */,

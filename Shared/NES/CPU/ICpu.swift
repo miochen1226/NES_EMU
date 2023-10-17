@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ICpu:HandleCpuReadWriteProtocol {
-    func initialize(cpuMemoryBus:CpuMemoryBus,apu: IApu,controllerPorts: IControllerPorts)
+    func initialize(cpuMemoryBus: CpuMemoryBus, apu: IApu, controllerPorts: IControllerPorts)
     func reset()
     
     func execute(_ cpuCyclesElapsed: inout UInt32)

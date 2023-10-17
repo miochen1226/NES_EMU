@@ -8,9 +8,10 @@
 import Foundation
 import AVFoundation
 
-class AudioUnitPlayer:NSObject, AudioDriveImp {
+class AudioUnitPlayer: NSObject, IAudioDrive {
+    var frameProvider: IFrameProvider?
     
-    required init(frameProvider: FrameProvider) {
+    required init(frameProvider: IFrameProvider) {
         self.frameProvider = frameProvider
         super.init()
         self.initEngine()
@@ -27,6 +28,4 @@ class AudioUnitPlayer:NSObject, AudioDriveImp {
     func stop() {
         AudioController.sharedInstance.stop()
     }
-    
-    var frameProvider: FrameProvider?
 }

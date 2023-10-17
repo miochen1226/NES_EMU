@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 enum OpCodeEntryTtype {
     case ADC
     case AND
@@ -67,7 +66,7 @@ enum OpCodeEntryTtype {
     case TYA
 }
 
-public enum AddressMode:UInt32 {
+public enum AddressMode: UInt32 {
     case Immedt = 0x0001 // Immediate : #value
     case Implid = 0x0002 // Implied : no operand
     case Accumu = 0x0004 // Accumulator : no operand
@@ -85,8 +84,7 @@ public enum AddressMode:UInt32 {
     //case JmpOrBranchOperand = Relatv|Absolu|Indrct
 }
 
-class OpCodeEntry:OpCodeDef
-{
+class OpCodeEntry: NSObject {
     var opCode:UInt8 = 0
     var opCodeName:OpCodeEntryTtype = .ADC
     var numBytes:UInt8 = 0
@@ -94,8 +92,7 @@ class OpCodeEntry:OpCodeDef
     var pageCrossCycles:UInt8 = 0 // 0 or 1
     var addrMode:AddressMode = .Immedt
     
-    func initial(opCode:Int,opCodeName:OpCodeEntryTtype,numBytes:Int,numCycles:Int,pageCrossCycles:Int,addrMode:AddressMode)->OpCodeEntry
-    {
+    func initial(opCode:Int, opCodeName: OpCodeEntryTtype, numBytes:Int,numCycles: Int, pageCrossCycles: Int, addrMode: AddressMode) -> OpCodeEntry {
         self.opCode = UInt8(opCode)
         self.opCodeName = opCodeName
         self.numBytes = UInt8(numBytes)
@@ -105,8 +102,7 @@ class OpCodeEntry:OpCodeDef
         return self
     }
     
-    func getName()->String
-    {
+    func getName() -> String {
         return String(describing: opCodeName)
     }
 }

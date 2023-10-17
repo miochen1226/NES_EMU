@@ -9,22 +9,7 @@ import Foundation
 
 
 class CpuBase: NSObject, Codable {
-    
-    override init() {
-        super.init()
-        initOpTable()
-    }
-    
-    func initOpTable() {
-        let array = OpCodeTable.GetOpCodeTable()
-        opCodeTable.removeAll()
-        for item in array {
-            opCodeTable[item.opCode] = item
-        }
-    }
-    
     var opCodeTable:[UInt8:OpCodeEntry] = [:]
-    
     var PC:UInt16 = 0        // Program counter
     var SP:UInt8 = 0        // Stack pointer
     var A:UInt8 = 0       // Accumulator
@@ -39,6 +24,11 @@ class CpuBase: NSObject, Codable {
     var cycles:UInt32 = 0
     var totalCycles:UInt32 = 0
     
+    override init() {
+        super.init()
+        initOpTable()
+    }
+    
     enum CodingKeys: String, CodingKey {
         case PC
         case SP
@@ -51,6 +41,14 @@ class CpuBase: NSObject, Codable {
         case spriteDmaRegister
         case cycles
         case totalCycles
+    }
+    
+    func initOpTable() {
+        let array = OpCodeTable.GetOpCodeTable()
+        opCodeTable.removeAll()
+        for item in array {
+            opCodeTable[item.opCode] = item
+        }
     }
     
     required init(from decoder: Decoder) throws {
@@ -114,8 +112,7 @@ extension Cpu:ICpu {
     func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {
         var result:UInt8 = 0
 
-        switch (cpuAddress)
-        {
+        switch (cpuAddress) {
         case CpuMemory.kSpriteDmaReg: // $4014
             result = spriteDmaRegister
             break
@@ -138,9 +135,8 @@ extension Cpu:ICpu {
         return result
     }
     
-    func handleCpuWrite(_ cpuAddress:UInt16, value:UInt8) {
-        switch (cpuAddress)
-        {
+    func handleCpuWrite(_ cpuAddress: UInt16, value: UInt8) {
+        switch (cpuAddress) {
         case CpuMemory.kSpriteDmaReg: // $4014
             
             // Initiate a DMA transfer from the input page to sprite ram.

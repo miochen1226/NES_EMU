@@ -22,7 +22,8 @@ class CpuInternalRam: HandleCpuReadWriteProtocol, Codable {
         try container.encode(memory, forKey: .memory)
     }
     init() {
-        memory = CpuInternalMemory.init().initialize(initSize:KB(2))
+        memory = CpuInternalMemory()
+        memory.initial(size: Int(KB(2)))
     }
     
     func handleCpuRead(_ cpuAddress: UInt16) -> UInt8 {

@@ -9,7 +9,7 @@ import Foundation
 import AVFAudio
 import AVFoundation
 
-class NesFrameProvider : FrameProvider{
+class NesFrameProvider : IFrameProvider{
     var frames:[Float32] = []
     let lockInput = NSLock()
     
@@ -19,16 +19,14 @@ class NesFrameProvider : FrameProvider{
         lockInput.unlock()
     }
     
-    func dequeue(byteSize: UInt32)-> FrameObj {
-        let frameObj = FrameObj()
+    func dequeue(byteSize: UInt32)-> AudioFrameObj {
+        let frameObj = AudioFrameObj()
         let floatCount:Int = Int(byteSize/4)
         
         lockInput.lock()
         
-        if(frames.count >= byteSize/4)
-        {
-            for _ in 0..<floatCount
-            {
+        if frames.count >= byteSize/4 {
+            for _ in 0..<floatCount {
                 frameObj.arrayFloat.append(frames.removeFirst())
             }
             
@@ -40,7 +38,7 @@ class NesFrameProvider : FrameProvider{
         return frameObj
     }
     
-    func getNextFrame(_ byteSize: UInt32) -> FrameObj {
+    func getNextFrame(_ byteSize: UInt32) -> AudioFrameObj {
         return dequeue(byteSize:byteSize)
     }
 }
@@ -48,14 +46,14 @@ class NesFrameProvider : FrameProvider{
 class AudioDriver: NSObject {
     let nesFrameProvider = NesFrameProvider()
     var audioUnitPlayer: AudioUnitPlayer!
+    
     required override init() {
         super.init()
         audioUnitPlayer = AudioUnitPlayer(frameProvider: nesFrameProvider)
         audioUnitPlayer.start()
     }
     
-    func enqueue(inputFrame: Float32)
-    {
+    func enqueue(inputFrame: Float32) {
         nesFrameProvider.enqueue(inputFrame: inputFrame)
     }
 }

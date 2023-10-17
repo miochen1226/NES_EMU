@@ -35,9 +35,9 @@ struct CpuMemory {
     
     static let  kStackBase:UInt16                    = 0x0100 // Range [$0100,$01FF] (page 1)
 
-        // PPU memory-mapped registers
-    static let  kPpuControlReg1:UInt16            = 0x2000 // (W)
-    static let  kPpuControlReg2:UInt16            = 0x2001 // (W)
+    // PPU memory-mapped registers
+    static let  kPpuControlReg:UInt16            = 0x2000 // (W)
+    static let  kPpuMaskReg:UInt16            = 0x2001 // (W)
     static let  kPpuStatusReg:UInt16                = 0x2002 // (R)
     static let  kPpuSprRamAddressReg:UInt16        = 0x2003 // (W) \_ OAMADDR
     static let  kPpuSprRamIoReg:UInt16            = 0x2004 // (W) /  OAMDATA

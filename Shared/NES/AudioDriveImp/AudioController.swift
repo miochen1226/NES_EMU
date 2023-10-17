@@ -8,8 +8,11 @@
 import Foundation
 import AVFoundation
 
-class AudioController: NSObject
-{
+class AudioController: NSObject {
+    static var sharedInstance = AudioController()
+    var remoteIOUnit: AudioComponentInstance!
+    var frameProvider: IFrameProvider?
+    
     func start() {
         AudioOutputUnitStart(remoteIOUnit)
     }
@@ -18,8 +21,7 @@ class AudioController: NSObject
         AudioOutputUnitStop(remoteIOUnit)
     }
     
-    func getAudioUnitSubType()->UInt32
-    {
+    func getAudioUnitSubType() -> UInt32 {
 #if os(iOS)
         return kAudioUnitSubType_RemoteIO
 #else
@@ -28,10 +30,7 @@ class AudioController: NSObject
     }
     
     func initAudioComponent() {
-        
-        let audioUnitSubType:UInt32 = getAudioUnitSubType()
-
-        
+        let audioUnitSubType: UInt32 = getAudioUnitSubType()
         var audioComponentDesc = AudioComponentDescription(componentType: OSType(kAudioUnitType_Output),
                                                            componentSubType: OSType(audioUnitSubType),
                                                            componentManufacturer: OSType(kAudioUnitManufacturer_Apple),
@@ -83,15 +82,6 @@ class AudioController: NSObject
             if frameObj!.isFloat {
                 let floatCount = Int(frameObj?.countFloat ?? 0)
                 if floatCount==0 {
-                    /*
-                    var empty:[Float32] = []
-                    for _ in 0...reqByteSize-1
-                    {
-                        empty.append(0)
-                    }
-                    abl?[0].mDataByteSize = 10
-                    memcpy(abl?[0].mData, &empty, Int(reqByteSize))
-                     */
                     return 0
                 }
                 
@@ -101,15 +91,13 @@ class AudioController: NSObject
             }
             else {
                 let byteCount = Int(frameObj?.byteCount ?? 0)
-                if(byteCount==0)
-                {
+                if byteCount==0 {
                     return 0
                 }
                 
                 let pointer = UnsafeRawPointer(frameObj!.buffer!)
                 var randBuffer:[Float32] = []
-                for index in 0..<byteCount/4
-                {
+                for index in 0..<byteCount/4 {
                     let floatValue = pointer.load(fromByteOffset: index*4, as: Float32.self)
                     randBuffer.append(floatValue)
                 }
@@ -127,12 +115,8 @@ class AudioController: NSObject
         }
     }
     
-    func setUp(frameProvider: FrameProvider) {
+    func setUp(frameProvider: IFrameProvider) {
         self.frameProvider = frameProvider
         initAudioComponent()
     }
-    
-    static var sharedInstance = AudioController()
-    var remoteIOUnit: AudioComponentInstance!
-    var frameProvider: FrameProvider?
 }

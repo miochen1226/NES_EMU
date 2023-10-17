@@ -14,8 +14,45 @@ struct BgTileFetchData {
 }
 
 class PpuBase : NSObject, Codable {
+    var nes:Nes? = nil
+    var palette = PaletteMemory.init()
+    var renderer: IRenderer? = nil
+    var ppuStatusReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var ppuControlReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var ppuMaskReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
+    var numSpritesToRender:Int = 0
+    var vramAndScrollFirstWrite: Bool = false
+    var ppuRegisters: PpuRegisterMemory = PpuRegisterMemory.init()
+    var tempVRamAddress: UInt16 = 0
+    var vramAddress: UInt16 = 0
+    var fineX: UInt8 = 0                    // Fine x scroll (3 bits), "Loopy x"
+    var vramBufferedValue: UInt8 = 0
+    var cycle: UInt32 = 0
+    var evenFrame: Bool = false
+    var vblankFlagSetThisFrame: Bool = false
+    var ppuMemoryBus: PpuMemoryBus? = nil
+    var spriteFetchData: [SpriteFetchData] = []
+    var nameTables = NameTableMemory()
+    var kScreenWidth:UInt32 = 256
+    var kScreenHeight:UInt32 = 240
+    var renderSprite0 = false
+    var oam = OAM()
+    var oam2 = OAM()
+    var kNumPaletteColors:UInt = 64
+    var paletteColors:UnsafeMutablePointer<PixelColor>!
+    var bgTileFetchDataPipeline_0 = BgTileFetchData.init()
+    var bgTileFetchDataPipeline_1 = BgTileFetchData.init()
+    private var paletteColorsData:[PixelColor] = []
     
-    override init() {}
+    override init() {
+        super.init()
+        initial()
+    }
+    
+    func initial() {
+        nameTables.initial(size: Int(KB(2)))
+    }
+    
     enum CodingKeys: String, CodingKey {
         case ppuRegisters
         case kNumPaletteColors
@@ -80,6 +117,7 @@ class PpuBase : NSObject, Codable {
     required init(from decoder: Decoder) throws {
         print("Ppu.decoder")
         super.init()
+        initial()
         let values = try decoder.container(keyedBy: CodingKeys.self)
         ppuRegisters = try values.decode(PpuRegisterMemory.self, forKey: .ppuRegisters)
         kNumPaletteColors = try values.decode(UInt.self, forKey: .kNumPaletteColors)
@@ -94,8 +132,8 @@ class PpuBase : NSObject, Codable {
         palette = try values.decode(PaletteMemory.self, forKey: .palette)
         
         ppuStatusReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuStatusReg)
-        ppuControlReg1.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg1)
-        ppuControlReg2.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg2)
+        ppuControlReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg)
+        ppuMaskReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuMaskReg)
         
         initPaletteColors()
         
@@ -120,36 +158,6 @@ class PpuBase : NSObject, Codable {
         try container.encode(oam2, forKey: .oam2)
         try container.encode(palette, forKey: .palette)
     }
-    
-    var palette = PaletteMemory.init()
-    var renderer: IRenderer? = nil
-    var ppuStatusReg: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var ppuControlReg1: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var ppuControlReg2: Bitfield8WithPpuRegister = Bitfield8WithPpuRegister.init()
-    var numSpritesToRender:Int = 0
-    var vramAndScrollFirstWrite: Bool = false
-    var ppuRegisters: PpuRegisterMemory = PpuRegisterMemory.init()
-    var tempVRamAddress: UInt16 = 0
-    var vramAddress: UInt16 = 0
-    var fineX: UInt8 = 0                    // Fine x scroll (3 bits), "Loopy x"
-    var vramBufferedValue: UInt8 = 0
-    var cycle: UInt32 = 0
-    var evenFrame: Bool = false
-    var vblankFlagSetThisFrame: Bool = false
-    var nes:Nes? = nil
-    var ppuMemoryBus: PpuMemoryBus? = nil
-    var spriteFetchData: [SpriteFetchData] = []
-    var nameTables = NameTableMemory.init(initSize: KB(2))
-    var kScreenWidth:UInt32 = 256
-    var kScreenHeight:UInt32 = 240
-    var renderSprite0 = false
-    var oam = OAM()
-    var oam2 = OAM()
-    var kNumPaletteColors:UInt = 64
-    var paletteColors:UnsafeMutablePointer<PixelColor>!
-    var bgTileFetchDataPipeline_0 = BgTileFetchData.init()
-    var bgTileFetchDataPipeline_1 = BgTileFetchData.init()
-    private var paletteColorsData:[PixelColor] = []
 }
 
 extension Ppu: IPpu {
@@ -164,11 +172,11 @@ extension Ppu: IPpu {
         // See http://wiki.nesdev.com/w/index.php/PPU_power_up_state
         
         ppuStatusReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuStatusReg)
-        ppuControlReg1.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg1)
-        ppuControlReg2.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg2)
+        ppuControlReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuControlReg)
+        ppuMaskReg.initialize(ppuRegisterMemory: ppuRegisters,regAddress: CpuMemory.kPpuMaskReg)
         
-        writePpuRegister(CpuMemory.kPpuControlReg1, value: 0)
-        writePpuRegister(CpuMemory.kPpuControlReg2, value: 0)
+        writePpuRegister(CpuMemory.kPpuControlReg, value: 0)
+        writePpuRegister(CpuMemory.kPpuMaskReg, value: 0)
         writePpuRegister(CpuMemory.kPpuVRamAddressReg1, value: 0)
         writePpuRegister(CpuMemory.kPpuVRamIoReg, value: 0)
         
@@ -199,14 +207,16 @@ extension Ppu: IPpu {
         let ppuCycles = cpuToPpuCycles(cpuCycles)
         completedFrame = false
         
-        let renderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
+        let renderingEnabled = ppuMaskReg.test(UInt8(PpuMask.RenderBackground|PpuMask.RenderSprites))
         
         for _ in 0 ..< ppuCycles {
-            let x = cycle % kNumScanlineCycles // offset in current scanline
-            let y = cycle / kNumScanlineCycles // scanline
+            // offset in current scanline
+            let x = cycle % kNumScanlineCycles
+            // scanline
+            let y = cycle / kNumScanlineCycles
 
-            if ( (y <= 239) || y == 261 ) // Visible and Pre-render scanlines
-            {
+            // Visible and Pre-render scanlines
+            if y <= 239 || y == 261 {
                 if renderingEnabled {
                     if x == 64 {
                         // Cycles 1-64: Clear secondary OAM to $FF
@@ -216,8 +226,7 @@ extension Ppu: IPpu {
                         // Cycles 65-256: Sprite evaluation
                         performSpriteEvaluation(x: x, y: y)
                     }
-                    else if (x == 260)
-                    {
+                    else if x == 260 {
                         //@TODO: This is a dirty hack for Mapper4 (MMC3) and the like to get around the fact that
                         // my PPU implementation doesn't perform Sprite fetches as expected (must fetch even if no
                         // sprites found on scanline, and fetch each sprite separately like I do for tiles). For now
@@ -287,7 +296,7 @@ extension Ppu: IPpu {
 
                 if y == 241 && x == 1 {
                     setVBlankFlag()
-                    if ppuControlReg1.test(PpuControl1.NmiOnVBlank) {
+                    if ppuControlReg.test(PpuControl.NmiOnVBlank) {
                         nes?.SignalCpuNmi()
                     }
                 }
@@ -302,7 +311,9 @@ extension Ppu: IPpu {
         assert(cpuAddress >= CpuMemory.kPpuRegistersBase && cpuAddress < CpuMemory.kPpuRegistersEnd)
         var result:UInt8 = 0
         switch cpuAddress {
-        case CpuMemory.kPpuStatusReg: // $2002
+            
+        // $2002
+        case CpuMemory.kPpuStatusReg:
             //@HACK: Some games like Bomberman and Burger Time poll $2002.7 (VBlank flag) expecting the
             // bit to be set before the NMI executes. On actual hardware, this results in a race condition
             // where sometimes the bit won't be set, or the NMI won't occur. See:
@@ -344,7 +355,7 @@ extension Ppu: IPpu {
             vramBufferedValue = ppuMemoryBus!.read(vramAddress)
                 
             // Advance vram pointer
-            let advanceOffset:UInt16 = PpuControl1.getPpuAddressIncrementSize(ppuControlReg1.value())
+            let advanceOffset:UInt16 = PpuControl.getPpuAddressIncrementSize(ppuControlReg.value())
             vramAddress += advanceOffset
             break
         default:
@@ -363,21 +374,22 @@ extension Ppu: IPpu {
         writePpuRegister(cpuAddress, value: value)
         
         switch (cpuAddress) {
-        case CpuMemory.kPpuControlReg1: // $2000
+        case CpuMemory.kPpuControlReg: // $2000
             
             setVRamAddressNameTable(v: &tempVRamAddress, value: value & 0x3)
 
-            let oldPpuControlReg1:Bitfield8 = Bitfield8.init()
-            oldPpuControlReg1.set(oldValue)
+            let oldPpuControlReg:Bitfield8 = Bitfield8.init()
+            oldPpuControlReg.set(oldValue)
             
-            let enabledNmiOnVBlank = !oldPpuControlReg1.test(PpuControl1.NmiOnVBlank) && ppuControlReg1.test(PpuControl1.NmiOnVBlank)
+            let enabledNmiOnVBlank = !oldPpuControlReg.test(PpuControl.NmiOnVBlank) && ppuControlReg.test(PpuControl.NmiOnVBlank)
             
             if  enabledNmiOnVBlank && ppuStatusReg.test(PpuStatus.InVBlank) {
                 // In vblank (and $2002 not read yet, which resets this bit)
                 nes!.SignalCpuNmi()
             }
             break
-        case CpuMemory.kPpuControlReg2: //$2001
+        case CpuMemory.kPpuMaskReg: //$2001
+            
             break
         case CpuMemory.kPpuSprRamIoReg: // $2004
             // Write value to sprite ram at address in $2003 (OAMADDR) and increment address
@@ -425,7 +437,7 @@ extension Ppu: IPpu {
                 ppuMemoryBus?.write(vramAddress, value: value)
             }
 
-            let advanceOffset = PpuControl1.getPpuAddressIncrementSize(ppuControlReg1.value())
+            let advanceOffset = PpuControl.getPpuAddressIncrementSize(ppuControlReg.value())
             vramAddress = vramAddress + advanceOffset;
             break
         default:
@@ -466,9 +478,6 @@ class Ppu: PpuBase {
 
     func writePpuRegister(_ cpuAddress:UInt16, value: UInt8) {
         ppuRegisters.write(address: mapCpuToPpuRegister(cpuAddress), value: value)
-        ppuStatusReg.reload()
-        ppuControlReg1.reload()
-        ppuControlReg2.reload()
     }
     
     func setVRamAddressFineY(v:inout UInt16, value: UInt8) {
@@ -503,7 +512,7 @@ class Ppu: PpuBase {
     
     func performSpriteEvaluation(x:UInt32, y: UInt32) {
         // See http://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
-        let isSprite8x16:Bool = ppuControlReg1.test(PpuControl1.SpriteSize8x16)
+        let isSprite8x16:Bool = ppuControlReg.test(PpuControl.SpriteSize8x16)
         
         var spriteHeight: UInt8 = 8
         if isSprite8x16 {
@@ -594,7 +603,7 @@ class Ppu: PpuBase {
     func fetchSpriteData(_ y:UInt32) {
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering#Cycles_257-320
         
-        let isSprite8x16 = ppuControlReg1.test(PpuControl1.SpriteSize8x16)
+        let isSprite8x16 = ppuControlReg.test(PpuControl.SpriteSize8x16)
 
         if numSpritesToRender == 0 {
             return
@@ -612,7 +621,7 @@ class Ppu: PpuBase {
             var tileIndex:UInt8 = 0
             // 8x8 sprite, oam byte 1 is tile index
             if !isSprite8x16 {
-                if ppuControlReg1.test(PpuControl1.SpritePatternTableAddress8x8) {
+                if ppuControlReg.test(PpuControl.SpritePatternTableAddress8x8) {
                     patternTableAddress = 0x1000
                 }
                 else {
@@ -692,7 +701,7 @@ class Ppu: PpuBase {
         }
         // Load bg tile row data (2 bytes) at v into pipeline
         let v = vramAddress
-        let patternTableAddress:UInt16 = PpuControl1.getBackgroundPatternTableAddress(ppuControlReg1.value())
+        let patternTableAddress:UInt16 = PpuControl.getBackgroundPatternTableAddress(ppuControlReg.value())
         let tileIndexAddress:UInt16 = 0x2000 | (v & 0x0FFF)
         let attributeAddress:UInt16 = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07)
         
@@ -744,15 +753,15 @@ class Ppu: PpuBase {
             return
         }
         // See http://wiki.nesdev.com/w/index.php/PPU_rendering
-        var bgRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground))
-        var spriteRenderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderSprites))
+        var bgRenderingEnabled = ppuMaskReg.test(UInt8(PpuMask.RenderBackground))
+        var spriteRenderingEnabled = ppuMaskReg.test(UInt8(PpuMask.RenderSprites))
         
         // Consider bg/sprites as disabled (for this pixel) if we're not supposed to render it in the left-most 8 pixels
-        if !ppuControlReg2.test(UInt8(PpuControl2.BackgroundShowLeft8)) && x < 8 {
+        if !ppuMaskReg.test(UInt8(PpuMask.BackgroundShowLeft8)) && x < 8 {
             bgRenderingEnabled = false
         }
 
-        if !ppuControlReg2.test(UInt8(PpuControl2.SpritesShowLeft8)) && x < 8 {
+        if !ppuMaskReg.test(UInt8(PpuMask.SpritesShowLeft8)) && x < 8 {
             spriteRenderingEnabled = false
         }
         
@@ -880,7 +889,7 @@ class Ppu: PpuBase {
     }
     
     func onFrameComplete() {
-        let renderingEnabled = ppuControlReg2.test(UInt8(PpuControl2.RenderBackground|PpuControl2.RenderSprites))
+        let renderingEnabled = ppuMaskReg.test(UInt8(PpuMask.RenderBackground|PpuMask.RenderSprites))
         // For odd frames, the cycle at the end of the scanline (340,239) is skipped
         if !evenFrame && renderingEnabled {
             cycle = cycle + 1

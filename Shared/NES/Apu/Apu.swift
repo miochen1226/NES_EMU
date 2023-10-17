@@ -108,9 +108,45 @@ extension Apu: IApu {
             break
         }
     }
+    
+    func enableSound() {
+        pulseChannel0?.getLengthCounter().setEnabled(true)
+        pulseChannel1?.getLengthCounter().setEnabled(true)
+        triangleChannel?.getLengthCounter().setEnabled(true)
+        noiseChannel?.getLengthCounter().setEnabled(true)
+        
+    }
 }
 
 class Apu: NSObject {
+    enum ApuChannel {
+        case PulseChannel1
+        case PulseChannel2
+        case TriangleChannel
+        case NoiseChannel
+        case DmcChannel
+    }
+    
+    static let kAvgNumScreenPpuCycles:Float32 = 89342 - 0.5
+    static let kCpuCyclesPerSec:Float32 = (kAvgNumScreenPpuCycles / 3) * 60.0
+    static let sampleRate: Double = 44100
+    static let kCpuCyclesPerSample:Float32 = Apu.kCpuCyclesPerSec/Float(sampleRate)
+    
+    
+    var audioDriver: AudioDriver?
+    var frameCounter: FrameCounter?
+    
+    var pulseChannel0: PulseChannel?
+    var pulseChannel1: PulseChannel?
+    var triangleChannel: TriangleChannel?
+    var noiseChannel: NoiseChannel?
+    var dmcChannel:DmcChannel?
+    var elapsedCpuCycles: Float = 0
+    var sampleSum = 0
+    var numSamples = 0
+    var channelVolumes:[ApuChannel:Float32] = [:]
+    var evenFrame = false
+    
     func stopPlayer() {
         audioDriver?.audioUnitPlayer.stop()
     }
@@ -184,8 +220,7 @@ class Apu: NSObject {
         
         channelVolume = channelVolumes[ApuChannel.PulseChannel1] ?? 0
         
-        switch (channel)
-        {
+        switch channel {
         case .PulseChannel1:
             channelValue = pulseChannel0?.getValue() ?? 0
             break
@@ -225,32 +260,4 @@ class Apu: NSObject {
         let interrupt = frameCounter?.enableIRQ ?? 0
         return interrupt
     }
-    
-    enum ApuChannel {
-        case PulseChannel1
-        case PulseChannel2
-        case TriangleChannel
-        case NoiseChannel
-        case DmcChannel
-    }
-    
-    static let kAvgNumScreenPpuCycles:Float32 = 89342 - 0.5
-    static let kCpuCyclesPerSec:Float32 = (kAvgNumScreenPpuCycles / 3) * 60.0
-    static let sampleRate: Double = 44100
-    static let kCpuCyclesPerSample:Float32 = Apu.kCpuCyclesPerSec/Float(sampleRate)
-    
-    
-    var audioDriver: AudioDriver?
-    var frameCounter: FrameCounter?
-    
-    var pulseChannel0: PulseChannel?
-    var pulseChannel1: PulseChannel?
-    var triangleChannel: TriangleChannel?
-    var noiseChannel: NoiseChannel?
-    var dmcChannel:DmcChannel?
-    var elapsedCpuCycles: Float = 0
-    var sampleSum = 0
-    var numSamples = 0
-    var channelVolumes:[ApuChannel:Float32] = [:]
-    var evenFrame = false
 }

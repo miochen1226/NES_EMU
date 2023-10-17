@@ -11,4 +11,5 @@ protocol IApu: HandleCpuReadWriteProtocol {
     func execute(_ cpuCycles: UInt32)
     func startPlayer()
     func stopPlayer()
+    func enableSound()
 }

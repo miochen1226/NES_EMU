@@ -7,8 +7,7 @@
 
 import Foundation
 
-class PpuControl2 {
-    
+class PpuMask {
     static let DisplayType                 = BIT(0) // 0 = Color, 1 = Monochrome
     static let BackgroundShowLeft8         = BIT(1) // 0 = BG invisible in left 8-pixel column, 1 = No clipping
     static let SpritesShowLeft8            = BIT(2) // 0 = Sprites invisible in left 8-pixel column, 1 = No clipping

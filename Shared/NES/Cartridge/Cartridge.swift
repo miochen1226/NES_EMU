@@ -214,7 +214,7 @@ class Cartridge: CartridgeBase {
             var readIndex = 16
             for _ in 0..<numPrgBanks {
                 let newMemory = Memory.init()
-                newMemory.initial(size: globeDef.kPrgBankSize)
+                newMemory.initial(size: Int(globeDef.kPrgBankSize))
                 let beginIndex:UInt = UInt(readIndex)
                 fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kPrgBankSize), memory: newMemory)
                 readIndex = readIndex + Int(globeDef.kPrgBankSize)
@@ -231,7 +231,7 @@ class Cartridge: CartridgeBase {
             let numChrBanks = chrRomSize / globeDef.kChrBankSize
             for _ in 0..<numChrBanks {
                 let newMemory = Memory.init()
-                newMemory.initial(size: globeDef.kChrBankSize)
+                newMemory.initial(size: Int(globeDef.kChrBankSize))
                 let beginIndex:UInt = UInt(readIndex)
                 
                 fillMemory(srcMem: arrayData, begin: beginIndex, size: Int(globeDef.kChrBankSize), memory: newMemory)
@@ -248,7 +248,7 @@ class Cartridge: CartridgeBase {
             
             for _ in 0..<numSavBanks {
                 let newMemory = Memory.init()
-                newMemory.initial(size: globeDef.kSavBankSize)
+                newMemory.initial(size: Int(globeDef.kSavBankSize))
                 savBanks.append(newMemory)
             }
             

@@ -7,10 +7,8 @@
 
 import Foundation
 
-class CpuRegDef:NSObject
-{
-    enum StatusFlag:UInt8
-    {
+class CpuRegDef: NSObject {
+    enum StatusFlag:UInt8 {
         case Carry              = 0b00000001//(1<<0)
         case Zero               = 0b00000010//(1<<1)
         case IrqDisabled        = 0b00000100// Interrupt (IRQ) disabled

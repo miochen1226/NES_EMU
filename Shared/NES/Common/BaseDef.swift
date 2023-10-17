@@ -41,29 +41,24 @@ protocol HandlePpuReadWriteProtocol {
     func handlePpuWrite(_ ppuAddress: UInt16, value: UInt8)
 }
 
-func BIT(_ n:Int)->UInt8
-{
+func BIT(_ n: Int) -> UInt8 {
     return UInt8(1<<n)
 }
 
-func BIT16(_ n:Int)->UInt16
-{
+func BIT16(_ n: Int) -> UInt16 {
     return UInt16(1<<n)
 }
 
-func BITS16(_ bitsIn:[Int])->UInt16
-{
+func BITS16(_ bitsIn: [Int]) -> UInt16 {
     var result:UInt16 = 0
-    for bit in bitsIn
-    {
+    for bit in bitsIn {
         let dig = 1<<bit
         result |= UInt16(dig)
     }
     return result
 }
 
-func BITS(_ bitsIn:[UInt8])->UInt8
-{
+func BITS(_ bitsIn: [UInt8]) -> UInt8 {
     var result:UInt8 = 0
     for bit in bitsIn
     {
@@ -89,8 +84,7 @@ func testBits(target:UInt16, value: UInt16) -> Bool {
     return readBits(target: target, value: value) != 0
 }
 
-func readBits(target:UInt16, value:UInt16)->UInt16
-{
+func readBits(target:UInt16, value:UInt16) -> UInt16 {
     return target & value
 }
 
