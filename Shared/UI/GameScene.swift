@@ -9,15 +9,13 @@ import Foundation
 import SpriteKit
 import GameController
 
-protocol IRenderScreen
-{
+protocol IRenderScreen {
     func renderScreen()
 }
 
-class GameScene: SKScene,IRenderScreen {
+class GameScene: SKScene, IRenderScreen {
     
-    func getFpsInfo()->String
-    {
+    func getFpsInfo() -> String {
         return nes.getFpsInfo()
     }
     
@@ -34,8 +32,7 @@ class GameScene: SKScene,IRenderScreen {
         #endif
     }
     
-    func adjRenderCavansSize(_ oldSize: CGSize)
-    {
+    func adjRenderCavansSize(_ oldSize: CGSize) {
         let windowWidth = oldSize.width
         let windowHeight = oldSize.height
         

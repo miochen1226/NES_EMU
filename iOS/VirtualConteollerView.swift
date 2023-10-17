@@ -10,8 +10,7 @@ import SwiftUI
 struct VirtualControllerView: UIViewControllerRepresentable {
     typealias UIViewControllerType = GameViewController
     
-    func makeUIViewController(context: Self.Context) -> GameViewController
-    {
+    func makeUIViewController(context: Self.Context) -> GameViewController {
         return GameViewController()
     }
         

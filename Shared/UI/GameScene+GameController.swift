@@ -8,8 +8,7 @@
 import Foundation
 import GameController
 
-extension GameScene
-{
+extension GameScene {
     @objc func didConnectController(_ notification: Notification) {
         let controller = notification.object as! GCController
         gameController = controller
