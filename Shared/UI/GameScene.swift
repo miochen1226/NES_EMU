@@ -9,7 +9,6 @@ import Foundation
 import SpriteKit
 import GameController
 
-
 protocol IRenderScreen {
     func renderScreen()
 }
@@ -17,7 +16,6 @@ protocol IRenderScreen {
 class GameScene: SKScene, IRenderScreen {
     
     func getFpsInfo() -> String {
-        
         return nes.getFpsInfo()
     }
     
@@ -28,7 +26,6 @@ class GameScene: SKScene, IRenderScreen {
         DispatchQueue.main.async {
             let viewSize = CGSize.init(width: self.view?.frame.width ?? 256, height: self.view?.frame.height ?? 240)
             self.adjRenderCavansSize(viewSize)
-            ObjcTest().helloCPP()
             self.renderBG()
         }
         
