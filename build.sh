@@ -31,7 +31,7 @@ mkdir "output"
 
 echo "Process archive..."
 #進行一個阿凱敷的動作
-xcodebuild -project ${PROJECT_NAME} -scheme ${TARGET_NAME} -sdk iphoneos -configuration AppStoreDistribution archive -archivePath ${ARCHIVE_FILE} -allowProvisioningUpdates
+xcodebuild -project ${PROJECT_NAME} -scheme ${TARGET_NAME} -sdk iphoneos -configuration AppStoreDistribution archive -archivePath ${ARCHIVE_FILE}
 
 #進行一個挨批誒的輸出的動作
 xcodebuild -exportArchive -archivePath ${ARCHIVE_FILE} -exportOptionsPlist ${ARCHIVE_EXPORTOPTION} -exportPath ${OUT_FOLDER}
