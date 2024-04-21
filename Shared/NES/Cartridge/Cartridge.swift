@@ -185,8 +185,8 @@ class Cartridge: CartridgeBase {
         //let filepath = bundleUrl!.appendingPathComponent("Blaster Master (USA).nes")
         
         
-        let filepath = bundleUrl!.appendingPathComponent("Chou-Wakusei Senki - MetaFight (J).nes")
-        //let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
+        //let filepath = bundleUrl!.appendingPathComponent("Chou-Wakusei Senki - MetaFight (J).nes")
+        let filepath = bundleUrl!.appendingPathComponent("Super Mario Bros. 3 (USA).nes")
         //Chou-Wakusei Senki - MetaFight (J)
         
         //if let filepath = Bundle.main.path(forResource: "Donkey Kong (Japan)", ofType: "nes")
