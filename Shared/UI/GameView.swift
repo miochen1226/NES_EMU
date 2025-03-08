@@ -14,8 +14,6 @@ let nes = Nes.sharedInstance
 struct GameView: View {
     var body: some View {
         SpriteView(scene: scene)
-                    .frame(width: UIScreen.screenWidth, height: UIScreen.screenHeight)
-                    .ignoresSafeArea()
     }
     let scene: GameScene
 }

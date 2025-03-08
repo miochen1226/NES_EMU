@@ -17,19 +17,51 @@ extension UIScreen{
 #endif
 
 struct ContentView: View {
+    
     var body: some View {
         
         ZStack {
 #if os(iOS)
-            GameView(scene: scene).frame(width: UIScreen.screenWidth, height: UIScreen.screenHeight, alignment: .top)
-            VirtualControllerView()
+                
+                GameView(scene: scene).frame(width: nil, height: nil,alignment: .top).overlay(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .onAppear {
+                                scene.didChangeSize(geometry.size)
+                            }
+                            .onChange(of: geometry.size) { _ in
+                                scene.didChangeSize(geometry.size)
+                            }
+                    }
+                )
+                
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text(labenFps).onReceive(timer) { _ in
+                            updateFps()
+                        }
+                    }
+                    Spacer()
+                }
+                .foregroundStyle(.white)
+                
+                VirtualControllerView()
 #else
-            GameView(scene: scene).frame(width: nil, height: nil,alignment: .top)
-            /*
-            Text(labenFps).position(x: 40, y: 20).onReceive(timer) { _ in
-                updateFps()
+                GameView(scene: scene).frame(width: nil, height: nil,alignment: .top)
+                
+            if #available(macOS 12.0, *) {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text(labenFps).onReceive(timer) { _ in
+                            updateFps()
+                        }
+                    }
+                    Spacer()
+                }
+                .foregroundStyle(.white)
             }
-            */
 #endif
         }.background(Color.black)
         

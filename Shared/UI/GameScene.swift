@@ -15,27 +15,39 @@ protocol IRenderScreen {
 
 class GameScene: SKScene, IRenderScreen {
     
+    var bgSKShapeNode: SKSpriteNode?
+    
     func getFpsInfo() -> String {
         return nes.getFpsInfo()
     }
     
-    override func didChangeSize(_ oldSize: CGSize) {
-        #if os(iOS)
-        #else
-        
-        DispatchQueue.main.async {
-            let viewSize = CGSize.init(width: self.view?.frame.width ?? 256, height: self.view?.frame.height ?? 240)
-            self.adjRenderCavansSize(viewSize)
-            self.renderBG()
+    override func sceneDidLoad() {
+        let bufferSize = 256*240*4
+        self.rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        let data = Data(bytes: self.rawBuffer, count: bufferSize)
+        let bgTexture = SKTexture.init(data: data, size: CGSize(width: 256, height: 240))
+        bgTexture.filteringMode = .nearest
+        bgSKShapeNode = SKSpriteNode.init(texture: bgTexture)
+        if let bgSKShapeNode = bgSKShapeNode {
+            self.addChild(bgSKShapeNode)
         }
-        
-        #endif
+    }
+    
+    override func didChangeSize(_ oldSize: CGSize) {
+        DispatchQueue.main.async { [self] in
+            if let view = self.view {
+                let viewSize = CGSize.init(width: view.frame.width, height: view.frame.height)
+                self.adjRenderCavansSize(viewSize)
+                self.renderBG()
+            }
+        }
     }
     
     func adjRenderCavansSize(_ oldSize: CGSize) {
         let windowWidth = oldSize.width
         let windowHeight = oldSize.height
         
+        self.size = oldSize
         if Float(Float(windowWidth)/Float(windowHeight))>Float(256.0/240.0) {
             gameCanvasHeight = Int(windowHeight)
             gameCanvasWidth = gameCanvasHeight*256/240
@@ -50,6 +62,12 @@ class GameScene: SKScene, IRenderScreen {
             gameCanvasCenterX = Int(gameCanvasWidth/2)
             gameCanvasCenterY = Int(gameCanvasHeight/2 + (Int(windowHeight) - gameCanvasHeight)/2)
         }
+        
+        if let bgSKShapeNode = self.bgSKShapeNode {
+            //bgSKShapeNode.inputView?.frame = CGRect(x: gameCanvasCenterX , y: gameCanvasCenterY, width: gameCanvasWidth, height: gameCanvasHeight)
+            bgSKShapeNode.position = CGPoint.init(x: gameCanvasCenterX, y: gameCanvasCenterY)
+            bgSKShapeNode.size = CGSize(width: gameCanvasWidth, height: gameCanvasHeight)
+        }
     }
     
     override func didMove(to view: SKView) {
@@ -61,7 +79,6 @@ class GameScene: SKScene, IRenderScreen {
 #else
 #endif
         
-        rawBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 256*240*4)
         nes.loadRom()
         nes.setRenderScreen(iRenderScreen: self)
         nes.start()
@@ -83,56 +100,14 @@ class GameScene: SKScene, IRenderScreen {
         nes.renderer.getFrame(dstArray2Pointer: &self.rawBuffer)
         let data = Data(bytes: self.rawBuffer, count: 256*240*4)//Data.init(self.rawBuffer)
         let bgTexture = SKTexture.init(data: data, size: CGSize(width: 256, height: 240))
-        bgTexture.filteringMode = .nearest
-        let bkNode = SKSpriteNode.init(texture: bgTexture)
-        
-#if os(iOS)
-        bkNode.position = CGPoint.init(x: gameCanvasCenterX, y: gameCanvasCenterY)
-        bkNode.size = CGSize(width: gameCanvasWidth, height: gameCanvasHeight)
-#else
-        bkNode.position = CGPoint.init(x: gameCanvasCenterX, y: gameCanvasCenterY)
-        bkNode.size = CGSize(width: gameCanvasWidth, height: gameCanvasHeight)
-#endif
-        arraySKShapeNode.append(bkNode)
-        addChild(bkNode)
+
+        bgSKShapeNode?.texture = bgTexture
         
         bIsBusy = false
     }
     
-    //Current not use.
-    /*
-    func renderSprites() {
-        let spriteObjs = nes.getSpriteObjs()
-        for spriteObj in spriteObjs {
-            let location = CGPoint.init(x: spriteObj.x+4, y: spriteObj.y-4)
-            let size = CGSize(width: 8, height: 8)
-            let spriteNode = SKSpriteNode.init(texture: spriteObj.getTexture())
-            spriteNode.size = size
-            spriteNode.position = location
-            
-            arraySKShapeNode.append(spriteNode)
-            addChild(spriteNode)
-        }
-    }
-    */
-    
     func renderScreen() {
-        for sKShapeNode in arraySKShapeNode {
-            sKShapeNode.removeFromParent()
-        }
-        
-        arraySKShapeNode.removeAll()
-        
-        if enableDrawBG {
-            self.renderBG()
-        }
-        
-        //Current not use.
-        /*
-        if(enableDrawSprites)
-        {
-            self.renderSprites()
-        }*/
+        self.renderBG()
     }
     
     
@@ -148,8 +123,6 @@ class GameScene: SKScene, IRenderScreen {
     var gameCanvasCenterX = 0
     var gameCanvasCenterY = 0
     
-    
-    var arraySKShapeNode:[SKSpriteNode] = []
     var enableDrawBG = true
     var enableDrawSprites = false
     var rawBuffer:UnsafeMutablePointer<UInt8>!

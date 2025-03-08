@@ -125,7 +125,7 @@ class Nes {
     var totalFrame = 0
     let serialQueue = DispatchQueue(label: "SerialQueue")
     var iRenderScreen:IRenderScreen?
-    let frameLimitTime:Double = 1/60
+    let frameLimitTime:Double = 1/65
 }
 
 

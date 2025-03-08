@@ -24,6 +24,12 @@ extension Renderer: IRenderer {
     
     func drawPixelColor(x: UInt32, y: UInt32, pixelColor: PixelColor) {
         let pixelPos = Int(x + (239-y)*256)*4
+        
+//        rawBuffer[pixelPos] = 255
+//        rawBuffer[pixelPos+1] = 0
+//        rawBuffer[pixelPos+2] = 0
+//        rawBuffer[pixelPos+3] = 255
+        
         rawBuffer[pixelPos] = pixelColor.d_r
         rawBuffer[pixelPos+1] = pixelColor.d_g
         rawBuffer[pixelPos+2] = pixelColor.d_b
