@@ -3,10 +3,60 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F7382B22F3D5EFE00E9FA23 /* NesWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 0F7382B12F3D5EFE00E9FA23 /* NesWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		0F7382C32F3D61E100E9FA23 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3545B4E32A6D776F00C1E32E /* GameView.swift */; };
+		0F7382C42F3D61F200E9FA23 /* Nes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3226BF6C8B00CF18DD /* Nes.swift */; };
+		0F7382C52F3D620200E9FA23 /* RomHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760F26BD5D5B005AB816 /* RomHeader.swift */; };
+		0F7382C62F3D622F00E9FA23 /* SpriteFetchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 358D403426C66CEB005AAAD8 /* SpriteFetchData.swift */; };
+		0F7382C72F3D622F00E9FA23 /* CpuInternalRam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA4A26BF771500CF18DD /* CpuInternalRam.swift */; };
+		0F7382C82F3D622F00E9FA23 /* CpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3C26BF6E7A00CF18DD /* CpuMemoryBus.swift */; };
+		0F7382C92F3D622F00E9FA23 /* Cpu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA3726BF6DCF00CF18DD /* Cpu.swift */; };
+		0F7382CA2F3D622F00E9FA23 /* OpCodeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA5126BF7A6B00CF18DD /* OpCodeEntry.swift */; };
+		0F7382CB2F3D622F00E9FA23 /* ICpu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B88626C7FBE600A2858C /* ICpu.swift */; };
+		0F7382CC2F3D622F00E9FA23 /* OpCodeTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA6026C0590300CF18DD /* OpCodeTable.swift */; };
+		0F7382CD2F3D623400E9FA23 /* CpuRegDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B89C26C8006100A2858C /* CpuRegDef.swift */; };
+		0F7382CE2F3D623C00E9FA23 /* Bitfield8WithPpuRegister.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3F26C566540031E1A6 /* Bitfield8WithPpuRegister.swift */; };
+		0F7382CF2F3D623C00E9FA23 /* PpuMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF0942A87FF780093A24F /* PpuMask.swift */; };
+		0F7382D02F3D623C00E9FA23 /* PpuMemoryBus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C58226C29A5400E13D57 /* PpuMemoryBus.swift */; };
+		0F7382D12F3D623C00E9FA23 /* PpuMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57D26C291C700E13D57 /* PpuMemory.swift */; };
+		0F7382D22F3D623C00E9FA23 /* OAM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DEF54C2A84FF9D00AE8149 /* OAM.swift */; };
+		0F7382D32F3D623C00E9FA23 /* IPpu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B87F26C7FAC400A2858C /* IPpu.swift */; };
+		0F7382D42F3D623C00E9FA23 /* Ppu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA4526BF70BB00CF18DD /* Ppu.swift */; };
+		0F7382D52F3D623C00E9FA23 /* PpuControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C57826C28F9A00E13D57 /* PpuControl.swift */; };
+		0F7382D62F3D624400E9FA23 /* Bitfield8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352F931226C18E0A00323AC1 /* Bitfield8.swift */; };
+		0F7382D72F3D624400E9FA23 /* Memory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22C26BECE62008DB9B9 /* Memory.swift */; };
+		0F7382D82F3D624400E9FA23 /* Color4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DA36F826C3C10F005B2BC1 /* Color4.swift */; };
+		0F7382D92F3D624400E9FA23 /* BaseDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3547C22726BEBDB0008DB9B9 /* BaseDef.swift */; };
+		0F7382DA2F3D624C00E9FA23 /* IApu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3592DB1C2AD96E51003D52AD /* IApu.swift */; };
+		0F7382DB2F3D624C00E9FA23 /* AudioDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AFFE62A6E6EA800F811F8 /* AudioDriver.swift */; };
+		0F7382DC2F3D624C00E9FA23 /* Apu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352AFFE32A6E6DD100F811F8 /* Apu.swift */; };
+		0F7382DD2F3D625400E9FA23 /* BaseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EAB42A6F83AE00B14943 /* BaseChannel.swift */; };
+		0F7382DE2F3D625400E9FA23 /* NoiseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EABA2A6F89F300B14943 /* NoiseChannel.swift */; };
+		0F7382DF2F3D625400E9FA23 /* TriangleChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EAB72A6F85B600B14943 /* TriangleChannel.swift */; };
+		0F7382E02F3D625400E9FA23 /* DmcChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35714DD12AD3E5FB004A7A3F /* DmcChannel.swift */; };
+		0F7382E12F3D625400E9FA23 /* PulseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EAB02A6F82D700B14943 /* PulseChannel.swift */; };
+		0F7382E22F3D625B00E9FA23 /* FrameCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350858912A72261900318C3D /* FrameCounter.swift */; };
+		0F7382E32F3D626400E9FA23 /* ControllerPorts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352BF75F2A7295D40093CB65 /* ControllerPorts.swift */; };
+		0F7382E42F3D626400E9FA23 /* IControllerPorts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356883222ADA3B4C0009AE7C /* IControllerPorts.swift */; };
+		0F7382E52F3D626C00E9FA23 /* AudioDriveImp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBAA2A7C12E80059AA50 /* AudioDriveImp.swift */; };
+		0F7382E62F3D626C00E9FA23 /* AudioUnitPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557FBA92A7C12E80059AA50 /* AudioUnitPlayer.swift */; };
+		0F7382E72F3D626C00E9FA23 /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 356CF08B2A87935C0093A24F /* AudioController.swift */; };
+		0F7382E82F3D627700E9FA23 /* IRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3568831F2ADA377C0009AE7C /* IRenderer.swift */; };
+		0F7382E92F3D627700E9FA23 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35265B3A26C5548F0031E1A6 /* Renderer.swift */; };
+		0F7382EA2F3D628200E9FA23 /* Cartridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3525760526BD48DF005AB816 /* Cartridge.swift */; };
+		0F7382EB2F3D628200E9FA23 /* ICartridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530B88D26C7FC4200A2858C /* ICartridge.swift */; };
+		0F7382EC2F3D628B00E9FA23 /* Mapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA5626BF880E00CF18DD /* Mapper.swift */; };
+		0F7382ED2F3D628B00E9FA23 /* Mapper0.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B9C5A126C3191600E13D57 /* Mapper0.swift */; };
+		0F7382EE2F3D628B00E9FA23 /* Mapper4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B78E2D2A86091100B1E42F /* Mapper4.swift */; };
+		0F7382EF2F3D628B00E9FA23 /* Mapper1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3530FA5B26BFBCA800CF18DD /* Mapper1.swift */; };
+		0F7382F02F3D628B00E9FA23 /* IMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3538AD562AD90A1A00787E9A /* IMapper.swift */; };
+		0F7382F52F3D647D00E9FA23 /* WatchGameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F7382F22F3D647300E9FA23 /* WatchGameScene.swift */; };
+		0F7382F72F3D65B400E9FA23 /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F7382F62F3D65B400E9FA23 /* SpriteKit.framework */; };
+		0F7382F82F3D669A00E9FA23 /* Roms.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 351C8C7B2A83C96E00C2735D /* Roms.bundle */; };
 		3505EAB12A6F82D700B14943 /* PulseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EAB02A6F82D700B14943 /* PulseChannel.swift */; };
 		3505EAB22A6F82D700B14943 /* PulseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EAB02A6F82D700B14943 /* PulseChannel.swift */; };
 		3505EAB52A6F83AE00B14943 /* BaseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3505EAB42A6F83AE00B14943 /* BaseChannel.swift */; };
@@ -129,7 +179,35 @@
 		35DEF54E2A84FF9D00AE8149 /* OAM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DEF54C2A84FF9D00AE8149 /* OAM.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		0F7382B32F3D5EFE00E9FA23 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 352575DD26BD4827005AB816 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0F7382B02F3D5EFE00E9FA23;
+			remoteInfo = "NesWatch Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0F7382BE2F3D5EFF00E9FA23 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				0F7382B22F3D5EFE00E9FA23 /* NesWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		0F7382AC2F3D5EFE00E9FA23 /* NesWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NesWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F7382B12F3D5EFE00E9FA23 /* NesWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NesWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F7382F22F3D647300E9FA23 /* WatchGameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchGameScene.swift; sourceTree = "<group>"; };
+		0F7382F62F3D65B400E9FA23 /* SpriteKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpriteKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.1.sdk/System/Library/Frameworks/SpriteKit.framework; sourceTree = DEVELOPER_DIR; };
 		3505EAB02A6F82D700B14943 /* PulseChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseChannel.swift; sourceTree = "<group>"; };
 		3505EAB42A6F83AE00B14943 /* BaseChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseChannel.swift; sourceTree = "<group>"; };
 		3505EAB72A6F85B600B14943 /* TriangleChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriangleChannel.swift; sourceTree = "<group>"; };
@@ -205,7 +283,19 @@
 		35DEF54C2A84FF9D00AE8149 /* OAM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAM.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		0F7382B52F3D5EFE00E9FA23 /* NesWatch Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "NesWatch Watch App"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		0F7382AE2F3D5EFE00E9FA23 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F7382F72F3D65B400E9FA23 /* SpriteKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		352575E626BD4829005AB816 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -267,6 +357,7 @@
 				352575E126BD4828005AB816 /* Shared */,
 				352575EB26BD4829005AB816 /* iOS */,
 				352575F226BD4829005AB816 /* macOS */,
+				0F7382B52F3D5EFE00E9FA23 /* NesWatch Watch App */,
 				352575EA26BD4829005AB816 /* Products */,
 				3530B86926C6DF3600A2858C /* Frameworks */,
 			);
@@ -288,6 +379,8 @@
 			children = (
 				352575E926BD4829005AB816 /* NES_EMU.app */,
 				352575F126BD4829005AB816 /* NES_EMU.app */,
+				0F7382AC2F3D5EFE00E9FA23 /* NesWatch.app */,
+				0F7382B12F3D5EFE00E9FA23 /* NesWatch Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -339,6 +432,7 @@
 		3530B85526C6DD1200A2858C /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				0F7382F22F3D647300E9FA23 /* WatchGameScene.swift */,
 				352575E326BD4828005AB816 /* ContentView.swift */,
 				3545B4E32A6D776F00C1E32E /* GameView.swift */,
 				356CF08E2A87BFD70093A24F /* GameScene+GameController.swift */,
@@ -369,6 +463,7 @@
 		3530B86926C6DF3600A2858C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0F7382F62F3D65B400E9FA23 /* SpriteKit.framework */,
 				3518A3552A8688F700D16FF9 /* GameController.framework */,
 				3505EABD2A6FC2B400B14943 /* AVFoundation.framework */,
 				35CC2F452A6EB8D700832AE2 /* AVKit.framework */,
@@ -461,6 +556,47 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0F7382AB2F3D5EFE00E9FA23 /* NesWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0F7382C22F3D5EFF00E9FA23 /* Build configuration list for PBXNativeTarget "NesWatch" */;
+			buildPhases = (
+				0F7382AA2F3D5EFE00E9FA23 /* Resources */,
+				0F7382BE2F3D5EFF00E9FA23 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0F7382B42F3D5EFE00E9FA23 /* PBXTargetDependency */,
+			);
+			name = NesWatch;
+			packageProductDependencies = (
+			);
+			productName = NesWatch;
+			productReference = 0F7382AC2F3D5EFE00E9FA23 /* NesWatch.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		0F7382B02F3D5EFE00E9FA23 /* NesWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0F7382C12F3D5EFF00E9FA23 /* Build configuration list for PBXNativeTarget "NesWatch Watch App" */;
+			buildPhases = (
+				0F7382AD2F3D5EFE00E9FA23 /* Sources */,
+				0F7382AE2F3D5EFE00E9FA23 /* Frameworks */,
+				0F7382AF2F3D5EFE00E9FA23 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				0F7382B52F3D5EFE00E9FA23 /* NesWatch Watch App */,
+			);
+			name = "NesWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "NesWatch Watch App";
+			productReference = 0F7382B12F3D5EFE00E9FA23 /* NesWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 		352575E826BD4829005AB816 /* NES_EMU (iOS) */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 352575FD26BD4829005AB816 /* Build configuration list for PBXNativeTarget "NES_EMU (iOS)" */;
@@ -501,9 +637,15 @@
 		352575DD26BD4827005AB816 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1230;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 1320;
 				TargetAttributes = {
+					0F7382AB2F3D5EFE00E9FA23 = {
+						CreatedOnToolsVersion = 26.1;
+					};
+					0F7382B02F3D5EFE00E9FA23 = {
+						CreatedOnToolsVersion = 26.1;
+					};
 					352575E826BD4829005AB816 = {
 						CreatedOnToolsVersion = 12.3;
 					};
@@ -527,11 +669,28 @@
 			targets = (
 				352575E826BD4829005AB816 /* NES_EMU (iOS) */,
 				352575F026BD4829005AB816 /* NES_EMU (macOS) */,
+				0F7382AB2F3D5EFE00E9FA23 /* NesWatch */,
+				0F7382B02F3D5EFE00E9FA23 /* NesWatch Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0F7382AA2F3D5EFE00E9FA23 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0F7382AF2F3D5EFE00E9FA23 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F7382F82F3D669A00E9FA23 /* Roms.bundle in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		352575E726BD4829005AB816 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -557,6 +716,60 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0F7382AD2F3D5EFE00E9FA23 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F7382C32F3D61E100E9FA23 /* GameView.swift in Sources */,
+				0F7382E22F3D625B00E9FA23 /* FrameCounter.swift in Sources */,
+				0F7382CE2F3D623C00E9FA23 /* Bitfield8WithPpuRegister.swift in Sources */,
+				0F7382F52F3D647D00E9FA23 /* WatchGameScene.swift in Sources */,
+				0F7382CF2F3D623C00E9FA23 /* PpuMask.swift in Sources */,
+				0F7382D02F3D623C00E9FA23 /* PpuMemoryBus.swift in Sources */,
+				0F7382D12F3D623C00E9FA23 /* PpuMemory.swift in Sources */,
+				0F7382D22F3D623C00E9FA23 /* OAM.swift in Sources */,
+				0F7382D32F3D623C00E9FA23 /* IPpu.swift in Sources */,
+				0F7382D42F3D623C00E9FA23 /* Ppu.swift in Sources */,
+				0F7382D52F3D623C00E9FA23 /* PpuControl.swift in Sources */,
+				0F7382E52F3D626C00E9FA23 /* AudioDriveImp.swift in Sources */,
+				0F7382E62F3D626C00E9FA23 /* AudioUnitPlayer.swift in Sources */,
+				0F7382E72F3D626C00E9FA23 /* AudioController.swift in Sources */,
+				0F7382DD2F3D625400E9FA23 /* BaseChannel.swift in Sources */,
+				0F7382DE2F3D625400E9FA23 /* NoiseChannel.swift in Sources */,
+				0F7382DF2F3D625400E9FA23 /* TriangleChannel.swift in Sources */,
+				0F7382E02F3D625400E9FA23 /* DmcChannel.swift in Sources */,
+				0F7382E82F3D627700E9FA23 /* IRenderer.swift in Sources */,
+				0F7382E92F3D627700E9FA23 /* Renderer.swift in Sources */,
+				0F7382E12F3D625400E9FA23 /* PulseChannel.swift in Sources */,
+				0F7382C42F3D61F200E9FA23 /* Nes.swift in Sources */,
+				0F7382EC2F3D628B00E9FA23 /* Mapper.swift in Sources */,
+				0F7382ED2F3D628B00E9FA23 /* Mapper0.swift in Sources */,
+				0F7382EE2F3D628B00E9FA23 /* Mapper4.swift in Sources */,
+				0F7382EF2F3D628B00E9FA23 /* Mapper1.swift in Sources */,
+				0F7382F02F3D628B00E9FA23 /* IMapper.swift in Sources */,
+				0F7382C62F3D622F00E9FA23 /* SpriteFetchData.swift in Sources */,
+				0F7382CD2F3D623400E9FA23 /* CpuRegDef.swift in Sources */,
+				0F7382C72F3D622F00E9FA23 /* CpuInternalRam.swift in Sources */,
+				0F7382C82F3D622F00E9FA23 /* CpuMemoryBus.swift in Sources */,
+				0F7382C92F3D622F00E9FA23 /* Cpu.swift in Sources */,
+				0F7382CA2F3D622F00E9FA23 /* OpCodeEntry.swift in Sources */,
+				0F7382CB2F3D622F00E9FA23 /* ICpu.swift in Sources */,
+				0F7382CC2F3D622F00E9FA23 /* OpCodeTable.swift in Sources */,
+				0F7382C52F3D620200E9FA23 /* RomHeader.swift in Sources */,
+				0F7382DA2F3D624C00E9FA23 /* IApu.swift in Sources */,
+				0F7382DB2F3D624C00E9FA23 /* AudioDriver.swift in Sources */,
+				0F7382E32F3D626400E9FA23 /* ControllerPorts.swift in Sources */,
+				0F7382E42F3D626400E9FA23 /* IControllerPorts.swift in Sources */,
+				0F7382DC2F3D624C00E9FA23 /* Apu.swift in Sources */,
+				0F7382D62F3D624400E9FA23 /* Bitfield8.swift in Sources */,
+				0F7382EA2F3D628200E9FA23 /* Cartridge.swift in Sources */,
+				0F7382EB2F3D628200E9FA23 /* ICartridge.swift in Sources */,
+				0F7382D72F3D624400E9FA23 /* Memory.swift in Sources */,
+				0F7382D82F3D624400E9FA23 /* Color4.swift in Sources */,
+				0F7382D92F3D624400E9FA23 /* BaseDef.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		352575E526BD4829005AB816 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -681,7 +894,139 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		0F7382B42F3D5EFE00E9FA23 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0F7382B02F3D5EFE00E9FA23 /* NesWatch Watch App */;
+			targetProxy = 0F7382B32F3D5EFE00E9FA23 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		0F7382BC2F3D5EFF00E9FA23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				INFOPLIST_KEY_CFBundleDisplayName = NesWatch;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.miochen.NesWatch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		0F7382BD2F3D5EFF00E9FA23 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				INFOPLIST_KEY_CFBundleDisplayName = NesWatch;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.miochen.NesWatch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0F7382BF2F3D5EFF00E9FA23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = NesWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.miochen.NesWatch.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Debug;
+		};
+		0F7382C02F3D5EFF00E9FA23 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82Q375NBS9;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = NesWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.miochen.NesWatch.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Release;
+		};
 		352575FB26BD4829005AB816 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -907,6 +1252,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0F7382C12F3D5EFF00E9FA23 /* Build configuration list for PBXNativeTarget "NesWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0F7382BF2F3D5EFF00E9FA23 /* Debug */,
+				0F7382C02F3D5EFF00E9FA23 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0F7382C22F3D5EFF00E9FA23 /* Build configuration list for PBXNativeTarget "NesWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0F7382BC2F3D5EFF00E9FA23 /* Debug */,
+				0F7382BD2F3D5EFF00E9FA23 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		352575E026BD4827005AB816 /* Build configuration list for PBXProject "NES_EMU" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

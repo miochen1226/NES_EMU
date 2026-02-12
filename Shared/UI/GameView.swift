@@ -10,18 +10,25 @@ import SpriteKit
 
 let nes = Nes.sharedInstance
 
-#if os(iOS)
+#if os(iOS) || os(watchOS)
 struct GameView: View {
     var body: some View {
         SpriteView(scene: scene)
+            //.ignoresSafeArea()          // 必须全屏
+            #if os(watchOS)
+            .onAppear {
+                scene.didAppearInSKScene()
+            }
+            #endif
     }
     let scene: GameScene
 }
 #else
+// macOS 实现（保持不变）
 struct GameView: View {
     var body: some View {
         GeometryReader { proxy in
-            GameViewRepresentable(scene: scene, proxy: proxy,window: $window)
+            GameViewRepresentable(scene: scene, proxy: proxy, window: $window)
         }
     }
     
@@ -145,4 +152,3 @@ struct GameViewRepresentable: NSViewRepresentable {
     @Binding var window: NSWindow?
 }
 #endif
-

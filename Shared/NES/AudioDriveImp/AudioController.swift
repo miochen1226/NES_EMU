@@ -7,7 +7,9 @@
 
 import Foundation
 import AVFoundation
+#if os(watchOS)
 
+#else
 class AudioController: NSObject {
     static var sharedInstance = AudioController()
     var remoteIOUnit: AudioComponentInstance!
@@ -120,3 +122,4 @@ class AudioController: NSObject {
         initAudioComponent()
     }
 }
+#endif
