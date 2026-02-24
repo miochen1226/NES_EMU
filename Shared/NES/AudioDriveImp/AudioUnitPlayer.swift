@@ -18,23 +18,14 @@ class AudioUnitPlayer: NSObject, IAudioDrive {
     }
     
     func initEngine() {
-#if os(watchOS)
-#else
         AudioController.sharedInstance.setUp(frameProvider: self.frameProvider!)
-#endif
     }
     
     func start() {
-#if os(watchOS)
-#else
         AudioController.sharedInstance.start()
-#endif
     }
     
     func stop() {
-#if os(watchOS)
-#else
         AudioController.sharedInstance.stop()
-#endif
     }
 }

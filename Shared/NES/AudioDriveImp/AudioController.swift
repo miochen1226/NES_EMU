@@ -1,3 +1,78 @@
+import Foundation
+import AVFoundation
+
+#if os(watchOS)
+class AudioController: NSObject {
+    static var sharedInstance = AudioController()
+    
+    private let engine = AVAudioEngine()
+    private var sourceNode: AVAudioSourceNode?
+    var frameProvider: IFrameProvider?
+    
+    func start() {
+        do {
+            // 在 watchOS 上，必須先啟動 Audio Session
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, policy: .longFormAudio)
+            try session.setActive(true)
+            
+            if !engine.isRunning {
+                try engine.start()
+            }
+        } catch {
+            print("無法啟動音訊引擎: \(error)")
+        }
+    }
+    
+    func stop() {
+        engine.stop()
+        try? AVAudioSession.sharedInstance().setActive(false)
+    }
+    
+    func setUp(frameProvider: IFrameProvider) {
+        self.frameProvider = frameProvider
+        
+        // 1. 定義輸出格式 (NES 通常是單聲道 44.1kHz)
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
+        
+        // 2. 建立 Source Node (替代原本的 Render Callback)
+        sourceNode = AVAudioSourceNode { [weak self] (_, _, frameCount, audioBufferList) -> OSStatus in
+            guard let self = self, let provider = self.frameProvider else { return noErr }
+            
+            let abl = UnsafeMutableAudioBufferListPointer(audioBufferList)
+            let buffer = abl[0]
+            
+            // 計算需要多少位元組 (Float32 = 4 bytes)
+            let reqByteSize = Int(frameCount) * 4
+            let frameObj = provider.getNextFrame(UInt32(reqByteSize))
+            
+            if frameObj.isFloat {
+                let copyCount = Int(frameObj.countFloat) * 4
+                if copyCount > 0 {
+                    memcpy(buffer.mData, frameObj.arrayFloat, copyCount)
+                }
+            } else if let srcBuffer = frameObj.buffer {
+                let byteCount = Int(frameObj.byteCount)
+                if byteCount > 0 {
+                    memcpy(buffer.mData, srcBuffer, byteCount)
+                }
+            }
+            
+            return noErr
+        }
+        
+        // 3. 將節點連接到引擎
+        guard let sourceNode = sourceNode else { return }
+        engine.attach(sourceNode)
+        engine.connect(sourceNode, to: engine.mainMixerNode, format: format)
+        
+        // 4. 預熱引擎
+        engine.prepare()
+    }
+}
+
+#else
+
 //
 //  AudioController.swift
 //  NES_EMU
@@ -7,9 +82,7 @@
 
 import Foundation
 import AVFoundation
-#if os(watchOS)
 
-#else
 class AudioController: NSObject {
     static var sharedInstance = AudioController()
     var remoteIOUnit: AudioComponentInstance!
@@ -122,4 +195,5 @@ class AudioController: NSObject {
         initAudioComponent()
     }
 }
+
 #endif
