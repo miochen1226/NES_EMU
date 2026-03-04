@@ -7,6 +7,11 @@ Practice implement NES emu with swift ,  just for fun
   
 # Change log
 
+
+## 2/24/2026
+- 1.Support Apple Watch
+<img src="https://raw.githubusercontent.com/miochen1226/NES_EMU/master/Image/SnapShot/apple_watch.png">
+
 ## 10/13/2023
 - 1.Support Save/Load state to file for Osx version 
   >key '1' for save, '2' for load).
