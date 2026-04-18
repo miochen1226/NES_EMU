@@ -50,19 +50,10 @@ class GameScene: SKScene, IRenderScreen {
     }
     
     override func didChangeSize(_ oldSize: CGSize) {
-        // 防止递归调用
-//        if screenSize.width > oldSize.width {
-//            return
-//        }
         print(oldSize)
         screenSize = oldSize
-//        guard !isUpdatingLayout else { return }
-        guard oldSize.width > 200 else { return }//, oldSize.height > 0 else { return }
-//        print(oldSize)
-//        isUpdatingLayout = true
-//        defer { isUpdatingLayout = false }
-        
-        //self.adjRenderCanvasSize(oldSize)
+        guard oldSize.width > 200 else { return }
+
     }
     
     func adjRenderCanvasSize(_ viewSize: CGSize) {
@@ -74,12 +65,9 @@ class GameScene: SKScene, IRenderScreen {
             return
         }
         
-        //self.size = viewSize
         scaleMode = .resizeFill
-        //会使场景自动适应视图大小
         
         if windowWidth / windowHeight > 256.0 / 240.0 {
-            // 宽屏模式：高度撑满，宽度按比例计算
             gameCanvasHeight = Int(windowHeight)
             gameCanvasWidth = gameCanvasHeight * 256 / 240
             
@@ -89,7 +77,6 @@ class GameScene: SKScene, IRenderScreen {
             gameCanvasCenterX = halfCanvasWidth + extraXOffset
             gameCanvasCenterY = gameCanvasHeight / 2
         } else {
-            // 窄屏模式：宽度撑满，高度按比例计算
             gameCanvasWidth = Int(windowWidth)
             gameCanvasHeight = Int(windowWidth * 240 / 256)
             
@@ -99,9 +86,6 @@ class GameScene: SKScene, IRenderScreen {
             let extraYOffset = Int((windowHeight - canvasHeightFloat) / 2)
             gameCanvasCenterY = halfCanvasHeight + extraYOffset
         }
-        
-        //bgSKSpriteNode?.position = CGPoint(x: gameCanvasCenterX, y: gameCanvasCenterY)
-        //bgSKSpriteNode?.size = CGSize(width: gameCanvasWidth, height: gameCanvasHeight)
     }
     
     // MARK: - 平台特定的初始化入口
