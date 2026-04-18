@@ -92,3 +92,6 @@ with open('/tmp/payload.json', 'w', encoding='utf-8') as f:
 
 curl -s -H "Content-Type: application/json" -X POST -d @"/tmp/payload.json" "$DISCORD_WEBHOOK"
 rm -f "/tmp/payload.json"
+
+# 在 ci_post_clone.sh 獲取名稱後加上：
+echo "$DYNAMIC_PROJECT_NAME" > /tmp/project_name.txt
