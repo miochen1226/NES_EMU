@@ -107,3 +107,5 @@ if [[ "$HTTP_CODE" =~ ^[0-9]+$ ]] && { [ "$HTTP_CODE" -eq 204 ] || [ "$HTTP_CODE
 else
     echo "❌ 失敗，HTTP Code: $HTTP_CODE"
 fi
+
+echo "$CHANGELOG" > /tmp/final_changelog.txt
