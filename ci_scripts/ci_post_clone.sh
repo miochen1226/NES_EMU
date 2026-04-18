@@ -1,46 +1,49 @@
 #!/bin/bash
 
-# ============================================================
-# 腳本位置：專案目錄/ci_scripts/ci_post_clone.sh
-# 目的：動態抓取專案資訊、精準比對 Git 區間並通知 Discord
-# ============================================================
-
-# 1. 配置 Webhook (請確認網址正確)
+# 1. 配置
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1494864601500618783/ubSTg2Y_uS_pKvjTKSRHWm8vaBkO8Y4bvunh07l9EQUQqp_daQWX-CYtwaXGiQEru3ZF"
 
-# 2. 處理 Xcode Cloud 的 Shallow Clone 問題
+# 2. 處理淺層複製
 if [ -f "$(git rev-parse --git-dir)/shallow" ]; then
-    echo "🏗️ 偵測到淺層複製，正在解開以獲取完整歷史..."
     git fetch --unshallow --tags
 else
-    echo "✅ 環境已具備完整歷史，僅同步最新 Tag。"
     git fetch --tags
 fi
 
-# 3. 獲取專案資訊 (動態抓取)
-# 自動從 Project 設定中抓取產品名稱
-DYNAMIC_PROJECT_NAME=$(xcodebuild -showBuildSettings | grep " PRODUCT_NAME " | head -1 | awk -F '=' '{print $2}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-[ -z "$DYNAMIC_PROJECT_NAME" ] && DYNAMIC_PROJECT_NAME="iOS Project"
+# 3. 獲取專案資訊 (優先使用 CI 內建變數，抓不到再用 xcodebuild)
+# CI_XCODE_SCHEME 或 CI_XCODE_PROJECT 是 Xcode Cloud 必備的
+DYNAMIC_PROJECT_NAME=${CI_XCODE_SCHEME:-${CI_XCODE_PROJECT:-"NES_EMU"}}
 
-# 4. 獲取版本與 Git 區間資訊
+# 4. 獲取版本資訊
 CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 BASE_VERSION=$(echo "$CURRENT_TAG" | sed -E 's/Build_v//; s/v\.//; s/\(.*\)//')
 BUILD_NUM=${CI_BUILD_NUMBER:-"Local"}
 DISPLAY_VERSION="v${BASE_VERSION} (Build ${BUILD_NUM})"
 
-# 決定比對區間
-START_COMMIT=${CI_PREVIOUS_COMMIT:-"${CURRENT_TAG}^"}
+# 5. Git 比對區間 (強化版：增加保底顯示)
+# 使用 CI_COMMIT 變數，這是 Xcode Cloud 保證提供的
+START_COMMIT=${CI_PREVIOUS_COMMIT}
 END_COMMIT=${CI_COMMIT:-"HEAD"}
 
-# 擷取短 Commit ID 供 Discord 顯示
-START_SHORT=$(git rev-parse --short $START_COMMIT 2>/dev/null || echo "N/A")
-END_SHORT=$(git rev-parse --short $END_COMMIT 2>/dev/null || echo "HEAD")
+# 擷取短雜湊，如果 START 為空則顯示 "First Build"
+if [ -n "$START_COMMIT" ]; then
+    START_SHORT=$(git rev-parse --short "$START_COMMIT" 2>/dev/null || echo "Start")
+else
+    START_SHORT="First"
+fi
+END_SHORT=$(git rev-parse --short "$END_COMMIT" 2>/dev/null || echo "HEAD")
+RANGE_TEXT="$START_SHORT...$END_SHORT"
 
-# 5. 擷取 Changelog (Merge 嚴格模式)
-echo "--- 🔍 偵錯資訊開始 ---"
-echo "比對區間: $START_SHORT...$END_SHORT"
+# 6. 擷取 Changelog
+echo "--- 🔍 偵錯資訊 ---"
+echo "Range: $RANGE_TEXT"
 
-RAW_LOGS=$(git log "${START_COMMIT}..${END_COMMIT}" --merges --pretty=format:'%s')
+if [ -n "$START_COMMIT" ]; then
+    RAW_LOGS=$(git log "${START_COMMIT}..${END_COMMIT}" --merges --pretty=format:'%s')
+else
+    # 第一次建置時抓最近 5 條 Merge
+    RAW_LOGS=$(git log -n 5 --merges --pretty=format:'%s')
+fi
 
 CHANGELOG=$(echo "$RAW_LOGS" | while read -r line; do
     [ -z "$line" ] && continue
@@ -52,21 +55,16 @@ CHANGELOG=$(echo "$RAW_LOGS" | while read -r line; do
     fi
 done | grep "^•" | sort -u | paste -sd "\n" -)
 
-if [ -z "$CHANGELOG" ]; then
-    CHANGELOG="無合併更新說明 (本次可能為直接提交或針對同一 Commit 重複打包)"
-fi
+[ -z "$CHANGELOG" ] && CHANGELOG="無合併更新說明 (本次可能為直接提交或針對同一 Commit 重複打包)"
 
-# 將 Changelog 存入暫存檔供後續 ci_post_xcodebuild.sh 使用
+# 存入暫存檔給 post_xcodebuild 用
 echo "$CHANGELOG" > /tmp/final_changelog.txt
-echo "--- 🔍 偵錯資訊結束 ---"
 
-# 6. 使用暫存檔模式組裝 JSON 並發送
-PAYLOAD_PATH="/tmp/discord_payload.json"
-
+# 7. 組裝並發送
 export PY_NAME="$DYNAMIC_PROJECT_NAME"
 export PY_TAG="$CURRENT_TAG"
 export PY_VERSION="$DISPLAY_VERSION"
-export PY_RANGE="$START_SHORT...$END_SHORT"
+export PY_RANGE="$RANGE_TEXT"
 export PY_LOGS="$CHANGELOG"
 
 python3 -c "
@@ -88,10 +86,9 @@ data = {
     }]
 }
 
-with open('$PAYLOAD_PATH', 'w', encoding='utf-8') as f:
+with open('/tmp/payload.json', 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False)
 "
 
-# 7. 發送通知
-curl -s -H "Content-Type: application/json" -X POST -d @"$PAYLOAD_PATH" "$DISCORD_WEBHOOK"
-rm -f "$PAYLOAD_PATH"
+curl -s -H "Content-Type: application/json" -X POST -d @"/tmp/payload.json" "$DISCORD_WEBHOOK"
+rm -f "/tmp/payload.json"
