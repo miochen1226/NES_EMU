@@ -32,20 +32,27 @@ for obj in objects.values():
 " 2>/dev/null)
 [ -z "$DYNAMIC_PROJECT_NAME" ] && DYNAMIC_PROJECT_NAME="NES_EMU"
 
-# 3. 【核心修改】獲取最新 Tag 作為版號
-# 使用 describe 抓取最接近的 tag，如果完全沒 tag 則預設 1.0.0
-CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")
+# 3. 【核心修改】獲取最新 Tag
+# 根據你的專案習慣，移除可能的 "v" 前綴以確保版號純淨
+CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "1.0.0")
 
 # 4. Git 區間與 Changelog
 START_COMMIT=${CI_PREVIOUS_COMMIT:-"${CURRENT_TAG}^"}
 END_COMMIT=${CI_COMMIT:-"HEAD"}
 RANGE_TEXT="$(git rev-parse --short $START_COMMIT 2>/dev/null)...$(git rev-parse --short $END_COMMIT 2>/dev/null)"
 
-# 這裡可以加入你原本的 git log 擷取邏輯，目前先用保底字串
-CHANGELOG=$(git log "${START_COMMIT}..${END_COMMIT}" --merges --pretty=format:'%s' | sed 's/^/• /' | paste -sd "\n" -)
-[ -z "$CHANGELOG" ] && CHANGELOG="測試更新"
+# 【重點修改】過濾 Merge branch '...' 字眼，只保留分支名稱
+CHANGELOG=$(git log "${START_COMMIT}..${END_COMMIT}" --merges --pretty=format:'%s' | \
+            sed "s/Merge branch '\(.*\)'/\1/" | \
+            sed 's/^/• /' | \
+            paste -sd "\n" -)
 
-# 5. 將所有資訊寫入暫存檔 (供 ci_post_xcodebuild.sh 讀取)
+# 如果過濾後為空（例如不是 Merge commit），則抓取最後一則 commit message 第一行
+if [ -z "$CHANGELOG" ]; then
+    CHANGELOG="• $(git log -1 --pretty=format:'%s')"
+fi
+
+# 5. 將所有資訊寫入暫存檔
 echo "$DYNAMIC_PROJECT_NAME" > /tmp/ci_project_name.txt
 echo "$CURRENT_TAG" > /tmp/ci_current_tag.txt
 echo "$RANGE_TEXT" > /tmp/ci_git_range.txt
@@ -61,15 +68,13 @@ export PY_LOGS="$CHANGELOG"
 python3 -c '
 import json, os
 p_name = os.environ.get("PY_NAME")
-p_tag  = os.environ.get("PY_TAG")
 p_ver  = os.environ.get("PY_VER")
 p_range = os.environ.get("PY_RANGE")
 p_logs  = os.environ.get("PY_LOGS")
 
 description = (
     f"**專案名稱：** {p_name}\n"
-    f"**目前基準 Tag：** {p_tag}\n"
-    f"**預計版本：** {p_ver}\n"
+    f"**打包版本：** {p_ver}\n"
     f"**Git 比對區間：** `{p_range}`\n\n"
     f"**更新說明：**\n{p_logs}"
 )
