@@ -31,8 +31,6 @@ struct GameView: View {
         GeometryReader { geometry in
             ZStack {
                 Color.black.ignoresSafeArea()
-                
-                // 1. 遊戲畫面：維持絕對置中，並稍微縮小一點點點，騰出頂部控制空間
                 SpriteView(scene: scene)
                     .frame(width: geometry.size.width, height: geometry.size.width * 0.75)
                     .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + 5) // 稍微往下移 5 像素，避開頂部按鈕
