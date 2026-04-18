@@ -179,5 +179,4 @@ class GameScene: SKScene, IRenderScreen {
         print("watchOS: No game controller available")
     }
     #endif
-    
 }
