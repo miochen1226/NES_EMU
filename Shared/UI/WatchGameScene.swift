@@ -178,5 +178,5 @@ class GameScene: SKScene, IRenderScreen {
     func scanPad() {
         print("watchOS: No game controller available")
     }
-    #endif
+    #endifß
 }

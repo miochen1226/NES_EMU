@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-
 @main
 struct NES_EMUApp: App {
     
