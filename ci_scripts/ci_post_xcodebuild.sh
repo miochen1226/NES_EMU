@@ -1,39 +1,46 @@
 #!/bin/bash
 
-# 1. 配置
-DISCORD_WEBHOOK="https://discord.com/api/webhooks/1504314067114790932/Y9pWPtitNsphk49rdbK8ooDlAMvsoND_iG290iJ6eh5zzLrmZS_24YC0DGERECkqjTMK"
+# 1. 狀態檢查
+[ -n "$CI_XCODEBUILD_EXIT_CODE" ] && [ "$CI_XCODEBUILD_EXIT_CODE" != "0" ] && exit 0
 
-# 2. 處理 Shallow Clone
-git fetch --unshallow --tags 2>/dev/null || git fetch --tags
+# 2. 直接使用環境變數組合 Tag 名稱 (最準確)
+MARKETING_VERSION="1.0.3"
+TAG_NAME="${MARKETING_VERSION}(${CI_BUILD_NUMBER})"
 
-# 3. 獲取版本資訊
-# 偵錯：印出目前 Git 裡所有的 Tag 狀況
-ALL_TAGS=$(git tag --sort=-creatordate | head -n 5 | paste -sd ", " -)
-TAG_NAME=$(git tag --sort=-creatordate | grep -E '[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)' | head -n 1)
-[ -z "$TAG_NAME" ] && TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "Initial_Build")
+echo "🚀 準備回寫同步後的 Tag: $TAG_NAME"
 
-# 4. 偵錯：檢查 Xcode Cloud 注入的變數
-# 這裡是關鍵，看看 CI_BUILD_NUMBER 到底是 5 還是 38
-DEBUG_INFO="Build編號: ${CI_BUILD_NUMBER:-未定義} | 工作流: ${CI_WORKFLOW_ID:-未知}"
+# 3. 使用 PAT 推送
+if [ -n "$GH_TOKEN" ] && [ -n "$CI_BUILD_NUMBER" ]; then
+    git config user.name "Xcode Cloud (Automated)"
+    git config user.email "xcode-cloud@users.noreply.github.com"
+    
+    # 強制覆蓋已存在的本地 Tag (防止上一跑殘留)
+    git tag -af "$TAG_NAME" "${CI_COMMIT:-HEAD}" -m "Xcode Cloud Release $TAG_NAME"
+    
+    REMOTE_URL="https://miochen1226:${GH_TOKEN}@github.com/miochen1226/NES_EMU.git"
+    
+    # 執行推送
+    if git push "$REMOTE_URL" "refs/tags/$TAG_NAME" --force; then
+        TITLE="✅ Tag 已同步回 GitHub 🚀"
+        COLOR=3066993
+        MSG="成功建立並推送 Tag: **${TAG_NAME}**"
+    else
+        TITLE="❌ Git Tag 推送失敗"
+        COLOR=15158332
+        MSG="無法推送 Tag 至 GitHub，請檢查 PAT 權限。"
+    fi
+fi
 
-# 5. 擷取 Changelog
-COMMIT_RANGE="$([ "$TAG_NAME" = "Initial_Build" ] && echo "HEAD" || echo "$TAG_NAME..HEAD")"
-CHANGELOG=$(git log "$COMMIT_RANGE" --first-parent --no-merges --pretty=format:'%s' | while read -r line; do
-    [[ "$line" =~ ^#[0-9]+- ]] && echo "• $line"
-done | sort -u)
-[ -z "$CHANGELOG" ] && CHANGELOG="無更新說明"
-echo "$CHANGELOG" > ../changelog_temp.txt
-
-# 轉義 JSON
+# 4. 發送 Discord 通知
+CHANGELOG=$(cat ../changelog_temp.txt 2>/dev/null || echo "無更新說明")
 CHANGELOG_ESCAPED=$(echo "$CHANGELOG" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
 
-# 6. 發送通知
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
-    "title": "🍎 [Debug模式] Xcode Cloud 啟動",
-    "color": 3447003,
-    "description": "**基準 Tag:** ${TAG_NAME}\n**系統注入編號:** ${CI_BUILD_NUMBER}\n**Debug詳情:** ${DEBUG_INFO}\n**最近Tags:** ${ALL_TAGS}\n\n**待處理更新:**\n${CHANGELOG_ESCAPED}"
+    "title": "${TITLE}",
+    "color": ${COLOR},
+    "description": "${MSG}\n\n**更新內容:**\n${CHANGELOG_ESCAPED}"
   }]
 }
 EOF
