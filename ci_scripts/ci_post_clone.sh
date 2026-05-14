@@ -51,7 +51,7 @@ PAYLOAD=$(cat <<EOF
   "embeds": [{
     "title": "🍎 Xcode Cloud 流程啟動 — 準備打包 🏗️",
     "color": 3447003,
-    "description": "**專案名稱：** ${SCHEME}\n**基準 Tag：** ${TAG_NAME}\n**觸發 Commit：** ${CI_COMMIT}\n\n**待處理更新內容：**\n${CHANGELOG_ESCAPED}"
+    "description": "**專案名稱：** ${SCHEME}\n**上一個版本 Tag：** ${TAG_NAME}\n**觸發 Commit：** ${CI_COMMIT}\n\n**待處理更新內容：**\n${CHANGELOG_ESCAPED}"
   }]
 }
 EOF
