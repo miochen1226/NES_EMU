@@ -1,41 +1,39 @@
 #!/bin/bash
 
-# 1. 檢查狀態
-[ -n "$CI_XCODEBUILD_EXIT_CODE" ] && [ "$CI_XCODEBUILD_EXIT_CODE" != "0" ] && exit 0
+# 1. 配置
+DISCORD_WEBHOOK="https://discord.com/api/webhooks/1504314067114790932/Y9pWPtitNsphk49rdbK8ooDlAMvsoND_iG290iJ6eh5zzLrmZS_24YC0DGERECkqjTMK"
 
-# 2. 從產物讀取同步後的版號
-APP_INFO_PLIST=$(find "$CI_ARCHIVE_PATH/Products/Applications" -path "*.app/Contents/Info.plist" -o -path "*.app/Info.plist" | head -n 1)
-MARKETING_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_INFO_PLIST" 2>/dev/null)
-BUILD_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_INFO_PLIST" 2>/dev/null)
-TAG_NAME="${MARKETING_VERSION}(${BUILD_VERSION})"
+# 2. 處理 Shallow Clone
+git fetch --unshallow --tags 2>/dev/null || git fetch --tags
 
-# 3. 處理 Discord 內容
-CHANGELOG_RAW=$(cat ../changelog_temp.txt 2>/dev/null || echo "無更新說明")
-CHANGELOG_ESCAPED=$(echo "$CHANGELOG_RAW" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
+# 3. 獲取版本資訊
+# 偵錯：印出目前 Git 裡所有的 Tag 狀況
+ALL_TAGS=$(git tag --sort=-creatordate | head -n 5 | paste -sd ", " -)
+TAG_NAME=$(git tag --sort=-creatordate | grep -E '[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)' | head -n 1)
+[ -z "$TAG_NAME" ] && TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "Initial_Build")
 
-# 4. 使用 GH_TOKEN 推送 (方法 C)
-if [ -n "$GH_TOKEN" ]; then
-    git config user.name "Xcode Cloud (via PAT)"
-    git config user.email "xcode-cloud@users.noreply.github.com"
-    git tag -a "$TAG_NAME" "${CI_COMMIT:-HEAD}" -m "Xcode Cloud Release $TAG_NAME"
-    
-    REMOTE_URL="https://miochen1226:${GH_TOKEN}@github.com/miochen1226/NES_EMU.git"
-    if git push "$REMOTE_URL" "refs/tags/$TAG_NAME" 2>&1; then
-        TITLE="✅ Xcode Cloud 打包完成且 Tag 已同步 🚀"
-        COLOR=3066993
-    else
-        TITLE="❌ Xcode Cloud 打包完成但 Tag 回寫失敗"
-        COLOR=15158332
-    fi
-fi
+# 4. 偵錯：檢查 Xcode Cloud 注入的變數
+# 這裡是關鍵，看看 CI_BUILD_NUMBER 到底是 5 還是 38
+DEBUG_INFO="Build編號: ${CI_BUILD_NUMBER:-未定義} | 工作流: ${CI_WORKFLOW_ID:-未知}"
 
-# 5. 發送完成通知
+# 5. 擷取 Changelog
+COMMIT_RANGE="$([ "$TAG_NAME" = "Initial_Build" ] && echo "HEAD" || echo "$TAG_NAME..HEAD")"
+CHANGELOG=$(git log "$COMMIT_RANGE" --first-parent --no-merges --pretty=format:'%s' | while read -r line; do
+    [[ "$line" =~ ^#[0-9]+- ]] && echo "• $line"
+done | sort -u)
+[ -z "$CHANGELOG" ] && CHANGELOG="無更新說明"
+echo "$CHANGELOG" > ../changelog_temp.txt
+
+# 轉義 JSON
+CHANGELOG_ESCAPED=$(echo "$CHANGELOG" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
+
+# 6. 發送通知
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
-    "title": "${TITLE}",
-    "color": ${COLOR},
-    "description": "**版本號：** ${TAG_NAME}\n\n**本版更新內容：**\n${CHANGELOG_ESCAPED}"
+    "title": "🍎 [Debug模式] Xcode Cloud 啟動",
+    "color": 3447003,
+    "description": "**基準 Tag:** ${TAG_NAME}\n**系統注入編號:** ${CI_BUILD_NUMBER}\n**Debug詳情:** ${DEBUG_INFO}\n**最近Tags:** ${ALL_TAGS}\n\n**待處理更新:**\n${CHANGELOG_ESCAPED}"
   }]
 }
 EOF
