@@ -20,8 +20,12 @@ MARKETING_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionStrin
 BUILD_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_INFO_PLIST")
 TAG_NAME="${MARKETING_VERSION}(${BUILD_VERSION})"
 
-# 3. 讀取先前存下的 Changelog
-CHANGELOG=$(cat ../changelog_temp.txt 2>/dev/null || echo "無更新說明")
+# 3. 讀取並轉義 Changelog (核心修正點)
+# 從暫存檔讀取原始內容
+CHANGELOG_RAW=$(cat ../changelog_temp.txt 2>/dev/null || echo "無更新說明")
+
+# 進行 JSON 轉義：處理反斜線、雙引號，並將換行符號轉為 \n 字串
+CHANGELOG_ESCAPED=$(echo "$CHANGELOG_RAW" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
 
 # 4. Git Tag 回寫
 git config user.name "Xcode Cloud"
@@ -29,13 +33,13 @@ git config user.email "xcode-cloud@users.noreply.github.com"
 git tag -a "$TAG_NAME" "${CI_COMMIT:-HEAD}" -m "Xcode Cloud Release $TAG_NAME"
 git push origin "refs/tags/$TAG_NAME"
 
-# 5. 發送「打包完成」通知
+# 5. 組裝 JSON 並發送「打包完成」通知
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
     "title": "✅ Xcode Cloud 打包完成 🚀",
     "color": 3066993,
-    "description": "**版本號：** ${TAG_NAME}\n**Commit：** ${CI_COMMIT}\n\n**本版更新內容：**\n${CHANGELOG}"
+    "description": "**版本號：** ${TAG_NAME}\n**Commit：** ${CI_COMMIT}\n\n**本版更新內容：**\n${CHANGELOG_ESCAPED}"
   }]
 }
 EOF
