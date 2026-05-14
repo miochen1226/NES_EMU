@@ -2,7 +2,6 @@
 
 # ============================================================
 # 腳本位置：專案目錄/ci_scripts/ci_post_clone.sh
-# 目的：在 Xcode Cloud 環境中擷取 Git Log 並發送 Discord 通知
 # ============================================================
 
 # 1. 配置
@@ -10,42 +9,44 @@ DISCORD_WEBHOOK="https://discord.com/api/webhooks/1504314067114790932/Y9pWPtitNs
 SCHEME="NES_EMU"
 
 # 2. 處理 Xcode Cloud 的 Shallow Clone 問題
-# 必須 fetch tags 才能讓 git describe 與 git log 運作
-git fetch --unshallow --tags
+git fetch --unshallow --tags 2>/dev/null || git fetch --tags
 
 # 3. 獲取版本資訊
-# 取得最近的 Tag 名稱
-TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "Initial_Build")
-# 格式化版本號 (假設 Tag 格式為 Build_v5.9.47(8))
-VERSION=$(echo "$TAG_NAME" | sed -E 's/Build_v(.+)\((.+)\)/\1 (\2)/')
+# 優先找 1.0.4(1) 格式的 Tag
+TAG_NAME=$(git tag --list "*([0-9]*)" --sort=-creatordate | head -n 1)
 
-# 4. 擷取 Changelog (延用 Fastfile 的過濾邏輯)
-CHANGELOG=$(git log "$TAG_NAME..HEAD" --merges --pretty=format:'%s' | while read -r line; do
-    # 擷取分支名稱
-    BRANCH=$(echo "$line" | sed -E "s/Merge branch '(.+)' into.*/\1/; s/Merge pull request #[0-9]+ from .+\/(.+)/\1/")
-    
-    # 過濾環境分支與無意義標題
-    if [[ ! "$BRANCH" =~ ^(release|main|master|develop|Release)/ ]] && [[ "$BRANCH" != "$line" ]]; then
-        echo "• $BRANCH"
+if [ -z "$TAG_NAME" ]; then
+    TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "Initial_Build")
+fi
+
+# 定義 Commit 範圍
+if [ "$TAG_NAME" = "Initial_Build" ]; then
+    COMMIT_RANGE="HEAD"
+else
+    COMMIT_RANGE="$TAG_NAME..HEAD"
+fi
+
+# 4. 擷取符合 #222-修改項目 格式的 Changelog
+CHANGELOG=$(git log "$COMMIT_RANGE" --first-parent --no-merges --pretty=format:'%s' | while read -r line; do
+    if [[ "$line" =~ ^#[0-9]+- ]]; then
+        echo "• $line"
     fi
 done | sort -u | paste -sd "\\n" -)
 
-# 如果沒有內容，給予預設值
 if [ -z "$CHANGELOG" ]; then
     CHANGELOG="無更新說明"
 fi
 
-# 將 Changelog 存檔，以便後續 ci_post_xcodebuild.sh 讀取 (若有需要)
+# 將 Changelog 存檔，以便後續 ci_post_xcodebuild.sh 讀取
 echo "$CHANGELOG" > ../changelog_temp.txt
 
-# 5. 組裝 JSON 並發送 Discord 通知
-# 這裡發送的是「開始打包」的預告
+# 5. 發送「開始打包」通知
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
     "title": "🍎 Xcode Cloud 流程啟動 — 準備打包 🏗️",
     "color": 3447003,
-    "description": "**專案名稱：** ${SCHEME}\n**目前基準 Tag：** ${TAG_NAME}\n**預計版本：** ${VERSION}\n**觸發 Commit：** ${CI_COMMIT}\n\n**待處理更新內容：**\n${CHANGELOG}"
+    "description": "**專案名稱：** ${SCHEME}\n**目前基準 Tag：** ${TAG_NAME}\n**觸發 Commit：** ${CI_COMMIT}\n\n**待處理更新內容：**\n${CHANGELOG}"
   }]
 }
 EOF
