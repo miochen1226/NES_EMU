@@ -2,48 +2,61 @@
 
 # ============================================================
 # 腳本位置：專案目錄/ci_scripts/ci_post_clone.sh
-# 修正目標：精準過濾掉已經屬於舊版號的 Commit (#555, #99 等)
+# 目的：增加 Debug 資訊，打印完整區間 Commit 紀錄
 # ============================================================
 
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1504314067114790932/Y9pWPtitNsphk49rdbK8ooDlAMvsoND_iG290iJ6eh5zzLrmZS_24YC0DGERECkqjTMK"
 
-# 1. 確保完整 Git 歷史與 Tag
+# 1. 基礎設施與同步
 git fetch --unshallow --tags 2>/dev/null || git fetch --tags
 
-# 2. 獲取最新的一個 Tag (使用版本號排序最穩)
-LATEST_TAG=$(git tag --sort=-version:refname | grep -E '[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)' | head -n 1)
+# ------------------------------------------------------------
+# [DEBUG] 打印環境資訊
+# ------------------------------------------------------------
+echo "===== [DEBUG START] ====="
+CURRENT_HEAD_HASH=$(git rev-parse HEAD)
+CURRENT_HEAD_MSG=$(git log -1 --pretty=format:'%s')
+echo "當前 HEAD Hash: $CURRENT_HEAD_HASH"
+echo "當前 HEAD 訊息: $CURRENT_HEAD_MSG"
 
-# 3. 擷取精準的 Changelog
+LATEST_TAG=$(git tag --sort=-version:refname | grep -E '[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)' | head -n 1)
 if [ -n "$LATEST_TAG" ]; then
-    echo "基準 Tag 識別為: $LATEST_TAG"
-    # 取得 LATEST_TAG 指向的 Commit ID，我們要徹底排除它
+    TAG_HASH=$(git rev-parse "$LATEST_TAG")
+    echo "識別到的基準 Tag: $LATEST_TAG"
+    echo "該 Tag 指向的 Hash: $TAG_HASH"
+    
+    echo "--- 區間 [$LATEST_TAG..HEAD] 內的所有 Commit ---"
+    # 這裡就是你要的：打印區間內所有 commit
+    git log "$LATEST_TAG..HEAD" --first-parent --pretty=format:'%H | %s'
+    echo -e "\n--------------------------------------------"
+else
+    echo "找不到符合格式的基準 Tag"
+fi
+echo "===== [DEBUG END] ====="
+# ------------------------------------------------------------
+
+# 2. 擷取 Changelog 邏輯 (維持區間依賴)
+if [ -n "$LATEST_TAG" ]; then
     EXCLUDE_HASH=$(git rev-parse "$LATEST_TAG")
     
-    # 邏輯說明：
-    # git log $LATEST_TAG..HEAD : 抓取從標籤後到現在的所有紀錄
-    # grep -v "$(git rev-list -n 1 $LATEST_TAG)" : 二次確保不包含標籤本身的 commit
+    # 使用區間抓取
     CHANGELOG=$(git log "$LATEST_TAG..HEAD" --first-parent --no-merges --pretty=format:'%H|%s' | while read -r line; do
         HASH=$(echo "$line" | cut -d'|' -f1)
         MSG=$(echo "$line" | cut -d'|' -f2)
         
-        # 條件 1: 包含 #數字
-        # 條件 2: Commit Hash 不能是舊標籤的 Hash
+        # 只要包含 #數字 且 不是 Tag 本身就抓
         if [[ "$MSG" =~ #[0-9]+ ]] && [ "$HASH" != "$EXCLUDE_HASH" ]; then
             echo "• $MSG"
         fi
     done | sort -u)
 else
-    echo "未找到舊標籤，顯示最近紀錄"
     CHANGELOG=$(git log -n 3 --pretty=format:'• %s')
 fi
 
-# 4. 備援機制 (如果區間內真的沒有 #數字 的 commit)
-[ -z "$CHANGELOG" ] && CHANGELOG="• 本次建置無新增 Issue 紀錄"
-
-# 存入暫存檔供 ci_post_xcodebuild.sh 使用
+# 3. 備援與發送
+[ -z "$CHANGELOG" ] && CHANGELOG="• 本次建置無新增 Issue 紀錄 (請檢查 Debug Log)"
 echo "$CHANGELOG" > ../changelog_temp.txt
 
-# 5. 發送通知
 MARKETING_VERSION="1.0.3"
 TARGET_TAG="${MARKETING_VERSION}(${CI_BUILD_NUMBER:-0})"
 CHANGELOG_ESCAPED=$(echo "$CHANGELOG" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
