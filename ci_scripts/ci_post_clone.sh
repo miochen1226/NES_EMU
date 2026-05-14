@@ -1,48 +1,34 @@
 #!/bin/bash
 
-# ============================================================
-# 腳本位置：專案目錄/ci_scripts/ci_post_clone.sh
-# ============================================================
-
 # 1. 配置
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1504314067114790932/Y9pWPtitNsphk49rdbK8ooDlAMvsoND_iG290iJ6eh5zzLrmZS_24YC0DGERECkqjTMK"
 SCHEME="NES_EMU"
 
-# 2. 處理 Xcode Cloud 的 Shallow Clone
+# 2. 處理 Shallow Clone 確保能看到舊 Tag
 git fetch --unshallow --tags 2>/dev/null || git fetch --tags
 
-# 3. 獲取版本資訊 (識別 1.0.3(35) 格式)
-# 優先搜尋符合「數字.數字.數字(數字)」格式的最新 Tag
+# 3. 獲取版本資訊 (精準識別帶括號格式)
+# 優先抓取符合 1.x.x(x) 格式的最新 Tag
 TAG_NAME=$(git tag --sort=-creatordate | grep -E '[0-9]+\.[0-9]+\.[0-9]+\([0-9]+\)' | head -n 1)
 
 if [ -z "$TAG_NAME" ]; then
     TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "Initial_Build")
 fi
 
-if [ "$TAG_NAME" = "Initial_Build" ]; then
-    COMMIT_RANGE="HEAD"
-else
-    COMMIT_RANGE="$TAG_NAME..HEAD"
-fi
+COMMIT_RANGE="$([ "$TAG_NAME" = "Initial_Build" ] && echo "HEAD" || echo "$TAG_NAME..HEAD")"
 
-# 4. 擷取並轉義 Changelog (防止 Discord 50109 錯誤)
+# 4. 擷取並轉義 Changelog (處理 JSON 特殊字元防止發送失敗)
 CHANGELOG_RAW=$(git log "$COMMIT_RANGE" --first-parent --no-merges --pretty=format:'%s' | while read -r line; do
-    if [[ "$line" =~ ^#[0-9]+- ]]; then
-        echo "• $line"
-    fi
+    [[ "$line" =~ ^#[0-9]+- ]] && echo "• $line"
 done | sort -u)
 
-if [ -z "$CHANGELOG_RAW" ]; then
-    CHANGELOG_RAW="無更新說明"
-fi
+[ -z "$CHANGELOG_RAW" ] && CHANGELOG_RAW="無更新說明"
+CHANGELOG_ESCAPED=$(echo "$CHANGELOG_RAW" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
 
-# 關鍵：將換行符轉義為 \n 字串，並處理引號
-CHANGELOG_ESCAPED=$(echo "$CHANGELOG_RAW" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
-
-# 將原始內容存檔供後續腳本使用
 echo "$CHANGELOG_RAW" > ../changelog_temp.txt
 
-# 5. 發送 Discord 通知
+# 5. 發送通知
+# 注意：預計版本在這裡顯示為 "Xcode Cloud 自動編號"，因為確切數字要編譯後才知道
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
@@ -53,7 +39,4 @@ PAYLOAD=$(cat <<EOF
 }
 EOF
 )
-
 curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK"
-
-echo "✅ Git Log 擷取完成並已發送 Discord 通知。"
