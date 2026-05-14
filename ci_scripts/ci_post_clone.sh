@@ -6,8 +6,8 @@
 # ============================================================
 
 # 1. 配置
-DISCORD_WEBHOOK="https://discord.com/api/webhooks/1494864601500618783/ubSTg2Y_uS_pKvjTKSRHWm8vaBkO8Y4bvunh07l9EQUQqp_daQWX-CYtwaXGiQEru3ZF"
-SCHEME="Recruit"
+DISCORD_WEBHOOK="https://discord.com/api/webhooks/1504314067114790932/Y9pWPtitNsphk49rdbK8ooDlAMvsoND_iG290iJ6eh5zzLrmZS_24YC0DGERECkqjTMK"
+SCHEME="NES_EMU"
 
 # 2. 處理 Xcode Cloud 的 Shallow Clone 問題
 # 必須 fetch tags 才能讓 git describe 與 git log 運作
