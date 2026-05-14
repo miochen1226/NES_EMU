@@ -12,9 +12,7 @@ SCHEME="NES_EMU"
 git fetch --unshallow --tags 2>/dev/null || git fetch --tags
 
 # 3. 獲取版本資訊
-# 優先找 1.0.4(1) 格式的 Tag
 TAG_NAME=$(git tag --list "*([0-9]*)" --sort=-creatordate | head -n 1)
-
 if [ -z "$TAG_NAME" ]; then
     TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "Initial_Build")
 fi
@@ -26,27 +24,34 @@ else
     COMMIT_RANGE="$TAG_NAME..HEAD"
 fi
 
-# 4. 擷取符合 #222-修改項目 格式的 Changelog
-CHANGELOG=$(git log "$COMMIT_RANGE" --first-parent --no-merges --pretty=format:'%s' | while read -r line; do
+# 4. 擷取並轉義 Changelog
+# 先抓取原始內容
+CHANGELOG_RAW=$(git log "$COMMIT_RANGE" --first-parent --no-merges --pretty=format:'%s' | while read -r line; do
     if [[ "$line" =~ ^#[0-9]+- ]]; then
         echo "• $line"
     fi
-done | sort -u | paste -sd "\\n" -)
+done | sort -u)
 
-if [ -z "$CHANGELOG" ]; then
-    CHANGELOG="無更新說明"
+if [ -z "$CHANGELOG_RAW" ]; then
+    CHANGELOG_RAW="無更新說明"
 fi
 
-# 將 Changelog 存檔，以便後續 ci_post_xcodebuild.sh 讀取
-echo "$CHANGELOG" > ../changelog_temp.txt
+# --- 關鍵修正：JSON 轉義處理 ---
+# 1. 處理反斜線與雙引號
+# 2. 將換行符號轉換為實體的 \n 字串
+CHANGELOG_ESCAPED=$(echo "$CHANGELOG_RAW" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
 
-# 5. 發送「開始打包」通知
+# 將原始內容存檔供後續腳本使用
+echo "$CHANGELOG_RAW" > ../changelog_temp.txt
+
+# 5. 組裝 JSON 並發送
+# 注意：description 內的變數現在是安全的字串
 PAYLOAD=$(cat <<EOF
 {
   "embeds": [{
     "title": "🍎 Xcode Cloud 流程啟動 — 準備打包 🏗️",
     "color": 3447003,
-    "description": "**專案名稱：** ${SCHEME}\n**目前基準 Tag：** ${TAG_NAME}\n**觸發 Commit：** ${CI_COMMIT}\n\n**待處理更新內容：**\n${CHANGELOG}"
+    "description": "**專案名稱：** ${SCHEME}\n**基準 Tag：** ${TAG_NAME}\n**觸發 Commit：** ${CI_COMMIT}\n\n**待處理更新內容：**\n${CHANGELOG_ESCAPED}"
   }]
 }
 EOF
