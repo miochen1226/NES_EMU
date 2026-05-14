@@ -17,6 +17,4 @@ struct VirtualControllerView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: GameViewController, context: Context) {
         
     }
-    
-
 }
