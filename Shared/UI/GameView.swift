@@ -179,10 +179,10 @@ class MotionManager: NSObject, ObservableObject {
         
         // 根據傾斜角度決定方向（支援對角線）
         if pitch > threshold {
-            currentDirection.insert(.up)
+            currentDirection.insert(.down)
         }
         if pitch < -threshold {
-            currentDirection.insert(.down)
+            currentDirection.insert(.up)
         }
         if roll > threshold {
             currentDirection.insert(.right)
